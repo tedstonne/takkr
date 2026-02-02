@@ -1,0 +1,16 @@
+{
+	pki {
+		ca local {
+			intermediate_lifetime 400d
+		}
+	}
+}
+
+postit.localhost {
+	tls {
+		issuer internal {
+			lifetime 365d
+		}
+	}
+	reverse_proxy localhost:3001
+}

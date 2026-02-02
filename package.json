@@ -1,0 +1,33 @@
+{
+  "name": "postit",
+  "module": "index.tsx",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "./bin/dev.sh",
+    "caddy:stop": "caddy stop",
+    "lint": "biome check --write .",
+    "check": "tsc --noEmit",
+    "css": "vite build --watch",
+    "build:css": "vite build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.12",
+    "@tailwindcss/vite": "^4.1.10",
+    "@types/bun": "latest",
+    "tailwindcss": "^4.1.10",
+    "vite": "^6.3.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.2.2",
+    "@simplewebauthn/server": "^13.2.2",
+    "alpinejs": "^3.15.4",
+    "hono": "^4.11.5",
+    "htmx-ext-sse": "^2.2.4",
+    "htmx.org": "^2.0.8",
+    "surrge": "^0.11.5"
+  }
+}

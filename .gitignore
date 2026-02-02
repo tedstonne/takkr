@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Build output
+www/styles.css
+www/entry.js
+
+# OS files
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
