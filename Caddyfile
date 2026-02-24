@@ -6,7 +6,7 @@
 	}
 }
 
-postit.localhost {
+takkr.localhost {
 	tls {
 		issuer internal {
 			lifetime 365d

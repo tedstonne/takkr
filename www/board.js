@@ -70,7 +70,7 @@ window.board = () => ({
 
     // Pointer-based drag (works for mouse and touch)
     canvas.addEventListener("pointerdown", (e) => {
-      const note = e.target.closest(".postit");
+      const note = e.target.closest(".takkr");
       if (!note) return;
 
       // Don't start drag if clicking on textarea (editing)
@@ -94,7 +94,7 @@ window.board = () => ({
 
       // Bring to front
       const maxZ = Math.max(
-        ...Array.from(document.querySelectorAll(".postit")).map(
+        ...Array.from(document.querySelectorAll(".takkr")).map(
           (n) => parseInt(n.style.zIndex, 10) || 1,
         ),
       );
@@ -160,7 +160,7 @@ window.board = () => ({
 
     // Click to select
     canvas.addEventListener("click", (e) => {
-      const note = e.target.closest(".postit");
+      const note = e.target.closest(".takkr");
 
       if (this.selected) {
         this.selected.classList.remove("selected");
@@ -177,7 +177,7 @@ window.board = () => ({
 
     // Double click to edit
     canvas.addEventListener("dblclick", (e) => {
-      const note = e.target.closest(".postit");
+      const note = e.target.closest(".takkr");
       if (note) this.edit(note);
     });
   },
@@ -268,7 +268,7 @@ window.board = () => ({
   },
 
   edit(note) {
-    const front = note.querySelector(".postit-front p");
+    const front = note.querySelector(".takkr-front p");
     const content = front.textContent;
 
     note.classList.add("editing");
@@ -316,7 +316,7 @@ window.board = () => ({
   },
 
   selectNext(direction) {
-    const notes = Array.from(document.querySelectorAll(".postit"));
+    const notes = Array.from(document.querySelectorAll(".takkr"));
     if (notes.length === 0) return;
 
     if (!this.selected) {
@@ -334,7 +334,7 @@ window.board = () => ({
   },
 
   selectNearest(direction) {
-    const notes = Array.from(document.querySelectorAll(".postit"));
+    const notes = Array.from(document.querySelectorAll(".takkr"));
     if (notes.length === 0) return;
 
     if (!this.selected) {

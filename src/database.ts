@@ -1,8 +1,8 @@
 import { Database } from "bun:sqlite";
 
 const dbPath: string = process.env.DATA_PATH
-  ? `${process.env.DATA_PATH}/postit.db`
-  : "postit.db";
+  ? `${process.env.DATA_PATH}/takkr.db`
+  : "takkr.db";
 
 export const db: Database = new Database(dbPath, { create: true });
 

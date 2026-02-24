@@ -1,5 +1,5 @@
 {
-  "name": "postit",
+  "name": "takkr",
   "module": "index.tsx",
   "type": "module",
   "private": true,

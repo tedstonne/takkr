@@ -2,12 +2,12 @@
 export const challenges = new Map<string, string>();
 
 // RP (Relying Party) configuration
-export const rpName = "postit";
+export const rpName = "takkr";
 export const production = process.env.NODE_ENV === "production";
-export const rpID = production ? "postit.app" : "postit.localhost";
+export const rpID = production ? "takkr.app" : "takkr.localhost";
 export const origin = production
-  ? "https://postit.app"
-  : "https://postit.localhost";
+  ? "https://takkr.app"
+  : "https://takkr.localhost";
 
 // Session secret for signing tokens
 export const secret: string =

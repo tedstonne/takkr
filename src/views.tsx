@@ -48,7 +48,7 @@ export const Login = () => (
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="w-full max-w-sm space-y-8 text-center">
       <div>
-        <h1 class="text-4xl font-bold text-slate-900">Post-It</h1>
+        <h1 class="text-4xl font-bold text-slate-900">takkr</h1>
         <p class="mt-2 text-slate-600">
           Collaborative sticky notes for your ideas
         </p>
@@ -115,7 +115,7 @@ export const Home = (props: { username: string; boards: Board.Record[] }) => (
   <div class="min-h-full p-6">
     <div class="mx-auto max-w-2xl space-y-8">
       <header class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-slate-900">Post-It</h1>
+        <h1 class="text-2xl font-bold text-slate-900">takkr</h1>
         <div class="flex items-center gap-4">
           <span class="text-sm text-slate-600">{props.username}</span>
           <form action="/api/user/logout" method="post">
@@ -168,15 +168,15 @@ export const Home = (props: { username: string; boards: Board.Record[] }) => (
   </div>
 );
 
-// Post-it note component
-export const PostIt = (props: {
+// Takkr note component
+export const Takkr = (props: {
   note: Note.Record;
   selected?: boolean;
   oob?: boolean;
 }) => (
   <div
     id={`note-${props.note.id}`}
-    class={`postit postit-${props.note.color}${props.selected ? " selected" : ""}`}
+    class={`takkr takkr-${props.note.color}${props.selected ? " selected" : ""}`}
     data-id={props.note.id}
     data-x={props.note.x}
     data-y={props.note.y}
@@ -186,11 +186,11 @@ export const PostIt = (props: {
       ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
       : {})}
   >
-    <div class="postit-inner">
-      <div class="postit-front">
+    <div class="takkr-inner">
+      <div class="takkr-front">
         <p>{props.note.content}</p>
       </div>
-      <div class="postit-back">
+      <div class="takkr-back">
         <small>
           Space: flip | Enter: edit | Del: delete
           <br />
@@ -429,7 +429,7 @@ export const BoardView = (props: {
     >
       <div id="notes" sse-swap="note:created" hx-swap="beforeend">
         {props.notes.map((note) => (
-          <PostIt note={note} key={note.id} />
+          <Takkr note={note} key={note.id} />
         ))}
       </div>
       <div id="note-updated" sse-swap="note:updated" hx-swap="none" />

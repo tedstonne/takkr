@@ -12,7 +12,7 @@ import * as Member from "@/member";
 import { boardAccess, boardOwner, secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
-import { Alert, Home, PostIt } from "@/views";
+import { Alert, Home, Takkr } from "@/views";
 
 type Variables = {
   username: string;
@@ -173,11 +173,11 @@ api.post("/boards/:slug/notes", secure, boardAccess, async (c) => {
   const note = Note.create(board.id, content, username, x, y, color);
 
   // Broadcast to other clients
-  const html = <PostIt note={note} />;
+  const html = <Takkr note={note} />;
   const htmlString = html.toString();
   events.broadcast(board.id, events.Event.Note.Created, htmlString);
 
-  return c.html(<PostIt note={note} />);
+  return c.html(<Takkr note={note} />);
 });
 
 api.put("/notes/:id", secure, async (c) => {
@@ -205,12 +205,12 @@ api.put("/notes/:id", secure, async (c) => {
   // Only broadcast if not a silent update (position-only updates during drag)
   const silent = c.req.query("silent") === "1";
   if (!silent) {
-    const html = <PostIt note={updated} oob />;
+    const html = <Takkr note={updated} oob />;
     const htmlString = html.toString();
     events.broadcast(updated.board_id, events.Event.Note.Updated, htmlString);
   }
 
-  return c.html(<PostIt note={updated} />);
+  return c.html(<Takkr note={updated} />);
 });
 
 api.delete("/notes/:id", secure, async (c) => {

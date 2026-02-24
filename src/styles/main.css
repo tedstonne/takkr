@@ -21,12 +21,12 @@
   --color-input: oklch(0.922 0 0);
   --color-ring: oklch(0.708 0 0);
 
-  /* Post-it note colors */
-  --color-postit-yellow: oklch(0.961 0.109 95.541);
-  --color-postit-pink: oklch(0.894 0.116 6.172);
-  --color-postit-green: oklch(0.906 0.132 152.524);
-  --color-postit-blue: oklch(0.91 0.096 230.902);
-  --color-postit-orange: oklch(0.901 0.135 66.053);
+  /* Takkr note colors */
+  --color-takkr-yellow: oklch(0.961 0.109 95.541);
+  --color-takkr-pink: oklch(0.894 0.116 6.172);
+  --color-takkr-green: oklch(0.906 0.132 152.524);
+  --color-takkr-blue: oklch(0.91 0.096 230.902);
+  --color-takkr-orange: oklch(0.901 0.135 66.053);
 
   /* Border radius */
   --radius-sm: 0.25rem;
@@ -128,8 +128,8 @@
     @apply flex items-center p-6 pt-0;
   }
 
-  /* Post-it note */
-  .postit {
+  /* Takkr note */
+  .takkr {
     @apply absolute cursor-grab select-none shadow-lg transition-shadow duration-200 font-handwriting text-xl leading-relaxed;
     min-width: 150px;
     min-height: 150px;
@@ -139,36 +139,36 @@
     touch-action: none;
   }
 
-  .postit:hover {
+  .takkr:hover {
     @apply shadow-xl;
   }
 
-  .postit.selected {
+  .takkr.selected {
     @apply shadow-2xl scale-[1.02];
   }
 
-  .postit.dragging {
+  .takkr.dragging {
     @apply cursor-grabbing opacity-80 scale-105;
   }
 
-  .postit-yellow {
-    @apply bg-postit-yellow;
+  .takkr-yellow {
+    @apply bg-takkr-yellow;
   }
-  .postit-pink {
-    @apply bg-postit-pink;
+  .takkr-pink {
+    @apply bg-takkr-pink;
   }
-  .postit-green {
-    @apply bg-postit-green;
+  .takkr-green {
+    @apply bg-takkr-green;
   }
-  .postit-blue {
-    @apply bg-postit-blue;
+  .takkr-blue {
+    @apply bg-takkr-blue;
   }
-  .postit-orange {
-    @apply bg-postit-orange;
+  .takkr-orange {
+    @apply bg-takkr-orange;
   }
 
-  /* Post-it flip animation */
-  .postit-inner {
+  /* Takkr flip animation */
+  .takkr-inner {
     position: relative;
     width: 100%;
     height: 100%;
@@ -176,12 +176,12 @@
     transform-style: preserve-3d;
   }
 
-  .postit.flipped .postit-inner {
+  .takkr.flipped .takkr-inner {
     transform: rotateY(180deg);
   }
 
-  .postit-front,
-  .postit-back {
+  .takkr-front,
+  .takkr-back {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -189,7 +189,7 @@
     @apply p-4 rounded-sm;
   }
 
-  .postit-back {
+  .takkr-back {
     transform: rotateY(180deg);
     @apply text-sm font-sans text-foreground/70;
   }

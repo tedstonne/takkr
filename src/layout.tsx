@@ -13,7 +13,7 @@ export type Page = {
 };
 
 const pageTitle = (title: string): string =>
-  title ? `Post-It :: ${title}` : "Post-It";
+  title ? `takkr :: ${title}` : "takkr";
 
 export const Layout = (props: Page) => (
   <html lang="en" class="h-full">
@@ -22,7 +22,7 @@ export const Layout = (props: Page) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta
         name="description"
-        content="Collaborative post-it note board. Drag, drop, and organize your ideas."
+        content="Collaborative sticky note board. Drag, drop, and organize your ideas."
       />
       <title>{pageTitle(props.title)}</title>
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
