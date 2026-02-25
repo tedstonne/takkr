@@ -25,6 +25,7 @@ db.exec(`
     slug TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     owner TEXT NOT NULL REFERENCES users(username),
+    background TEXT DEFAULT 'grid',
     created DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
@@ -59,6 +60,11 @@ db.exec(`CREATE INDEX IF NOT EXISTS idx_boards_owner ON boards(owner)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_members_board ON members(board_id)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_members_user ON members(username)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_notes_board ON notes(board_id)`);
+
+// Migration: add background column if missing
+try {
+  db.exec(`ALTER TABLE boards ADD COLUMN background TEXT DEFAULT 'grid'`);
+} catch (_) {}
 
 // Migration: add description column if missing
 try {

@@ -121,6 +121,20 @@ api.delete("/boards/:slug", secure, boardAccess, boardOwner, (c) => {
   return c.redirect("/");
 });
 
+// Board background
+api.put("/boards/:slug/background", secure, boardAccess, boardOwner, async (c) => {
+  const board: Board.Record = c.get("board");
+  const body = await c.req.parseBody();
+  const bg = body.background as Board.Background;
+
+  if (!bg || !Board.BACKGROUNDS.includes(bg)) {
+    throw new HTTPException(400, { message: "Invalid background" });
+  }
+
+  Board.setBackground(board.id, bg);
+  return c.json({ ok: true, background: bg });
+});
+
 // SSE events for board
 api.get("/boards/:slug/events", secure, boardAccess, (c) => {
   const HEARTBEAT_INTERVAL_MS: number = Number(

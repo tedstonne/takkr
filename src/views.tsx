@@ -453,10 +453,10 @@ export const BoardView = (props: {
     sse-connect={`/api/boards/${props.board.slug}/events`}
   >
     <div
-      class="relative h-full overflow-hidden bg-slate-50"
+      class="relative h-full overflow-hidden"
       id="canvas"
       x-data="board()"
-      style="background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px); background-size: 20px 20px;"
+      data-background={props.board.background || "grid"}
     >
       <div id="notes" sse-swap="note:created" hx-swap="beforeend">
         {props.notes.map((note) => (
