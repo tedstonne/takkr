@@ -93,6 +93,9 @@ const zoom = {
     // Click backdrop to close
     this.overlay?.querySelector(".zoom-backdrop")?.addEventListener("click", () => this.close());
 
+    // Close button (X)
+    document.getElementById("zoom-close-btn")?.addEventListener("click", () => this.close());
+
     // Delete button
     document.getElementById("zoom-delete-btn")?.addEventListener("click", () => {
       if (this.noteId) {
@@ -539,15 +542,23 @@ const zoom = {
     this.save();
     this.saveDescription();
 
-    if (this.isFlipped) {
+    // Step 1: unflip back to front (if flipped)
+    const wasFlipped = this.isFlipped;
+    if (wasFlipped) {
       this.overlay.classList.remove("flipped");
       this.isFlipped = false;
     }
 
+    // Step 2: after unflip completes, shrink away
+    const shrinkDelay = wasFlipped ? 500 : 50;
     setTimeout(() => {
+      this.overlay.classList.add("closing");
       this.overlay.classList.remove("active");
+
+      // Step 3: clean up after shrink animation
       setTimeout(() => {
         this.overlay.style.display = "none";
+        this.overlay.classList.remove("closing");
         this.overlay.querySelector(".zoom-front").className = "zoom-front";
         this.overlay.querySelector(".zoom-back").className = "zoom-back";
         this.isOpen = false;
@@ -557,7 +568,7 @@ const zoom = {
         this.tags = [];
         this.attachments = [];
       }, 350);
-    }, 300);
+    }, shrinkDelay);
   },
 };
 

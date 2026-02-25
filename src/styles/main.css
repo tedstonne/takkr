@@ -257,6 +257,16 @@
     @apply opacity-100;
   }
 
+  .zoom-close-btn {
+    @apply absolute top-4 right-4 z-50 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 text-slate-600 shadow-md cursor-pointer transition-all duration-200 opacity-0 pointer-events-none;
+  }
+  .zoom-close-btn:hover {
+    @apply bg-white text-slate-900 scale-110;
+  }
+  .zoom-overlay.active .zoom-close-btn {
+    @apply opacity-100 pointer-events-auto;
+  }
+
   .zoom-card {
     @apply relative rounded-sm opacity-0;
     width: 480px;
