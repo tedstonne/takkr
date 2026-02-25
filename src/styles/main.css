@@ -465,6 +465,21 @@
     @apply border-slate-900 scale-110;
   }
 
+  /* ── Inline edit (37signals pattern) ── */
+  .inline-edit-field {
+    @apply relative;
+  }
+  .inline-edit-display {
+    @apply px-2 py-1.5 rounded text-sm text-slate-900 cursor-pointer hover:bg-slate-100 transition-colors min-h-[2rem] flex items-center;
+  }
+  .inline-edit-display:empty::before {
+    content: attr(data-placeholder);
+    @apply text-slate-400 italic;
+  }
+  .inline-edit-input {
+    @apply w-full px-2 py-1.5 rounded text-sm text-slate-900 border border-slate-300 bg-white outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent;
+  }
+
   /* ── Contenteditable ── */
   [contenteditable="true"] {
     @apply cursor-text;

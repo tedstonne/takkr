@@ -639,34 +639,56 @@ window.board = () => ({
       e.target.value = "";
     });
 
-    // Display name (save on blur)
-    const nameInput = document.getElementById("settings-display-name");
-    nameInput?.addEventListener("blur", () => {
-      const val = nameInput.value.trim();
-      fetch("/api/user/display-name", {
-        method: "PUT",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `display_name=${encodeURIComponent(val)}`,
-      });
-      // Update the label
-      const label = document.getElementById("settings-display-name-label");
-      if (label) label.textContent = val || nameInput.dataset.username || "";
-    });
-    nameInput?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); nameInput.blur(); }
-    });
+    // Inline edit fields (37signals pattern)
+    document.querySelectorAll(".inline-edit-field").forEach((field) => {
+      const display = field.querySelector(".inline-edit-display");
+      const input = field.querySelector(".inline-edit-input");
+      const endpoint = field.dataset.endpoint;
+      const fieldName = field.dataset.field;
+      if (!display || !input) return;
 
-    // Email (save on blur)
-    const emailInput = document.getElementById("settings-email");
-    emailInput?.addEventListener("blur", () => {
-      fetch("/api/user/email", {
-        method: "PUT",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `email=${encodeURIComponent(emailInput.value.trim())}`,
+      // Click text → show input
+      display.addEventListener("click", () => {
+        input.value = display.textContent.trim();
+        display.classList.add("hidden");
+        input.classList.remove("hidden");
+        input.focus();
+        input.select();
       });
-    });
-    emailInput?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); emailInput.blur(); }
+
+      // Save and go back to text
+      const commit = () => {
+        const val = input.value.trim();
+        display.textContent = val;
+        input.classList.add("hidden");
+        display.classList.remove("hidden");
+
+        // Save to server
+        fetch(endpoint, {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `${fieldName}=${encodeURIComponent(val)}`,
+        });
+
+        // Update header display name if it's the name field
+        if (fieldName === "display_name") {
+          const label = document.getElementById("settings-display-name-label");
+          if (label) label.textContent = val || label.dataset.fallback || "";
+        }
+      };
+
+      // Enter → save, Escape → cancel
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          input.classList.add("hidden");
+          display.classList.remove("hidden");
+        }
+      });
+
+      // Blur → save
+      input.addEventListener("blur", commit);
     });
 
     // Font picker in settings

@@ -556,28 +556,21 @@ const SettingsModal = (props: {
         </button>
       </div>
 
-      {/* Profile fields */}
-      <div class="mb-6 space-y-3">
-        <div>
-          <label class="text-sm font-medium text-slate-700" for="settings-display-name">Display Name</label>
-          <input
-            type="text"
-            id="settings-display-name"
-            class="input mt-1"
-            placeholder="How should we call you?"
-            value={props.displayName}
-            maxlength={50}
-          />
+      {/* Profile fields — inline edit */}
+      <div class="mb-6 space-y-2">
+        <div class="inline-edit-field" id="field-display-name" data-field="display_name" data-endpoint="/api/user/display-name">
+          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">Display Name</label>
+          <div class="inline-edit-display" data-placeholder="Add your name...">
+            {props.displayName || ""}
+          </div>
+          <input type="text" class="inline-edit-input hidden" value={props.displayName} maxlength={50} placeholder="How should we call you?" />
         </div>
-        <div>
-          <label class="text-sm font-medium text-slate-700" for="settings-email">Email</label>
-          <input
-            type="email"
-            id="settings-email"
-            class="input mt-1"
-            placeholder="your@email.com"
-            value={props.email}
-          />
+        <div class="inline-edit-field" id="field-email" data-field="email" data-endpoint="/api/user/email">
+          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">Email</label>
+          <div class="inline-edit-display" data-placeholder="Add your email...">
+            {props.email || ""}
+          </div>
+          <input type="email" class="inline-edit-input hidden" value={props.email} placeholder="your@email.com" />
         </div>
       </div>
 
