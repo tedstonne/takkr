@@ -371,6 +371,80 @@ api.get("/user/prefs", secure, (c) => {
   return c.json(prefs);
 });
 
+// Get user profile
+api.get("/user/profile", secure, (c) => {
+  const username: string = c.get("username");
+  return c.json(User.getProfile(username));
+});
+
+// Update display name
+api.put("/user/display-name", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const name = body.display_name as string;
+  if (name === undefined) throw new HTTPException(400, { message: "display_name required" });
+  User.setDisplayName(username, name);
+  return c.json({ ok: true });
+});
+
+// Update email
+api.put("/user/email", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const email = body.email as string;
+  if (email === undefined) throw new HTTPException(400, { message: "email required" });
+  User.setEmail(username, email);
+  return c.json({ ok: true });
+});
+
+// Upload avatar
+api.post("/user/avatar", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const file = body.file;
+  if (!file || typeof file === "string") {
+    throw new HTTPException(400, { message: "File required" });
+  }
+
+  const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+  if (file.size > MAX_SIZE) {
+    throw new HTTPException(400, { message: "File too large (max 2MB)" });
+  }
+
+  if (!file.type?.startsWith("image/")) {
+    throw new HTTPException(400, { message: "Must be an image" });
+  }
+
+  const ext = file.name.split(".").pop() || "jpg";
+  const fname = `avatar_${username}_${Date.now()}.${ext}`;
+  const dir = "./uploads";
+  const { mkdirSync, writeFileSync, unlinkSync } = await import("node:fs");
+  mkdirSync(dir, { recursive: true });
+  const buf = await file.arrayBuffer();
+  writeFileSync(`${dir}/${fname}`, Buffer.from(buf));
+
+  // Delete old avatar
+  const old = User.find(username)?.avatar;
+  if (old) { try { unlinkSync(`${dir}/${old}`); } catch (_) {} }
+
+  User.setAvatar(username, fname);
+  return c.json({ ok: true, avatar: fname });
+});
+
+// Serve avatar
+api.get("/user/avatar/:filename", async (c) => {
+  const filename = c.req.param("filename");
+  try {
+    const { readFileSync } = await import("node:fs");
+    const data = readFileSync(`./uploads/${filename}`);
+    const ext = filename.split(".").pop()?.toLowerCase();
+    const mime = ext === "png" ? "image/png" : ext === "gif" ? "image/gif" : ext === "webp" ? "image/webp" : "image/jpeg";
+    return c.newResponse(data, { headers: { "Content-Type": mime, "Cache-Control": "public, max-age=31536000" } });
+  } catch (_) {
+    throw new HTTPException(404, { message: "Not found" });
+  }
+});
+
 // Get note detail (for zoom view)
 api.get("/notes/:id", secure, (c) => {
   const username: string = c.get("username");

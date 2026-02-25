@@ -27,6 +27,21 @@ try {
   db.exec(`ALTER TABLE users ADD COLUMN preferred_background TEXT DEFAULT 'grid'`);
 } catch (_) {}
 
+// Migration: add display_name column
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN display_name TEXT DEFAULT ''`);
+} catch (_) {}
+
+// Migration: add email column
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''`);
+} catch (_) {}
+
+// Migration: add avatar column (filename in uploads/)
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN avatar TEXT DEFAULT ''`);
+} catch (_) {}
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS boards (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -600,6 +600,75 @@ window.board = () => ({
       document.getElementById("settings-modal")?.showModal();
     });
 
+    // Avatar upload
+    document.getElementById("avatar-file-input")?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { alert("Image too large (max 2MB)"); return; }
+      if (!file.type.startsWith("image/")) { alert("Must be an image"); return; }
+
+      const form = new FormData();
+      form.append("file", file);
+
+      try {
+        const res = await fetch("/api/user/avatar", { method: "POST", body: form });
+        if (!res.ok) { alert("Upload failed"); return; }
+        const data = await res.json();
+
+        // Update avatar in settings modal
+        const label = document.getElementById("avatar-label");
+        const initials = document.getElementById("settings-avatar-initials");
+        const existing = document.getElementById("settings-avatar-img");
+
+        if (existing) {
+          existing.src = `/api/user/avatar/${data.avatar}`;
+        } else if (initials) {
+          const img = document.createElement("img");
+          img.src = `/api/user/avatar/${data.avatar}`;
+          img.id = "settings-avatar-img";
+          img.className = "h-14 w-14 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-slate-400 transition-all";
+          initials.replaceWith(img);
+        }
+
+        // Update header avatar
+        const headerBtn = document.getElementById("settings-btn");
+        if (headerBtn) {
+          headerBtn.innerHTML = `<img src="/api/user/avatar/${data.avatar}" class="h-10 w-10 rounded-full object-cover" alt="" />`;
+        }
+      } catch (_) { alert("Upload failed"); }
+      e.target.value = "";
+    });
+
+    // Display name (save on blur)
+    const nameInput = document.getElementById("settings-display-name");
+    nameInput?.addEventListener("blur", () => {
+      const val = nameInput.value.trim();
+      fetch("/api/user/display-name", {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `display_name=${encodeURIComponent(val)}`,
+      });
+      // Update the label
+      const label = document.getElementById("settings-display-name-label");
+      if (label) label.textContent = val || nameInput.dataset.username || "";
+    });
+    nameInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); nameInput.blur(); }
+    });
+
+    // Email (save on blur)
+    const emailInput = document.getElementById("settings-email");
+    emailInput?.addEventListener("blur", () => {
+      fetch("/api/user/email", {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `email=${encodeURIComponent(emailInput.value.trim())}`,
+      });
+    });
+    emailInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); emailInput.blur(); }
+    });
+
     // Font picker in settings
     document.getElementById("settings-font-grid")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-font]");

@@ -499,6 +499,9 @@ const SettingsModal = (props: {
   username: string;
   font: string;
   preferredColor: string;
+  displayName: string;
+  email: string;
+  avatar: string;
   board: Board.Record;
   members: Member.Record[];
   isOwner: boolean;
@@ -510,12 +513,36 @@ const SettingsModal = (props: {
     <div class="w-[90vw] max-w-lg p-6">
       <div class="mb-6 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white text-lg font-semibold uppercase">
-            {props.username.slice(0, 2)}
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold text-slate-900">{props.username}</h3>
-            <p class="text-xs text-slate-500">Settings &amp; preferences</p>
+          {/* Avatar with upload */}
+          <label class="relative cursor-pointer group" id="avatar-label">
+            {props.avatar ? (
+              <img
+                src={`/api/user/avatar/${props.avatar}`}
+                id="settings-avatar-img"
+                class="h-14 w-14 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-slate-400 transition-all"
+                alt=""
+              />
+            ) : (
+              <div
+                id="settings-avatar-initials"
+                class="flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white text-lg font-semibold uppercase ring-2 ring-transparent group-hover:ring-slate-400 transition-all"
+              >
+                {props.username.slice(0, 2)}
+              </div>
+            )}
+            <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              </svg>
+            </div>
+            <input type="file" accept="image/*" class="hidden" id="avatar-file-input" />
+          </label>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-slate-900" id="settings-display-name-label">
+              {props.displayName || props.username}
+            </h3>
+            <p class="text-xs text-slate-500">@{props.username}</p>
           </div>
         </div>
         <button
@@ -527,6 +554,31 @@ const SettingsModal = (props: {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
+      </div>
+
+      {/* Profile fields */}
+      <div class="mb-6 space-y-3">
+        <div>
+          <label class="text-sm font-medium text-slate-700" for="settings-display-name">Display Name</label>
+          <input
+            type="text"
+            id="settings-display-name"
+            class="input mt-1"
+            placeholder="How should we call you?"
+            value={props.displayName}
+            maxlength={50}
+          />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700" for="settings-email">Email</label>
+          <input
+            type="email"
+            id="settings-email"
+            class="input mt-1"
+            placeholder="your@email.com"
+            value={props.email}
+          />
+        </div>
       </div>
 
       {/* Font picker */}
@@ -656,6 +708,9 @@ export const BoardView = (props: {
   isOwner: boolean;
   font?: string;
   preferredColor?: string;
+  displayName?: string;
+  email?: string;
+  avatar?: string;
   attachmentCounts?: Map<number, number>;
 }) => (
   <div
@@ -705,11 +760,17 @@ export const BoardView = (props: {
       </button>
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold shadow hover:bg-slate-800 transition-colors uppercase"
+        class="flex h-10 w-10 items-center justify-center rounded-full shadow hover:ring-2 hover:ring-slate-400 transition-all overflow-hidden"
         id="settings-btn"
         title={props.username}
       >
-        {props.username.slice(0, 2)}
+        {props.avatar ? (
+          <img src={`/api/user/avatar/${props.avatar}`} class="h-10 w-10 rounded-full object-cover" alt="" />
+        ) : (
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold uppercase">
+            {props.username.slice(0, 2)}
+          </span>
+        )}
       </button>
     </div>
 
@@ -720,6 +781,9 @@ export const BoardView = (props: {
       username={props.username}
       font={props.font || "caveat"}
       preferredColor={props.preferredColor || "yellow"}
+      displayName={props.displayName || ""}
+      email={props.email || ""}
+      avatar={props.avatar || ""}
       board={props.board}
       members={props.members}
       isOwner={props.isOwner}

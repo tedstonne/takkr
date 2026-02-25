@@ -95,6 +95,7 @@ pages.get("/:slug", secure, (c) => {
   const isOwner = board.owner === username;
   const attachmentCounts = Note.attachmentCountsForBoard(board.id);
   const preferredColor = User.getPreferredColor(username);
+  const profile = User.getProfile(username);
 
   return c.html(
     <Layout title={slug} id="board" scripts={["/www/board.js"]} font={font}>
@@ -106,6 +107,9 @@ pages.get("/:slug", secure, (c) => {
         isOwner={isOwner}
         font={font}
         preferredColor={preferredColor}
+        displayName={profile.displayName}
+        email={profile.email}
+        avatar={profile.avatar}
         attachmentCounts={attachmentCounts}
       />
     </Layout>,

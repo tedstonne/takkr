@@ -12,6 +12,9 @@ export type Record = {
   font: string;
   preferred_color: string;
   preferred_background: string;
+  display_name: string;
+  email: string;
+  avatar: string;
   login?: string | null;
   created?: string;
 };
@@ -65,6 +68,28 @@ export const getPrefs = (username: string): { font: string; color: string; backg
     font: user?.font || "caveat",
     color: user?.preferred_color || "yellow",
     background: user?.preferred_background || "grid",
+  };
+};
+
+export const setDisplayName = (username: string, name: string): void => {
+  db.query("UPDATE users SET display_name = ? WHERE username = ?").run(name.trim(), username);
+};
+
+export const setEmail = (username: string, email: string): void => {
+  db.query("UPDATE users SET email = ? WHERE username = ?").run(email.trim(), username);
+};
+
+export const setAvatar = (username: string, avatar: string): void => {
+  db.query("UPDATE users SET avatar = ? WHERE username = ?").run(avatar, username);
+};
+
+export const getProfile = (username: string): { username: string; displayName: string; email: string; avatar: string } => {
+  const user = find(username);
+  return {
+    username,
+    displayName: user?.display_name || "",
+    email: user?.email || "",
+    avatar: user?.avatar || "",
   };
 };
 
