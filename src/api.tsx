@@ -346,6 +346,31 @@ api.put("/user/font", secure, async (c) => {
   return c.json({ ok: true, font });
 });
 
+// Update preferred color
+api.put("/user/color", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const color = body.color as string;
+  User.setPreferredColor(username, color);
+  return c.json({ ok: true, color });
+});
+
+// Update preferred background
+api.put("/user/background", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const bg = body.background as string;
+  User.setPreferredBackground(username, bg);
+  return c.json({ ok: true, background: bg });
+});
+
+// Get user prefs
+api.get("/user/prefs", secure, (c) => {
+  const username: string = c.get("username");
+  const prefs = User.getPrefs(username);
+  return c.json(prefs);
+});
+
 // Get note detail (for zoom view)
 api.get("/notes/:id", secure, (c) => {
   const username: string = c.get("username");

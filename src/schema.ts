@@ -15,9 +15,17 @@ db.exec(`
 // Migration: add font column if missing
 try {
   db.exec(`ALTER TABLE users ADD COLUMN font TEXT DEFAULT 'caveat'`);
-} catch (_) {
-  // column already exists
-}
+} catch (_) {}
+
+// Migration: add preferred_color column
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN preferred_color TEXT DEFAULT 'yellow'`);
+} catch (_) {}
+
+// Migration: add preferred_background column
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN preferred_background TEXT DEFAULT 'grid'`);
+} catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS boards (

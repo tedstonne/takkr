@@ -494,6 +494,139 @@ const MembersModal = (props: {
   </dialog>
 );
 
+// Settings modal
+const SettingsModal = (props: {
+  username: string;
+  font: string;
+  preferredColor: string;
+  board: Board.Record;
+  members: Member.Record[];
+  isOwner: boolean;
+}) => (
+  <dialog
+    id="settings-modal"
+    class="rounded-lg border-0 p-0 shadow-xl backdrop:bg-black/50 max-h-[85vh] overflow-y-auto"
+  >
+    <div class="w-[90vw] max-w-lg p-6">
+      <div class="mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white text-lg font-semibold uppercase">
+            {props.username.slice(0, 2)}
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900">{props.username}</h3>
+            <p class="text-xs text-slate-500">Settings &amp; preferences</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          onclick="this.closest('dialog').close()"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Font picker */}
+      <div class="mb-6">
+        <h4 class="text-sm font-medium text-slate-700 mb-3">Handwriting Font</h4>
+        <div class="grid grid-cols-3 gap-2" id="settings-font-grid">
+          {Object.entries({
+            caveat: "Caveat",
+            "indie-flower": "Indie Flower",
+            kalam: "Kalam",
+            handlee: "Handlee",
+            "gochi-hand": "Gochi Hand",
+            cookie: "Cookie",
+            parisienne: "Parisienne",
+            sofia: "Sofia",
+            "grand-hotel": "Grand Hotel",
+          }).map(([key, label]) => (
+            <button
+              type="button"
+              key={key}
+              data-font={key}
+              class={`settings-font-btn font-${key === "gochi-hand" ? "gochi-hand" : key === "indie-flower" ? "indie-flower" : key === "grand-hotel" ? "grand-hotel" : key}${props.font === key ? " active" : ""}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Preferred note color */}
+      <div class="mb-6">
+        <h4 class="text-sm font-medium text-slate-700 mb-3">Default Note Color</h4>
+        <div class="flex gap-3" id="settings-color-picker">
+          {(["yellow", "pink", "green", "blue", "orange"] as const).map((c) => (
+            <button
+              type="button"
+              key={c}
+              data-color={c}
+              class={`settings-color-btn bg-takkr-${c}${props.preferredColor === c ? " active" : ""}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Members (if owner) */}
+      {props.isOwner && (
+        <div class="mb-6">
+          <h4 class="text-sm font-medium text-slate-700 mb-3">Collaborators</h4>
+          <ul class="mb-3 space-y-2">
+            <li class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+              <div class="flex items-center gap-2">
+                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-semibold uppercase">
+                  {props.username.slice(0, 2)}
+                </div>
+                <span class="text-sm">{props.username}</span>
+              </div>
+              <span class="text-xs text-slate-500">owner</span>
+            </li>
+            {props.members.map((m) => (
+              <li key={m.username} class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <div class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-slate-700 text-xs font-semibold uppercase">
+                    {m.username.slice(0, 2)}
+                  </div>
+                  <span class="text-sm">{m.username}</span>
+                </div>
+                <form
+                  hx-delete={`/api/boards/${props.board.slug}/members/${m.username}`}
+                  hx-target="#hx-body"
+                  hx-swap="innerHTML"
+                >
+                  <Button type="submit" variant="destructive" size="sm">Remove</Button>
+                </form>
+              </li>
+            ))}
+          </ul>
+          <form
+            hx-post={`/api/boards/${props.board.slug}/members`}
+            hx-target="#hx-body"
+            hx-swap="innerHTML"
+            class="flex gap-2"
+          >
+            <Input type="text" name="username" placeholder="Invite by username" class="flex-1" />
+            <Button type="submit" variant="outline">Invite</Button>
+          </form>
+        </div>
+      )}
+
+      {/* Sign out */}
+      <div class="pt-4 border-t border-slate-200">
+        <form action="/api/user/logout" method="post">
+          <Button type="submit" variant="ghost" size="sm" class="text-slate-500">
+            Sign Out
+          </Button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+);
+
 // Board canvas view
 export const BoardView = (props: {
   board: Board.Record;
@@ -502,6 +635,7 @@ export const BoardView = (props: {
   username: string;
   isOwner: boolean;
   font?: string;
+  preferredColor?: string;
   attachmentCounts?: Map<number, number>;
 }) => (
   <div
@@ -532,54 +666,59 @@ export const BoardView = (props: {
       +
     </button>
 
+    {/* Left: back button */}
     <a
       href="/"
-      class="fixed top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow hover:bg-white hover:text-slate-900 transition-colors"
+      class="fixed top-4 left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow hover:bg-white hover:text-slate-900 transition-colors z-10"
     >
       ←
     </a>
 
-    <button
-      type="button"
-      class="fixed top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow hover:bg-white hover:text-slate-900 transition-colors"
-      id="help-btn"
-    >
-      ?
-    </button>
-
+    {/* Board toolbar: background picker */}
     {props.isOwner && (
+      <div class="fixed top-4 left-16 flex items-center gap-1 rounded-full bg-white/80 shadow px-2 py-1 z-10" id="bg-toolbar">
+        {(["plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle"] as const).map((bg) => (
+          <button
+            type="button"
+            key={bg}
+            data-bg={bg}
+            class={`board-bg-btn${props.board.background === bg ? " active" : ""}`}
+            title={bg}
+          />
+        ))}
+      </div>
+    )}
+
+    {/* Right: help + user avatar */}
+    <div class="fixed top-4 right-4 flex items-center gap-2 z-10">
       <button
         type="button"
-        class="fixed top-4 right-16 flex h-10 items-center gap-1 rounded-full bg-white/80 px-3 text-sm text-slate-600 shadow hover:bg-white hover:text-slate-900 transition-colors"
-        id="members-btn"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow hover:bg-white hover:text-slate-900 transition-colors"
+        id="help-btn"
       >
-        <span>{props.members.length + 1}</span>
-        <svg
-          class="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-          />
-        </svg>
+        ?
       </button>
-    )}
+      <button
+        type="button"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold shadow hover:bg-slate-800 transition-colors uppercase"
+        id="settings-btn"
+        title={props.username}
+      >
+        {props.username.slice(0, 2)}
+      </button>
+    </div>
 
     <ZoomOverlay />
     <AddNoteDialog slug={props.board.slug} />
     <HelpModal />
-    {props.isOwner && (
-      <MembersModal
-        board={props.board}
-        members={props.members}
-        username={props.username}
-      />
-    )}
+    <SettingsModal
+      username={props.username}
+      font={props.font || "caveat"}
+      preferredColor={props.preferredColor || "yellow"}
+      board={props.board}
+      members={props.members}
+      isOwner={props.isOwner}
+    />
   </div>
 );
 

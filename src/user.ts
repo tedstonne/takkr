@@ -10,6 +10,8 @@ export type Record = {
   public_key: Buffer;
   counter: number;
   font: string;
+  preferred_color: string;
+  preferred_background: string;
   login?: string | null;
   created?: string;
 };
@@ -34,6 +36,36 @@ export const getFont = (username: string): string => {
 export const setFont = (username: string, font: string): void => {
   if (!FONTS[font]) return;
   db.query("UPDATE users SET font = ? WHERE username = ?").run(font, username);
+};
+
+export const COLORS = ["yellow", "pink", "green", "blue", "orange"] as const;
+
+export const getPreferredColor = (username: string): string => {
+  const user = find(username);
+  return user?.preferred_color || "yellow";
+};
+
+export const setPreferredColor = (username: string, color: string): void => {
+  if (!COLORS.includes(color as any)) return;
+  db.query("UPDATE users SET preferred_color = ? WHERE username = ?").run(color, username);
+};
+
+export const getPreferredBackground = (username: string): string => {
+  const user = find(username);
+  return user?.preferred_background || "grid";
+};
+
+export const setPreferredBackground = (username: string, bg: string): void => {
+  db.query("UPDATE users SET preferred_background = ? WHERE username = ?").run(bg, username);
+};
+
+export const getPrefs = (username: string): { font: string; color: string; background: string } => {
+  const user = find(username);
+  return {
+    font: user?.font || "caveat",
+    color: user?.preferred_color || "yellow",
+    background: user?.preferred_background || "grid",
+  };
 };
 
 export const exists = (username: string): boolean => {

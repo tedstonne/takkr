@@ -594,6 +594,79 @@ window.board = () => ({
     document.getElementById("members-btn")?.addEventListener("click", () => {
       document.getElementById("members-modal")?.showModal();
     });
+
+    // Settings (user avatar)
+    document.getElementById("settings-btn")?.addEventListener("click", () => {
+      document.getElementById("settings-modal")?.showModal();
+    });
+
+    // Font picker in settings
+    document.getElementById("settings-font-grid")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-font]");
+      if (!btn) return;
+      const font = btn.dataset.font;
+
+      // Update active state
+      document.querySelectorAll("#settings-font-grid .settings-font-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.font === font);
+      });
+
+      // Update CSS variable live
+      document.documentElement.style.setProperty("--takkr-font", `"${FONT_MAP[font] || "Caveat"}"`);
+
+      // Save
+      fetch("/api/user/font", {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `font=${encodeURIComponent(font)}`,
+      });
+    });
+
+    // Color picker in settings
+    document.getElementById("settings-color-picker")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-color]");
+      if (!btn) return;
+      const color = btn.dataset.color;
+
+      document.querySelectorAll("#settings-color-picker .settings-color-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.color === color);
+      });
+
+      // Update the add-note dialog default
+      const radio = document.querySelector(`#add-note-dialog input[name="color"][value="${color}"]`);
+      if (radio) radio.checked = true;
+
+      fetch("/api/user/color", {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `color=${encodeURIComponent(color)}`,
+      });
+    });
+
+    // Background toolbar on board
+    document.getElementById("bg-toolbar")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-bg]");
+      if (!btn) return;
+      const bg = btn.dataset.bg;
+      const canvas = document.getElementById("canvas");
+      if (!canvas) return;
+
+      // Update active
+      document.querySelectorAll("#bg-toolbar .board-bg-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.bg === bg);
+      });
+
+      // Swap background
+      canvas.dataset.background = bg;
+
+      // Save board background
+      const slug = window.location.pathname.slice(1);
+      fetch(`/api/boards/${slug}/background`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `background=${encodeURIComponent(bg)}`,
+      });
+    });
   },
 
   setupKeyboard() {
