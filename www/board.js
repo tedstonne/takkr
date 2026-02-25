@@ -571,6 +571,7 @@ window.board = () => ({
   init() {
     zoom.init();
     this.setupDragAndDrop();
+    this.setupFileDrop();
     this.setupButtonHandlers();
     this.setupKeyboard();
   },
@@ -586,6 +587,100 @@ window.board = () => ({
 
   setupKeyboard() {
     window.addEventListener("keydown", (e) => this.handleKey(e));
+  },
+
+  setupFileDrop() {
+    const canvas = document.getElementById("canvas");
+    let hoveredNote = null;
+
+    // Detect file drag (not note drag) by checking dataTransfer types
+    const isFileDrag = (e) => e.dataTransfer?.types?.includes("Files");
+
+    canvas.addEventListener("dragenter", (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+    });
+
+    canvas.addEventListener("dragover", (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+
+      const note = e.target.closest(".takkr");
+      if (note !== hoveredNote) {
+        hoveredNote?.classList.remove("file-hover");
+        hoveredNote = note;
+        hoveredNote?.classList.add("file-hover");
+      }
+    });
+
+    canvas.addEventListener("dragleave", (e) => {
+      if (!isFileDrag(e)) return;
+      // Only clear if we actually left the canvas
+      if (!canvas.contains(e.relatedTarget)) {
+        hoveredNote?.classList.remove("file-hover");
+        hoveredNote = null;
+      }
+    });
+
+    canvas.addEventListener("drop", async (e) => {
+      if (!isFileDrag(e)) return;
+      e.preventDefault();
+
+      const note = e.target.closest(".takkr");
+      hoveredNote?.classList.remove("file-hover");
+      hoveredNote = null;
+
+      if (!note) return;
+
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length === 0) return;
+
+      const noteId = note.dataset.id;
+
+      // Upload each file (show uploading state)
+      note.classList.add("uploading");
+
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) continue; // skip >5MB silently
+
+        const form = new FormData();
+        form.append("file", file);
+
+        try {
+          const res = await fetch(`/api/notes/${noteId}/attachments`, {
+            method: "POST",
+            body: form,
+          });
+          if (!res.ok) continue;
+        } catch (_) {
+          continue;
+        }
+      }
+
+      note.classList.remove("uploading");
+
+      // Refresh attachment badge
+      try {
+        const res = await fetch(`/api/notes/${noteId}/attachments`);
+        const atts = await res.json();
+        const count = atts.length;
+        let badge = note.querySelector(".takkr-attachments");
+        if (count > 0) {
+          if (!badge) {
+            badge = document.createElement("div");
+            badge.className = "takkr-attachments";
+            note.appendChild(badge);
+          }
+          badge.innerHTML = `
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+            </svg>
+            <span>${count}</span>
+          `;
+        }
+      } catch (_) {}
+    });
   },
 
   setupDragAndDrop() {

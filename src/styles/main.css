@@ -194,6 +194,17 @@
     z-index: 9999 !important;
   }
 
+  .takkr.file-hover {
+    @apply ring-2 ring-slate-900/30 shadow-2xl;
+    transform: rotate(0deg) scale(1.06);
+    animation: filePulse 1s ease-in-out infinite;
+  }
+
+  .takkr.uploading {
+    @apply opacity-60;
+    animation: uploadPulse 0.8s ease-in-out infinite;
+  }
+
   .takkr-title {
     @apply p-4 text-xl leading-snug overflow-hidden;
     font-family: var(--takkr-font, "Caveat"), cursive;
@@ -438,6 +449,16 @@
   .scale-in {
     animation: scaleIn 0.3s ease-out;
   }
+}
+
+@keyframes filePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.1); }
+  50% { box-shadow: 0 0 0 8px rgba(0,0,0,0.05); }
+}
+
+@keyframes uploadPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
 }
 
 @keyframes fadeIn {
