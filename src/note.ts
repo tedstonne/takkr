@@ -8,6 +8,7 @@ export type Record = {
   id: number;
   board_id: number;
   content: string;
+  description: string;
   x: number;
   y: number;
   z: number;
@@ -57,12 +58,13 @@ export const create = (
 
 export const update = (
   id: number,
-  data: Partial<Pick<Record, "content" | "x" | "y" | "z" | "color">>,
+  data: Partial<Pick<Record, "content" | "description" | "x" | "y" | "z" | "color">>,
 ): Record | null => {
   const note = byId(id);
   if (!note) return null;
 
   const content = data.content ?? note.content;
+  const description = data.description ?? note.description;
   const x = data.x ?? note.x;
   const y = data.y ?? note.y;
   const z = data.z ?? note.z;
@@ -70,11 +72,11 @@ export const update = (
 
   const result = db
     .query(
-      `UPDATE notes SET content = ?, x = ?, y = ?, z = ?, color = ?
+      `UPDATE notes SET content = ?, description = ?, x = ?, y = ?, z = ?, color = ?
        WHERE id = ?
        RETURNING *`,
     )
-    .get(content, x, y, z, color, id);
+    .get(content, description, x, y, z, color, id);
 
   return result as Record;
 };

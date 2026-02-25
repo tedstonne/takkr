@@ -168,7 +168,7 @@ api.post("/boards/:slug/notes", secure, boardAccess, async (c) => {
   const x = body.x ? Number(body.x) : 100 + Math.random() * 200;
   const y = body.y ? Number(body.y) : 100 + Math.random() * 200;
 
-  if (!content) throw new HTTPException(400, { message: "Content required" });
+  if (!content) throw new HTTPException(400, { message: "Title required" });
 
   const note = Note.create(board.id, content, username, x, y, color);
 
@@ -194,6 +194,7 @@ api.put("/notes/:id", secure, async (c) => {
 
   const data: Partial<Note.Record> = {};
   if (body.content) data.content = body.content as string;
+  if (body.description !== undefined) data.description = body.description as string;
   if (body.x) data.x = Number(body.x);
   if (body.y) data.y = Number(body.y);
   if (body.z) data.z = Number(body.z);
@@ -314,3 +315,31 @@ api.delete(
     return c.redirect(`/${board.slug}`);
   },
 );
+
+// Font preference
+api.put("/user/font", secure, async (c) => {
+  const username: string = c.get("username");
+  const body = await c.req.parseBody();
+  const font = body.font as string;
+
+  if (!font || !User.FONTS[font]) {
+    throw new HTTPException(400, { message: "Invalid font" });
+  }
+
+  User.setFont(username, font);
+  return c.json({ ok: true, font });
+});
+
+// Get note detail (for zoom view)
+api.get("/notes/:id", secure, (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  return c.json(note);
+});

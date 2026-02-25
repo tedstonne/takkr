@@ -6,10 +6,18 @@ db.exec(`
     credential_id TEXT UNIQUE NOT NULL,
     public_key BLOB NOT NULL,
     counter INTEGER DEFAULT 0,
+    font TEXT DEFAULT 'caveat',
     login DATETIME,
     created DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
+
+// Migration: add font column if missing
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN font TEXT DEFAULT 'caveat'`);
+} catch (_) {
+  // column already exists
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS boards (
@@ -36,6 +44,7 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
+    description TEXT DEFAULT '',
     x INTEGER DEFAULT 100,
     y INTEGER DEFAULT 100,
     z INTEGER DEFAULT 1,
@@ -50,3 +59,10 @@ db.exec(`CREATE INDEX IF NOT EXISTS idx_boards_owner ON boards(owner)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_members_board ON members(board_id)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_members_user ON members(username)`);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_notes_board ON notes(board_id)`);
+
+// Migration: add description column if missing
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN description TEXT DEFAULT ''`);
+} catch (_) {
+  // column already exists
+}

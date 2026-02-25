@@ -1,11 +1,28 @@
 import { Hono } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as Board from "@/board";
 import { Layout } from "@/layout";
 import * as Member from "@/member";
 import { secure } from "@/middleware";
 import * as Note from "@/note";
+import * as User from "@/user";
 import { BoardView, Help, Home, Join, Login } from "@/views";
+
+const resolveFont = (c: any, username?: string): string => {
+  // URL param override (backdoor)
+  const paramFont = c.req.query("font");
+  if (paramFont && User.FONTS[paramFont]) {
+    setCookie(c, "takkr-font", paramFont, { maxAge: 365 * 24 * 60 * 60, path: "/" });
+    return paramFont;
+  }
+  // Cookie override
+  const cookieFont = getCookie(c, "takkr-font");
+  if (cookieFont && User.FONTS[cookieFont]) return cookieFont;
+  // User preference
+  if (username) return User.getFont(username);
+  return "caveat";
+};
 
 type Variables = {
   username: string;
@@ -57,6 +74,7 @@ pages.get("/~/help", (c) => {
 pages.get("/:slug", secure, (c) => {
   const username: string = c.get("username");
   const slug: string = c.req.param("slug");
+  const font = resolveFont(c, username);
 
   // Validate slug
   if (slug.startsWith("~") || slug.startsWith("api")) {
@@ -77,13 +95,14 @@ pages.get("/:slug", secure, (c) => {
   const isOwner = board.owner === username;
 
   return c.html(
-    <Layout title={slug} id="board" scripts={["/www/board.js"]}>
+    <Layout title={slug} id="board" scripts={["/www/board.js"]} font={font}>
       <BoardView
         board={board}
         notes={notes}
         members={members}
         username={username}
         isOwner={isOwner}
+        font={font}
       />
     </Layout>,
   );

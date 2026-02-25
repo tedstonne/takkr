@@ -10,6 +10,7 @@ export type Page = {
   title: string;
   children: Child;
   scripts?: string[];
+  font?: string;
 };
 
 const pageTitle = (title: string): string =>
@@ -27,7 +28,7 @@ export const Layout = (props: Page) => (
       <title>{pageTitle(props.title)}</title>
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link
-        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Inter:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Cookie&family=Gochi+Hand&family=Grand+Hotel&family=Handlee&family=Indie+Flower&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=Parisienne&family=Sofia&display=swap"
         rel="stylesheet"
       />
       <link rel="stylesheet" href="/www/styles.css" />
@@ -51,7 +52,7 @@ export const Layout = (props: Page) => (
         src={`https://cdn.jsdelivr.net/npm/alpinejs@${alpineVersion}/dist/cdn.min.js`}
       />
     </head>
-    <body class="h-full overflow-hidden">
+    <body class="h-full overflow-hidden" data-font={props.font || "caveat"}>
       <main id="hx-body" class={`h-full overflow-hidden ${props.id || ""}`}>
         {props.children}
       </main>

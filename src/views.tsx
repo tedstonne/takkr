@@ -168,11 +168,12 @@ export const Home = (props: { username: string; boards: Board.Record[] }) => (
   </div>
 );
 
-// Takkr note component
+// Takkr note component — fixed size card, title only on front
 export const Takkr = (props: {
   note: Note.Record;
   selected?: boolean;
   oob?: boolean;
+  attachmentCount?: number;
 }) => (
   <div
     id={`note-${props.note.id}`}
@@ -180,22 +181,50 @@ export const Takkr = (props: {
     data-id={props.note.id}
     data-x={props.note.x}
     data-y={props.note.y}
+    data-description={props.note.description || ""}
     style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
     tabindex={0}
     {...(props.oob
       ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
       : {})}
   >
-    <div class="takkr-inner">
-      <div class="takkr-front">
-        <p>{props.note.content}</p>
+    <div class="takkr-title">{props.note.content}</div>
+    {(props.attachmentCount ?? 0) > 0 && (
+      <div class="takkr-attachments">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+        </svg>
+        <span>{props.attachmentCount}</span>
       </div>
-      <div class="takkr-back">
-        <small>
-          Space: flip | Enter: edit | Del: delete
-          <br />
-          Arrows: navigate | n: new
-        </small>
+    )}
+  </div>
+);
+
+// Zoom overlay — rendered once, populated by JS
+export const ZoomOverlay = () => (
+  <div id="zoom-overlay" class="zoom-overlay" style="display:none;">
+    <div class="zoom-backdrop" />
+    <div id="zoom-card" class="zoom-card">
+      <div class="zoom-card-inner">
+        <div class="zoom-front">
+          <div class="zoom-title" id="zoom-title" />
+        </div>
+        <div class="zoom-back">
+          <div class="zoom-back-content">
+            <div class="zoom-back-title" id="zoom-back-title" contenteditable="false" />
+            <div class="zoom-back-description" id="zoom-back-description" contenteditable="false">
+              <p class="text-muted-foreground text-sm italic">Click to add details...</p>
+            </div>
+            <div class="zoom-back-attachments" id="zoom-back-attachments">
+              <div class="text-xs text-muted-foreground mt-4 pt-4 border-t border-black/10">
+                <span class="opacity-50">📎 Attachments coming soon</span>
+              </div>
+            </div>
+          </div>
+          <div class="zoom-back-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="zoom-delete-btn">Delete</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -238,13 +267,14 @@ const AddNoteDialog = (props: { slug: string }) => (
         x-ref="form"
         class="space-y-4"
       >
-        <textarea
+        <input
+          type="text"
           name="content"
           placeholder="What's on your mind?"
           required
-          rows={4}
+          maxlength={80}
           x-ref="content"
-          class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 font-handwriting text-lg"
         />
         <div class="flex gap-2">
           {(["yellow", "pink", "green", "blue", "orange"] as const).map((c) => (
@@ -415,6 +445,7 @@ export const BoardView = (props: {
   members: Member.Record[];
   username: string;
   isOwner: boolean;
+  font?: string;
 }) => (
   <div
     class="h-full overflow-hidden"
@@ -482,6 +513,7 @@ export const BoardView = (props: {
       </button>
     )}
 
+    <ZoomOverlay />
     <AddNoteDialog slug={props.board.slug} />
     <HelpModal />
     {props.isOwner && (
