@@ -96,6 +96,9 @@ pages.get("/:slug", secure, (c) => {
   const attachmentCounts = Note.attachmentCountsForBoard(board.id);
   const preferredColor = User.getPreferredColor(username);
   const profile = User.getProfile(username);
+  const ownedBoards = Board.owned(username).map((b) => ({ board: b, role: "owner" as const }));
+  const memberBoards = Board.member(username).map((b) => ({ board: b, role: "member" as const }));
+  const allBoards = [...ownedBoards, ...memberBoards];
 
   return c.html(
     <Layout title={slug} id="board" scripts={["/www/board.js"]} font={font}>
@@ -110,6 +113,7 @@ pages.get("/:slug", secure, (c) => {
         displayName={profile.displayName}
         email={profile.email}
         avatar={profile.avatar}
+        allBoards={allBoards}
         attachmentCounts={attachmentCounts}
       />
     </Layout>,

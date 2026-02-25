@@ -505,6 +505,7 @@ const SettingsModal = (props: {
   board: Board.Record;
   members: Member.Record[];
   isOwner: boolean;
+  allBoards: { board: Board.Record; role: "owner" | "member" }[];
 }) => (
   <dialog
     id="settings-modal"
@@ -680,6 +681,33 @@ const SettingsModal = (props: {
         </div>
       )}
 
+      {/* Your boards */}
+      <div class="mb-6">
+        <h4 class="text-sm font-medium text-slate-700 mb-3">Your Boards</h4>
+        {props.allBoards.length > 0 ? (
+          <div class="space-y-1">
+            {props.allBoards.map(({ board: b, role }) => (
+              <a
+                key={b.slug}
+                href={`/${b.slug}`}
+                class={`flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                  b.slug === props.board.slug
+                    ? "bg-slate-900 text-white"
+                    : "hover:bg-slate-100 text-slate-700"
+                }`}
+              >
+                <span class="font-mono">/{b.slug}</span>
+                <span class={`text-xs ${b.slug === props.board.slug ? "text-slate-400" : "text-slate-400"}`}>
+                  {role}
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-slate-400 italic">No boards yet</p>
+        )}
+      </div>
+
       {/* Sign out */}
       <div class="pt-4 border-t border-slate-200">
         <form action="/api/user/logout" method="post">
@@ -704,6 +732,7 @@ export const BoardView = (props: {
   displayName?: string;
   email?: string;
   avatar?: string;
+  allBoards?: { board: Board.Record; role: "owner" | "member" }[];
   attachmentCounts?: Map<number, number>;
 }) => (
   <div
@@ -780,6 +809,7 @@ export const BoardView = (props: {
       board={props.board}
       members={props.members}
       isOwner={props.isOwner}
+      allBoards={props.allBoards || []}
     />
   </div>
 );
