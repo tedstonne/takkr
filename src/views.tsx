@@ -571,6 +571,26 @@ const SettingsModal = (props: {
         </div>
       </div>
 
+      {/* Board background */}
+      {props.isOwner && (
+        <div class="mb-6">
+          <h4 class="text-sm font-medium text-slate-700 mb-3">Board Background</h4>
+          <div class="grid grid-cols-4 gap-2" id="settings-bg-grid">
+            {(["plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle"] as const).map((bg) => (
+              <button
+                type="button"
+                key={bg}
+                data-bg={bg}
+                class={`settings-bg-btn${props.board.background === bg ? " active" : ""}`}
+              >
+                <div class={`settings-bg-preview settings-bg-preview-${bg}`} />
+                <span class="text-xs text-slate-500 capitalize">{bg}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Members (if owner) */}
       {props.isOwner && (
         <div class="mb-6">
@@ -673,21 +693,6 @@ export const BoardView = (props: {
     >
       ←
     </a>
-
-    {/* Board toolbar: background picker */}
-    {props.isOwner && (
-      <div class="fixed top-4 left-16 flex items-center gap-1 rounded-full bg-white/80 shadow px-2 py-1 z-10" id="bg-toolbar">
-        {(["plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle"] as const).map((bg) => (
-          <button
-            type="button"
-            key={bg}
-            data-bg={bg}
-            class={`board-bg-btn${props.board.background === bg ? " active" : ""}`}
-            title={bg}
-          />
-        ))}
-      </div>
-    )}
 
     {/* Right: help + user avatar */}
     <div class="fixed top-4 right-4 flex items-center gap-2 z-10">

@@ -424,26 +424,30 @@
     @apply flex justify-end pt-4 mt-4 border-t border-black/10;
   }
 
-  /* ── Board background toolbar ── */
-  .board-bg-btn {
-    @apply w-7 h-7 rounded-full border-2 border-transparent cursor-pointer transition-all duration-150;
-  }
-  .board-bg-btn:hover {
-    @apply scale-110 border-slate-400;
-  }
-  .board-bg-btn.active {
-    @apply border-slate-900 scale-110;
-  }
-  .board-bg-btn[data-bg="plain"] { @apply bg-white; }
-  .board-bg-btn[data-bg="grid"] { @apply bg-slate-100; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 4px 4px; }
-  .board-bg-btn[data-bg="cork"] { background-color: #c4956a; }
-  .board-bg-btn[data-bg="chalkboard"] { background-color: #2d4a3e; }
-  .board-bg-btn[data-bg="lined"] { @apply bg-white; background-image: linear-gradient(transparent 60%, #e8d4d4 60%, #e8d4d4 64%, transparent 64%); }
-  .board-bg-btn[data-bg="canvas"] { background-color: #f5f0eb; }
-  .board-bg-btn[data-bg="blueprint"] { background-color: #1e3a5f; }
-  .board-bg-btn[data-bg="doodle"] { @apply bg-slate-100; }
-
   /* ── Settings modal ── */
+  /* Center dialogs */
+  #settings-modal {
+    @apply m-auto;
+  }
+
+  .settings-bg-btn {
+    @apply flex flex-col items-center gap-1 p-2 rounded-lg border border-slate-200 cursor-pointer transition-all duration-150 hover:border-slate-400;
+  }
+  .settings-bg-btn.active {
+    @apply border-slate-900 ring-1 ring-slate-900;
+  }
+  .settings-bg-preview {
+    @apply w-full h-10 rounded;
+  }
+  .settings-bg-preview-plain { @apply bg-white; }
+  .settings-bg-preview-grid { @apply bg-slate-100; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 4px 4px; }
+  .settings-bg-preview-cork { background-color: #c4956a; }
+  .settings-bg-preview-chalkboard { background-color: #2d4a3e; }
+  .settings-bg-preview-lined { @apply bg-white; background-image: linear-gradient(transparent 60%, #e8d4d4 60%, #e8d4d4 64%, transparent 64%); }
+  .settings-bg-preview-canvas { background-color: #f5f0eb; }
+  .settings-bg-preview-blueprint { background-color: #1e3a5f; }
+  .settings-bg-preview-doodle { @apply bg-slate-100; }
+
   .settings-font-btn {
     @apply px-3 py-2 rounded-md border border-slate-200 text-center text-sm cursor-pointer transition-all duration-150 hover:border-slate-400 hover:bg-slate-50;
   }

@@ -643,8 +643,8 @@ window.board = () => ({
       });
     });
 
-    // Background toolbar on board
-    document.getElementById("bg-toolbar")?.addEventListener("click", (e) => {
+    // Background picker in settings
+    document.getElementById("settings-bg-grid")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-bg]");
       if (!btn) return;
       const bg = btn.dataset.bg;
@@ -652,11 +652,11 @@ window.board = () => ({
       if (!canvas) return;
 
       // Update active
-      document.querySelectorAll("#bg-toolbar .board-bg-btn").forEach((b) => {
+      document.querySelectorAll("#settings-bg-grid .settings-bg-btn").forEach((b) => {
         b.classList.toggle("active", b.dataset.bg === bg);
       });
 
-      // Swap background
+      // Swap background live
       canvas.dataset.background = bg;
 
       // Save board background
