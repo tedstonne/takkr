@@ -182,6 +182,10 @@ export const Takkr = (props: {
     data-x={props.note.x}
     data-y={props.note.y}
     data-description={props.note.description || ""}
+    data-tags={props.note.tags || ""}
+    data-checklist={props.note.checklist || "[]"}
+    data-author={props.note.created_by || ""}
+    data-created={props.note.created || ""}
     style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
     tabindex={0}
     {...(props.oob
@@ -211,18 +215,65 @@ export const ZoomOverlay = () => (
         </div>
         <div class="zoom-back">
           <div class="zoom-back-content">
+            {/* Meta: author + date */}
+            <div class="zoom-back-meta" id="zoom-back-meta" />
+
+            {/* Title */}
+            {/* @ts-expect-error contenteditable accepts string in HTML */}
             <div class="zoom-back-title" id="zoom-back-title" contenteditable="false" />
-            <div class="zoom-back-description" id="zoom-back-description" contenteditable="false">
-              <p class="text-muted-foreground text-sm italic">Click to add details...</p>
-            </div>
-            <div class="zoom-back-attachments" id="zoom-back-attachments">
-              <div class="text-xs text-muted-foreground mt-4 pt-4 border-t border-black/10">
-                <span class="opacity-50">📎 Attachments coming soon</span>
+
+            {/* Description */}
+            {/* @ts-expect-error contenteditable accepts string in HTML */}
+            <div class="zoom-back-description" id="zoom-back-description" contenteditable="false" data-placeholder="Add details, notes, links..." />
+
+            {/* Color picker */}
+            <div class="zoom-back-section">
+              <div class="zoom-back-section-title">Color</div>
+              <div class="zoom-back-colors" id="zoom-back-colors">
+                {(["yellow", "pink", "green", "blue", "orange"] as const).map((c) => (
+                  <button
+                    type="button"
+                    key={c}
+                    data-color={c}
+                    class={`zoom-color-btn bg-takkr-${c}`}
+                  />
+                ))}
               </div>
+            </div>
+
+            {/* Checklist */}
+            <div class="zoom-back-section">
+              <div class="zoom-back-section-title">Checklist</div>
+              <div class="zoom-back-checklist" id="zoom-back-checklist" />
+              <div class="zoom-checklist-add">
+                <input type="text" id="zoom-checklist-input" placeholder="Add item..." />
+                <button type="button" class="btn btn-ghost btn-sm" id="zoom-checklist-add-btn">+</button>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div class="zoom-back-section">
+              <div class="zoom-back-section-title">Tags</div>
+              <div class="zoom-back-tags" id="zoom-back-tags">
+                <input type="text" class="zoom-tag-input" id="zoom-tag-input" placeholder="Add tag..." />
+              </div>
+            </div>
+
+            {/* Attachments */}
+            <div class="zoom-back-section">
+              <div class="zoom-back-section-title">Attachments</div>
+              <div class="zoom-back-attachments" id="zoom-back-attachments" />
+              <label class="zoom-upload-btn" id="zoom-upload-btn">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.317 4.502 4.502 0 013.576 4.065A3 3 0 0118 19.5H6.75z" />
+                </svg>
+                <span>Upload file (max 5MB)</span>
+                <input type="file" class="hidden" id="zoom-file-input" />
+              </label>
             </div>
           </div>
           <div class="zoom-back-actions">
-            <button type="button" class="btn btn-ghost btn-sm" id="zoom-delete-btn">Delete</button>
+            <button type="button" class="btn btn-ghost btn-sm text-red-500 hover:text-red-700" id="zoom-delete-btn">Delete note</button>
           </div>
         </div>
       </div>
@@ -446,6 +497,7 @@ export const BoardView = (props: {
   username: string;
   isOwner: boolean;
   font?: string;
+  attachmentCounts?: Map<number, number>;
 }) => (
   <div
     class="h-full overflow-hidden"
@@ -460,7 +512,7 @@ export const BoardView = (props: {
     >
       <div id="notes" sse-swap="note:created" hx-swap="beforeend">
         {props.notes.map((note) => (
-          <Takkr note={note} key={note.id} />
+          <Takkr note={note} key={note.id} attachmentCount={props.attachmentCounts?.get(note.id) ?? 0} />
         ))}
       </div>
       <div id="note-updated" sse-swap="note:updated" hx-swap="none" />

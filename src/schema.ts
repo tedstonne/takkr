@@ -72,3 +72,27 @@ try {
 } catch (_) {
   // column already exists
 }
+
+// Migration: add tags column if missing
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN tags TEXT DEFAULT ''`);
+} catch (_) {}
+
+// Migration: add checklist column if missing
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN checklist TEXT DEFAULT '[]'`);
+} catch (_) {}
+
+// Attachments table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS attachments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    mime_type TEXT DEFAULT '',
+    size INTEGER DEFAULT 0,
+    path TEXT NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+db.exec(`CREATE INDEX IF NOT EXISTS idx_attachments_note ON attachments(note_id)`);

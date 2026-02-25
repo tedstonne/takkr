@@ -2,7 +2,6 @@
 
 /* ShadCN-inspired design tokens */
 @theme {
-  /* Colors - HSL format for easy theming */
   --color-background: oklch(0.985 0 0);
   --color-foreground: oklch(0.145 0 0);
   --color-card: oklch(1 0 0);
@@ -21,117 +20,61 @@
   --color-input: oklch(0.922 0 0);
   --color-ring: oklch(0.708 0 0);
 
-  /* Takkr note colors */
   --color-takkr-yellow: oklch(0.961 0.109 95.541);
   --color-takkr-pink: oklch(0.894 0.116 6.172);
   --color-takkr-green: oklch(0.906 0.132 152.524);
   --color-takkr-blue: oklch(0.91 0.096 230.902);
   --color-takkr-orange: oklch(0.901 0.135 66.053);
 
-  /* Border radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
-  /* Font families */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-handwriting: "Caveat", cursive;
 }
 
-/* Base styles */
 @layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
 
-/* Component styles */
 @layer components {
-  /* Button variants */
+  /* ── Buttons ── */
   .btn {
     @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
   }
+  .btn-default { @apply bg-primary text-primary-foreground hover:bg-primary/90; }
+  .btn-destructive { @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
+  .btn-outline { @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground; }
+  .btn-secondary { @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
+  .btn-ghost { @apply hover:bg-accent hover:text-accent-foreground; }
+  .btn-link { @apply text-primary underline-offset-4 hover:underline; }
+  .btn-sm { @apply h-9 px-3 rounded-md; }
+  .btn-md { @apply h-10 px-4 py-2; }
+  .btn-lg { @apply h-11 px-8 rounded-md; }
+  .btn-icon { @apply h-10 w-10; }
 
-  .btn-default {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90;
-  }
-
-  .btn-destructive {
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
-  }
-
-  .btn-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
-  }
-
-  .btn-ghost {
-    @apply hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .btn-link {
-    @apply text-primary underline-offset-4 hover:underline;
-  }
-
-  /* Button sizes */
-  .btn-sm {
-    @apply h-9 px-3 rounded-md;
-  }
-
-  .btn-md {
-    @apply h-10 px-4 py-2;
-  }
-
-  .btn-lg {
-    @apply h-11 px-8 rounded-md;
-  }
-
-  .btn-icon {
-    @apply h-10 w-10;
-  }
-
-  /* Input */
+  /* ── Input ── */
   .input {
     @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Card */
-  .card {
-    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
-  }
+  /* ── Card ── */
+  .card { @apply rounded-lg border bg-card text-card-foreground shadow-sm; }
+  .card-header { @apply flex flex-col space-y-1.5 p-6; }
+  .card-title { @apply text-2xl font-semibold leading-none tracking-tight; }
+  .card-description { @apply text-sm text-muted-foreground; }
+  .card-content { @apply p-6 pt-0; }
+  .card-footer { @apply flex items-center p-6 pt-0; }
 
-  .card-header {
-    @apply flex flex-col space-y-1.5 p-6;
-  }
-
-  .card-title {
-    @apply text-2xl font-semibold leading-none tracking-tight;
-  }
-
-  .card-description {
-    @apply text-sm text-muted-foreground;
-  }
-
-  .card-content {
-    @apply p-6 pt-0;
-  }
-
-  .card-footer {
-    @apply flex items-center p-6 pt-0;
-  }
-
-  /* Board backgrounds — all CSS, no images */
-  [data-background="plain"] {
-    @apply bg-white;
-  }
+  /* ── Board backgrounds ── */
+  [data-background="plain"] { @apply bg-white; }
 
   [data-background="grid"] {
     @apply bg-slate-50;
@@ -142,26 +85,13 @@
   [data-background="cork"] {
     background-color: #c4956a;
     background-image:
-      repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.03) 2px,
-        rgba(0,0,0,0.03) 4px
-      ),
-      repeating-linear-gradient(
-        -45deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.02) 2px,
-        rgba(0,0,0,0.02) 4px
-      ),
+      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+      repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
       radial-gradient(ellipse at 20% 50%, rgba(210,170,120,0.5) 0%, transparent 50%),
       radial-gradient(ellipse at 80% 20%, rgba(180,140,90,0.4) 0%, transparent 50%),
       radial-gradient(ellipse at 50% 80%, rgba(200,160,110,0.3) 0%, transparent 50%);
     background-size: 8px 8px, 8px 8px, 100% 100%, 100% 100%, 100% 100%;
   }
-
   [data-background="cork"] .takkr {
     filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.3));
   }
@@ -175,61 +105,36 @@
       radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.03) 0%, transparent 60%);
     background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
   }
-
   [data-background="chalkboard"] .takkr {
     filter: drop-shadow(1px 2px 6px rgba(0,0,0,0.5));
   }
-
-  /* Chalk dust border effect */
   [data-background="chalkboard"]::after {
     content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    @apply pointer-events-none absolute bottom-0 left-0 right-0;
     height: 12px;
     background: linear-gradient(to top, rgba(200,190,170,0.15), transparent);
-    pointer-events: none;
   }
 
   [data-background="lined"] {
     @apply bg-white;
-    background-image:
-      linear-gradient(transparent 39px, #e8d4d4 39px, #e8d4d4 40px, transparent 40px);
+    background-image: linear-gradient(transparent 39px, #e8d4d4 39px, #e8d4d4 40px, transparent 40px);
     background-size: 100% 40px;
     background-position: 0 20px;
   }
-
-  /* Red margin line */
   [data-background="lined"]::before {
     content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
+    @apply pointer-events-none absolute top-0 bottom-0;
     left: 80px;
     width: 1px;
     background: #f0b8b8;
-    pointer-events: none;
     z-index: 0;
   }
 
   [data-background="canvas"] {
     background-color: #f5f0eb;
     background-image:
-      repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 1px,
-        rgba(0,0,0,0.02) 1px,
-        rgba(0,0,0,0.02) 2px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 1px,
-        rgba(0,0,0,0.015) 1px,
-        rgba(0,0,0,0.015) 2px
-      );
+      repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px),
+      repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.015) 1px, rgba(0,0,0,0.015) 2px);
     background-size: 4px 4px;
   }
 
@@ -242,19 +147,17 @@
       linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
     background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   }
-
   [data-background="blueprint"] .takkr {
     filter: drop-shadow(1px 2px 8px rgba(0,0,0,0.4));
   }
 
   [data-background="doodle"] {
     @apply bg-slate-50;
-    background-image:
-      url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23cbd5e1' stroke-width='0.5' opacity='0.6'%3E%3Crect x='8' y='6' width='12' height='12' rx='1' transform='rotate(-5 14 12)'/%3E%3Ccircle cx='55' cy='15' r='6'/%3E%3Cpath d='M25 55 L30 45 L35 55' stroke-linecap='round'/%3E%3Cpath d='M60 50 Q65 42 70 50 Q75 58 70 58' stroke-linecap='round'/%3E%3Cpath d='M10 35 L20 35' stroke-linecap='round'/%3E%3Cpath d='M15 30 L15 40' stroke-linecap='round'/%3E%3Cpath d='M50 70 L55 65 L60 70 L65 65' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23cbd5e1' stroke-width='0.5' opacity='0.6'%3E%3Crect x='8' y='6' width='12' height='12' rx='1' transform='rotate(-5 14 12)'/%3E%3Ccircle cx='55' cy='15' r='6'/%3E%3Cpath d='M25 55 L30 45 L35 55' stroke-linecap='round'/%3E%3Cpath d='M60 50 Q65 42 70 50 Q75 58 70 58' stroke-linecap='round'/%3E%3Cpath d='M10 35 L20 35' stroke-linecap='round'/%3E%3Cpath d='M15 30 L15 40' stroke-linecap='round'/%3E%3Cpath d='M50 70 L55 65 L60 70 L65 65' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
     background-size: 80px 80px;
   }
 
-  /* Font families for handwriting */
+  /* ── Font families ── */
   .font-caveat { font-family: "Caveat", cursive; }
   .font-indie-flower { font-family: "Indie Flower", cursive; }
   .font-kalam { font-family: "Kalam", cursive; }
@@ -265,33 +168,29 @@
   .font-gochi-hand { font-family: "Gochi Hand", cursive; }
   .font-grand-hotel { font-family: "Grand Hotel", cursive; }
 
-  /* Takkr note — fixed size post-it */
+  /* ── Takkr note card ── */
   .takkr {
     @apply absolute cursor-grab select-none shadow-lg transition-all duration-200;
     width: 240px;
     height: 180px;
     touch-action: none;
     border-radius: 2px;
-    /* Slight rotation for organic feel */
-    &:nth-child(odd) { transform: rotate(-1deg); }
-    &:nth-child(even) { transform: rotate(0.5deg); }
-    &:nth-child(3n) { transform: rotate(1.5deg); }
   }
+  .takkr:nth-child(odd) { transform: rotate(-1deg); }
+  .takkr:nth-child(even) { transform: rotate(0.5deg); }
+  .takkr:nth-child(3n) { transform: rotate(1.5deg); }
 
   .takkr:hover {
     @apply shadow-xl;
     transform: rotate(0deg) scale(1.02);
   }
-
   .takkr.selected {
     @apply shadow-2xl ring-2 ring-slate-900/20;
     transform: rotate(0deg) scale(1.03);
   }
-
   .takkr.dragging {
-    @apply cursor-grabbing shadow-2xl;
+    @apply cursor-grabbing shadow-2xl opacity-90;
     transform: rotate(0deg) scale(1.08) !important;
-    opacity: 0.9;
     z-index: 9999 !important;
   }
 
@@ -317,10 +216,10 @@
   .takkr-blue { @apply bg-takkr-blue; }
   .takkr-orange { @apply bg-takkr-orange; }
 
-  /* Post-it tape effect */
+  /* Tape effect */
   .takkr::before {
     content: "";
-    position: absolute;
+    @apply absolute;
     top: -8px;
     left: 50%;
     transform: translateX(-50%) rotate(-2deg);
@@ -330,78 +229,67 @@
     border-radius: 1px;
   }
 
-  /* Zoom overlay */
+  /* ── Zoom overlay ── */
   .zoom-overlay {
     @apply fixed inset-0 z-50 flex items-center justify-center;
     pointer-events: none;
     perspective: 1200px;
   }
-
   .zoom-overlay.active {
-    pointer-events: auto;
+    @apply pointer-events-auto;
   }
 
   .zoom-backdrop {
-    @apply fixed inset-0 bg-black/60;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    @apply fixed inset-0 bg-black/60 opacity-0 transition-opacity duration-300;
   }
-
   .zoom-overlay.active .zoom-backdrop {
-    opacity: 1;
+    @apply opacity-100;
   }
 
   .zoom-card {
-    position: relative;
+    @apply relative rounded-sm opacity-0;
     width: 480px;
     max-width: 90vw;
     min-height: 400px;
     max-height: 80vh;
-    border-radius: 3px;
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transform: scale(0.5) rotateY(0deg);
-    opacity: 0;
   }
-
   .zoom-overlay.active .zoom-card {
+    @apply opacity-100;
     transform: scale(1) rotateY(0deg);
-    opacity: 1;
   }
-
   .zoom-overlay.flipped .zoom-card {
     transform: scale(1) rotateY(180deg);
   }
 
   .zoom-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    @apply relative w-full h-full;
     transform-style: preserve-3d;
   }
 
   .zoom-front,
   .zoom-back {
-    position: absolute;
-    width: 100%;
+    @apply absolute w-full rounded-sm overflow-hidden;
     min-height: 400px;
     backface-visibility: hidden;
-    border-radius: 3px;
-    overflow: hidden;
   }
 
   .zoom-front {
-    @apply flex items-center justify-center p-8;
+    @apply flex items-center justify-center p-8 text-center break-words;
     font-family: var(--takkr-font, "Caveat"), cursive;
     font-size: 2.5rem;
     line-height: 1.3;
-    text-align: center;
-    word-break: break-word;
   }
 
   .zoom-back {
-    transform: rotateY(180deg);
     @apply p-6 flex flex-col font-sans;
+    transform: rotateY(180deg);
+  }
+
+  .zoom-back-meta {
+    @apply text-xs text-black/40 mb-3 flex items-center gap-2;
   }
 
   .zoom-back-content {
@@ -409,86 +297,155 @@
   }
 
   .zoom-back-title {
+    @apply text-2xl leading-tight mb-3 outline-none;
     font-family: var(--takkr-font, "Caveat"), cursive;
-    @apply text-2xl leading-tight mb-4 outline-none;
     min-height: 2rem;
   }
-
   .zoom-back-title:focus {
     @apply ring-2 ring-black/10 rounded px-1 -mx-1;
   }
 
   .zoom-back-description {
-    @apply text-sm leading-relaxed outline-none min-h-[100px];
+    @apply text-sm leading-relaxed outline-none;
+    min-height: 60px;
   }
-
   .zoom-back-description:focus {
     @apply ring-2 ring-black/10 rounded p-2 -m-2;
+  }
+
+  .zoom-back-section {
+    @apply mt-4 pt-4 border-t border-black/10;
+  }
+  .zoom-back-section-title {
+    @apply text-xs font-medium text-black/50 uppercase tracking-wide mb-2;
+  }
+
+  .zoom-back-colors {
+    @apply flex gap-2;
+  }
+  .zoom-color-btn {
+    @apply w-7 h-7 rounded-full border-2 border-transparent cursor-pointer transition-all duration-150;
+  }
+  .zoom-color-btn:hover {
+    @apply scale-110;
+  }
+  .zoom-color-btn.active {
+    @apply border-slate-900 scale-110;
+  }
+
+  .zoom-back-tags {
+    @apply flex flex-wrap gap-1.5 items-center;
+  }
+  .zoom-tag {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/10 text-xs text-black/60;
+  }
+  .zoom-tag-remove {
+    @apply cursor-pointer hover:text-black/80 text-xs leading-none;
+  }
+  .zoom-tag-input {
+    @apply bg-transparent border-none outline-none text-xs w-20;
+  }
+
+  .zoom-back-checklist {
+    @apply space-y-1.5;
+  }
+  .zoom-checklist-item {
+    @apply flex items-center gap-2 text-sm;
+  }
+  .zoom-checklist-item input[type="checkbox"] {
+    @apply w-4 h-4 rounded cursor-pointer accent-slate-700;
+  }
+  .zoom-checklist-item span {
+    @apply flex-1;
+  }
+  .zoom-checklist-item span.checked {
+    @apply line-through text-black/40;
+  }
+  .zoom-checklist-item .checklist-remove {
+    @apply text-black/30 hover:text-black/60 cursor-pointer text-xs;
+  }
+  .zoom-checklist-add {
+    @apply flex items-center gap-2 mt-2;
+  }
+  .zoom-checklist-add input {
+    @apply bg-transparent border-b border-black/20 outline-none text-sm flex-1 py-1;
+  }
+
+  .zoom-back-attachments {
+    @apply space-y-2;
+  }
+  .zoom-attachment-item {
+    @apply flex items-center gap-2 p-2 rounded bg-black/5 text-sm;
+  }
+  .zoom-attachment-thumb {
+    @apply w-10 h-10 rounded object-cover flex-shrink-0;
+  }
+  .zoom-attachment-info {
+    @apply flex-1 min-w-0;
+  }
+  .zoom-attachment-name {
+    @apply truncate text-black/70;
+  }
+  .zoom-attachment-size {
+    @apply text-xs text-black/40;
+  }
+  .zoom-attachment-remove {
+    @apply text-black/30 hover:text-red-500 cursor-pointer flex-shrink-0;
+  }
+  .zoom-upload-btn {
+    @apply mt-2 w-full flex items-center justify-center gap-2 py-2 rounded border border-dashed border-black/20 text-xs text-black/40 cursor-pointer hover:border-black/40 hover:text-black/60 transition-colors;
+  }
+  .zoom-upload-btn.dragover {
+    @apply border-black/40 bg-black/5 text-black/60;
   }
 
   .zoom-back-actions {
     @apply flex justify-end pt-4 mt-4 border-t border-black/10;
   }
 
-  /* Inline editing styles */
+  /* ── Contenteditable ── */
   [contenteditable="true"] {
-    cursor: text;
+    @apply cursor-text;
   }
-
   [contenteditable="true"]:empty::before {
     content: attr(data-placeholder);
     @apply text-black/30 italic;
   }
 
-  /* Modal/Dialog */
+  /* ── Modal/Dialog ── */
   .modal-backdrop {
     @apply fixed inset-0 bg-black/50 z-40;
   }
-
   .modal {
     @apply fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-lg shadow-lg p-6 w-full max-w-md;
   }
-
   .modal-header {
     @apply flex items-center justify-between mb-4;
   }
-
   .modal-title {
     @apply text-lg font-semibold;
   }
-
   .modal-close {
     @apply text-muted-foreground hover:text-foreground;
   }
 }
 
-/* Utilities */
+/* ── Utilities ── */
 @layer utilities {
   .fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
-
   .scale-in {
     animation: scaleIn 0.3s ease-out;
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }

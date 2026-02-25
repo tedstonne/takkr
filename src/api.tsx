@@ -209,6 +209,8 @@ api.put("/notes/:id", secure, async (c) => {
   const data: Partial<Note.Record> = {};
   if (body.content) data.content = body.content as string;
   if (body.description !== undefined) data.description = body.description as string;
+  if (body.tags !== undefined) data.tags = body.tags as string;
+  if (body.checklist !== undefined) data.checklist = body.checklist as string;
   if (body.x) data.x = Number(body.x);
   if (body.y) data.y = Number(body.y);
   if (body.z) data.z = Number(body.z);
@@ -355,5 +357,103 @@ api.get("/notes/:id", secure, (c) => {
   const hasAccess = Board.access(note.board_id, username);
   if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
 
-  return c.json(note);
+  const atts = Note.attachments(noteId);
+  return c.json({ ...note, attachments: atts });
+});
+
+// Upload attachment
+api.post("/notes/:id/attachments", secure, async (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  const body = await c.req.parseBody();
+  const file = body.file;
+  if (!file || typeof file === "string") {
+    throw new HTTPException(400, { message: "File required" });
+  }
+
+  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+  if (file.size > MAX_SIZE) {
+    throw new HTTPException(400, { message: "File too large (max 5MB)" });
+  }
+
+  // Save file
+  const ext = file.name.split(".").pop() || "bin";
+  const fname = `${noteId}_${Date.now()}.${ext}`;
+  const dir = "./uploads";
+  const { mkdirSync, writeFileSync } = await import("node:fs");
+  mkdirSync(dir, { recursive: true });
+  const buf = await file.arrayBuffer();
+  writeFileSync(`${dir}/${fname}`, Buffer.from(buf));
+
+  const att = Note.addAttachment(noteId, file.name, file.type || "", file.size, fname);
+  return c.json(att);
+});
+
+// List attachments for a note
+api.get("/notes/:id/attachments", secure, (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  return c.json(Note.attachments(noteId));
+});
+
+// Serve attachment
+api.get("/attachments/:id", secure, async (c) => {
+  const username: string = c.get("username");
+  const attId = Number(c.req.param("id"));
+
+  const att = Note.attachmentById(attId);
+  if (!att) throw new HTTPException(404, { message: "Attachment not found" });
+
+  const note = Note.byId(att.note_id);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  const { readFileSync } = await import("node:fs");
+  const data = readFileSync(`./uploads/${att.path}`);
+  return c.newResponse(data, {
+    headers: {
+      "Content-Type": att.mime_type || "application/octet-stream",
+      "Content-Disposition": `inline; filename="${att.filename}"`,
+    },
+  });
+});
+
+// Delete attachment
+api.delete("/attachments/:id", secure, async (c) => {
+  const username: string = c.get("username");
+  const attId = Number(c.req.param("id"));
+
+  const att = Note.attachmentById(attId);
+  if (!att) throw new HTTPException(404, { message: "Attachment not found" });
+
+  const note = Note.byId(att.note_id);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  // Delete file
+  try {
+    const { unlinkSync } = await import("node:fs");
+    unlinkSync(`./uploads/${att.path}`);
+  } catch (_) {}
+
+  Note.removeAttachment(attId);
+  return c.json({ ok: true });
 });

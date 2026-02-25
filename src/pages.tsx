@@ -93,6 +93,7 @@ pages.get("/:slug", secure, (c) => {
   const notes = Note.forBoard(board.id);
   const members = Member.forBoard(board.id);
   const isOwner = board.owner === username;
+  const attachmentCounts = Note.attachmentCountsForBoard(board.id);
 
   return c.html(
     <Layout title={slug} id="board" scripts={["/www/board.js"]} font={font}>
@@ -103,6 +104,7 @@ pages.get("/:slug", secure, (c) => {
         username={username}
         isOwner={isOwner}
         font={font}
+        attachmentCounts={attachmentCounts}
       />
     </Layout>,
   );
