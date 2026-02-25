@@ -243,6 +243,16 @@ const zoom = {
         backDesc.contentEditable = "true";
 
         backTitle.addEventListener("blur", () => this.save(), { once: false });
+        backTitle.addEventListener("input", () => {
+          const MAX_CHARS = 80;
+          if (backTitle.textContent.length > MAX_CHARS) {
+            backTitle.textContent = backTitle.textContent.slice(0, MAX_CHARS);
+            // Move cursor to end
+            const sel = window.getSelection();
+            sel.selectAllChildren(backTitle);
+            sel.collapseToEnd();
+          }
+        });
         backDesc.addEventListener("blur", () => this.saveDescription(), { once: false });
 
         backDesc.addEventListener("focus", () => {

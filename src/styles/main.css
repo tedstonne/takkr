@@ -206,12 +206,9 @@
   }
 
   .takkr-title {
-    @apply p-4 text-xl leading-snug overflow-hidden;
+    @apply px-4 text-xl leading-snug overflow-hidden flex items-center justify-center text-center;
     font-family: var(--takkr-font, "Caveat"), cursive;
     font-size: 1.4rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
     word-break: break-word;
     height: 100%;
   }
