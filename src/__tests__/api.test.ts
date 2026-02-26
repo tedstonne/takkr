@@ -491,4 +491,170 @@ describe("api", () => {
     const res = await authedFetch(`/api/boards/${b.slug}`, { method: "DELETE" });
     expect(res.status === 200 || res.status === 302).toBe(true);
   });
+
+  // --- Completion toggle ---
+
+  test("POST /notes/:id/complete marks note as completed", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Complete me", "apiuser");
+    const res = await authedFetch(`/api/notes/${note.id}/complete`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("completed");
+    expect(html).toContain("data-completed");
+    // Verify DB state
+    const updated = Note.byId(note.id)!;
+    expect(updated.completed).toBeTruthy();
+  });
+
+  test("POST /notes/:id/complete toggles back to incomplete", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Toggle me", "apiuser");
+    // Complete it first
+    await authedFetch(`/api/notes/${note.id}/complete`, { method: "POST" });
+    expect(Note.byId(note.id)!.completed).toBeTruthy();
+    // Toggle back
+    const res = await authedFetch(`/api/notes/${note.id}/complete`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const updated = Note.byId(note.id)!;
+    expect(updated.completed).toBeFalsy();
+  });
+
+  test("POST /notes/:id/complete returns 404 for unknown", async () => {
+    const res = await authedFetch("/api/notes/99999/complete", { method: "POST" });
+    expect(res.status).toBe(404);
+  });
+
+  test("POST /notes/:id/complete respects access control", async () => {
+    const secret = Board.create("secret-complete", "other");
+    const secretNote = Note.create(secret.id, "Secret", "other");
+    const res = await authedFetch(`/api/notes/${secretNote.id}/complete`, { method: "POST" });
+    expect(res.status).toBe(403);
+  });
+
+  // --- Soft delete ---
+
+  test("DELETE /notes/:id soft-deletes instead of removing", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Soft delete me", "apiuser");
+    const res = await authedFetch(`/api/notes/${note.id}`, { method: "DELETE" });
+    expect(res.status).toBe(200);
+    // Note should still exist in DB with deleted_at set
+    const fetched = Note.byId(note.id);
+    expect(fetched).not.toBeNull();
+    expect(fetched!.deleted_at).toBeTruthy();
+  });
+
+  test("DELETE /notes/:id excludes note from forBoard", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Hidden after delete", "apiuser");
+    await authedFetch(`/api/notes/${note.id}`, { method: "DELETE" });
+    const notes = Note.forBoard(board.id);
+    expect(notes.find(n => n.id === note.id)).toBeUndefined();
+  });
+
+  // --- Restore ---
+
+  test("POST /notes/:id/restore restores soft-deleted note", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Restore me", "apiuser");
+    Note.softDelete(note.id);
+    expect(Note.byId(note.id)!.deleted_at).toBeTruthy();
+    const res = await authedFetch(`/api/notes/${note.id}/restore`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const restored = Note.byId(note.id)!;
+    expect(restored.deleted_at).toBeFalsy();
+    // Should be back in forBoard
+    expect(Note.forBoard(board.id).find(n => n.id === note.id)).toBeDefined();
+  });
+
+  test("POST /notes/:id/restore clears completed state too", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Complete then restore", "apiuser");
+    Note.update(note.id, { completed: new Date().toISOString() });
+    expect(Note.byId(note.id)!.completed).toBeTruthy();
+    const res = await authedFetch(`/api/notes/${note.id}/restore`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const restored = Note.byId(note.id)!;
+    expect(restored.completed).toBeFalsy();
+  });
+
+  test("POST /notes/:id/restore returns 404 for unknown", async () => {
+    const res = await authedFetch("/api/notes/99999/restore", { method: "POST" });
+    expect(res.status).toBe(404);
+  });
+
+  test("POST /notes/:id/restore respects access control", async () => {
+    const secret = Board.create("secret-restore", "other");
+    const secretNote = Note.create(secret.id, "Secret", "other");
+    Note.softDelete(secretNote.id);
+    const res = await authedFetch(`/api/notes/${secretNote.id}/restore`, { method: "POST" });
+    expect(res.status).toBe(403);
+  });
+
+  // --- Filter endpoints: completed and deleted ---
+
+  test("GET /boards/:slug/completed returns completed notes HTML", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Completed card", "apiuser");
+    Note.update(note.id, { completed: new Date().toISOString() });
+    const res = await authedFetch(`/api/boards/${boardSlug}/completed`);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("Completed card");
+  });
+
+  test("GET /boards/:slug/completed excludes active notes", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const activeNote = Note.create(board.id, "Still active unique123", "apiuser");
+    const res = await authedFetch(`/api/boards/${boardSlug}/completed`);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).not.toContain("Still active unique123");
+  });
+
+  test("GET /boards/:slug/deleted returns soft-deleted notes HTML", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Deleted card", "apiuser");
+    Note.softDelete(note.id);
+    const res = await authedFetch(`/api/boards/${boardSlug}/deleted`);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("Deleted card");
+  });
+
+  test("GET /boards/:slug/deleted excludes active notes", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const activeNote = Note.create(board.id, "Not deleted unique456", "apiuser");
+    const res = await authedFetch(`/api/boards/${boardSlug}/deleted`);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).not.toContain("Not deleted unique456");
+  });
+
+  test("GET /boards/:slug/completed returns 404 for unknown board", async () => {
+    const res = await authedFetch("/api/boards/nonexistent-xyz/completed");
+    expect(res.status).toBe(404);
+  });
+
+  test("GET /boards/:slug/deleted returns 404 for unknown board", async () => {
+    const res = await authedFetch("/api/boards/nonexistent-xyz/deleted");
+    expect(res.status).toBe(404);
+  });
+
+  // --- PUT /notes/:id with completed field ---
+
+  test("PUT /notes/:id can set completed via update", async () => {
+    const board = Board.bySlug(boardSlug)!;
+    const note = Note.create(board.id, "Set completed via PUT", "apiuser");
+    const ts = "2026-01-15T12:00:00Z";
+    const res = await authedFetch(`/api/notes/${note.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `completed=${encodeURIComponent(ts)}`,
+    });
+    expect(res.status).toBe(200);
+    const updated = Note.byId(note.id)!;
+    expect(updated.completed).toBe(ts);
+  });
 });
