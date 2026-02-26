@@ -60,6 +60,7 @@ describe("views", () => {
       id: 1, board_id: 1, content: "Test", description: "desc",
       tags: "a,b", checklist: "[]", x: 10, y: 20, z: 1,
       color: "yellow", created_by: "viewuser", created: "2026-01-01",
+      assigned_to: "", completed: "", deleted_at: "",
     };
     const html = (<Takkr note={note} />).toString();
     expect(html).toContain("Test");
@@ -68,11 +69,25 @@ describe("views", () => {
     expect(html).toContain('data-author="viewuser"');
   });
 
+  test("Takkr renders completed card with check badge", () => {
+    const note: Note.Record = {
+      id: 99, board_id: 1, content: "Done", description: "",
+      tags: "", checklist: "[]", x: 0, y: 0, z: 1,
+      color: "green", created_by: "viewuser", completed: "2026-01-15T12:00:00Z",
+      assigned_to: "", deleted_at: "",
+    };
+    const html = (<Takkr note={note} />).toString();
+    expect(html).toContain("completed");
+    expect(html).toContain("takkr-check");
+    expect(html).toContain('data-completed="2026-01-15T12:00:00Z"');
+  });
+
   test("Takkr renders with selected class", () => {
     const note: Note.Record = {
       id: 2, board_id: 1, content: "Sel", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
       color: "pink", created_by: "viewuser",
+      assigned_to: "", completed: "", deleted_at: "",
     };
     const html = (<Takkr note={note} selected />).toString();
     expect(html).toContain("selected");
@@ -83,6 +98,7 @@ describe("views", () => {
       id: 3, board_id: 1, content: "OOB", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
       color: "green", created_by: "viewuser",
+      assigned_to: "", completed: "", deleted_at: "",
     };
     const html = (<Takkr note={note} oob />).toString();
     expect(html).toContain("hx-swap-oob");
@@ -93,6 +109,7 @@ describe("views", () => {
       id: 4, board_id: 1, content: "Att", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
       color: "blue", created_by: "viewuser",
+      assigned_to: "", completed: "", deleted_at: "",
     };
     const html = (<Takkr note={note} attachmentCount={3} />).toString();
     expect(html).toContain("takkr-attachments");
@@ -104,6 +121,7 @@ describe("views", () => {
       id: 5, board_id: 1, content: "No att", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
       color: "orange", created_by: "viewuser",
+      assigned_to: "", completed: "", deleted_at: "",
     };
     const html = (<Takkr note={note} attachmentCount={0} />).toString();
     expect(html).not.toContain("takkr-attachments");
@@ -117,7 +135,9 @@ describe("views", () => {
     expect(html).toContain("zoom-back-tags");
     expect(html).toContain("zoom-back-attachments");
     expect(html).toContain("zoom-file-input");
-    expect(html).toContain("Delete note");
+    expect(html).toContain("zoom-delete-btn");
+    expect(html).toContain("zoom-complete-btn");
+    expect(html).toContain("Mark complete");
   });
 
   test("Layout renders with title and children", () => {
@@ -144,6 +164,7 @@ describe("views", () => {
     const notes: Note.Record[] = [{
       id: 1, board_id: 1, content: "Note1", description: "", tags: "",
       checklist: "[]", x: 0, y: 0, z: 1, color: "yellow", created_by: "viewuser",
+      assigned_to: "", completed: "", deleted_at: "",
     }];
     const html = (<BoardView
       board={board}

@@ -111,6 +111,16 @@ try {
   db.exec(`ALTER TABLE notes ADD COLUMN assigned_to TEXT DEFAULT ''`);
 } catch (_) {}
 
+// Migration: add completed column (empty string = not complete, datetime = completed)
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN completed TEXT DEFAULT ''`);
+} catch (_) {}
+
+// Migration: add deleted_at column for soft delete (empty string = active, datetime = soft-deleted)
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN deleted_at TEXT DEFAULT ''`);
+} catch (_) {}
+
 // Attachments table
 db.exec(`
   CREATE TABLE IF NOT EXISTS attachments (

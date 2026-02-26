@@ -110,13 +110,31 @@ const zoom = {
     // Close button (X)
     document.getElementById("zoom-close-btn")?.addEventListener("click", () => this.close());
 
-    // Delete button
-    document.getElementById("zoom-delete-btn")?.addEventListener("click", () => {
-      if (this.noteId) {
+    // Delete button — two-step confirmation
+    const deleteBtn = document.getElementById("zoom-delete-btn");
+    const deleteLabel = document.getElementById("zoom-delete-label");
+    deleteBtn?.addEventListener("click", () => {
+      if (!this.noteId) return;
+      if (deleteBtn.classList.contains("confirming")) {
+        // Second click — soft delete with fade-out
+        const noteEl = document.querySelector(`[data-id="${this.noteId}"]`);
         fetch(`/api/notes/${this.noteId}`, { method: "DELETE" });
-        document.querySelector(`[data-id="${this.noteId}"]`)?.remove();
+        if (noteEl) {
+          noteEl.classList.add("fading");
+          noteEl.addEventListener("animationend", () => noteEl.remove(), { once: true });
+        }
         this.close();
+      } else {
+        // First click — enter confirmation state
+        deleteBtn.classList.add("confirming");
+        if (deleteLabel) deleteLabel.textContent = "Confirm?";
+        this._deleteResetTimer = setTimeout(() => this._resetDeleteBtn(), 3000);
       }
+    });
+
+    // Complete button
+    document.getElementById("zoom-complete-btn")?.addEventListener("click", () => {
+      if (this.noteId) this.toggleComplete();
     });
 
     // Color picker
@@ -188,10 +206,11 @@ const zoom = {
     const author = noteEl.dataset.author || "";
     const created = noteEl.dataset.created || "";
 
-    // Parse checklist, tags, assigned
+    // Parse checklist, tags, assigned, completed
     try { this.checklist = JSON.parse(noteEl.dataset.checklist || "[]"); } catch (_) { this.checklist = []; }
     this.tags = (noteEl.dataset.tags || "").split(",").map(t => t.trim()).filter(Boolean);
     this.assignedTo = noteEl.dataset.assigned || "";
+    this.completed = noteEl.dataset.completed || "";
 
     // Set front
     document.getElementById("zoom-title").textContent = title;
@@ -244,6 +263,12 @@ const zoom = {
 
     // Load attachments from API
     this.loadAttachments();
+
+    // Update complete button state
+    this._updateCompleteBtn();
+
+    // Reset delete button confirmation state
+    this._resetDeleteBtn();
 
     // Auto-flip to back
     setTimeout(() => this.flip(), 350);
@@ -352,6 +377,61 @@ const zoom = {
       });
     });
   }
+
+  _updateCompleteBtn() {
+    const btn = document.getElementById("zoom-complete-btn");
+    const label = document.getElementById("zoom-complete-label");
+    if (!btn || !label) return;
+    if (this.completed) {
+      btn.classList.add("is-completed");
+      label.textContent = "Completed";
+    } else {
+      btn.classList.remove("is-completed");
+      label.textContent = "Mark complete";
+    }
+  },
+
+  _resetDeleteBtn() {
+    clearTimeout(this._deleteResetTimer);
+    const btn = document.getElementById("zoom-delete-btn");
+    const label = document.getElementById("zoom-delete-label");
+    if (btn) {
+      btn.classList.remove("confirming");
+      if (label) label.textContent = "Delete note";
+    }
+  },
+
+  toggleComplete() {
+    if (!this.noteId) return;
+    const noteId = this.noteId;
+    fetch(`/api/notes/${noteId}/complete`, { method: "POST" }).then(async (res) => {
+      if (!res.ok) return;
+      const noteEl = document.querySelector(`[data-id="${noteId}"]`);
+      if (this.completed) {
+        // Was completed, now uncompleted — card should already be visible (via Show completed filter)
+        this.completed = "";
+        noteEl?.classList.remove("completed", "fading");
+        noteEl?.querySelector(".takkr-check")?.remove();
+        if (noteEl) noteEl.dataset.completed = "";
+      } else {
+        // Was not completed, now completed — show visual then fade out
+        this.completed = new Date().toISOString();
+        if (noteEl) {
+          noteEl.classList.add("completed");
+          noteEl.dataset.completed = this.completed;
+          if (!noteEl.querySelector(".takkr-check")) {
+            noteEl.insertAdjacentHTML("beforeend",
+              `<div class="takkr-check"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>`
+            );
+          }
+          // Fade out after brief display
+          noteEl.classList.add("fading");
+          noteEl.addEventListener("animationend", () => noteEl.remove(), { once: true });
+        }
+      }
+      this._updateCompleteBtn();
+    });
+  },
 
   renderChecklist() {
     const container = document.getElementById("zoom-back-checklist");
@@ -1276,9 +1356,14 @@ window.board = () => ({
     // Commands
     const commands = [
       { label: "New note", icon: "✨", hint: "n", action: () => { this.closePalette(); document.getElementById("add-note-dialog")?.showModal(); } },
+      { label: "Complete note", icon: "✅", hint: "Space", action: () => { this.closePalette(); this._toggleCompleteSelected(); } },
       { label: "Delete note", icon: "🗑️", hint: "x", action: () => { this.closePalette(); this._deleteSelected(); } },
       { label: "Duplicate note", icon: "📋", hint: "d", action: () => { this.closePalette(); this._duplicateSelected(); } },
       { label: "Cycle color", icon: "🎨", hint: "c", action: () => { this.closePalette(); this._cycleColor(); } },
+      { label: "Show completed", icon: "👁️", hint: "", action: () => { this.closePalette(); this._toggleShowCompleted(); } },
+      { label: "Show deleted", icon: "👁️", hint: "", action: () => { this.closePalette(); this._toggleShowDeleted(); } },
+      { label: "Tidy up", icon: "🧹", hint: "", action: () => { this.closePalette(); this._tidyUp(); } },
+      { label: "Auto-arrange", icon: "📐", hint: "", action: () => { this.closePalette(); this._autoArrange(); } },
       { label: "Settings", icon: "⚙️", hint: "s", action: () => { this.closePalette(); document.getElementById("settings-modal")?.showModal(); } },
       { label: "Members", icon: "👥", hint: "m", action: () => { this.closePalette(); document.getElementById("members-modal")?.showModal(); } },
       { label: "Zoom in", icon: "🔍", hint: "+", action: () => { this.closePalette(); this.zoomIn(); } },
@@ -1388,8 +1473,38 @@ window.board = () => ({
   // --- Actions ---
   _deleteSelected() {
     if (!this.selected) return;
-    fetch(`/api/notes/${this.selected.dataset.id}`, { method: "DELETE" });
-    this.selected.remove();
+    const el = this.selected;
+    fetch(`/api/notes/${el.dataset.id}`, { method: "DELETE" });
+    el.classList.add("fading");
+    el.addEventListener("animationend", () => el.remove(), { once: true });
+    this.selected = null;
+  },
+
+  _toggleCompleteSelected() {
+    if (!this.selected) return;
+    const el = this.selected;
+    const noteId = el.dataset.id;
+    const wasCompleted = !!el.dataset.completed;
+    fetch(`/api/notes/${noteId}/complete`, { method: "POST" }).then(res => {
+      if (!res.ok) return;
+      if (wasCompleted) {
+        // Uncomplete — restore card
+        el.classList.remove("completed", "fading");
+        el.querySelector(".takkr-check")?.remove();
+        el.dataset.completed = "";
+      } else {
+        // Complete — show then fade
+        el.classList.add("completed");
+        el.dataset.completed = new Date().toISOString();
+        if (!el.querySelector(".takkr-check")) {
+          el.insertAdjacentHTML("beforeend",
+            `<div class="takkr-check"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg></div>`
+          );
+        }
+        el.classList.add("fading");
+        el.addEventListener("animationend", () => el.remove(), { once: true });
+      }
+    });
     this.selected = null;
   },
 
@@ -1418,6 +1533,155 @@ window.board = () => ({
       method: "PUT",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `color=${encodeURIComponent(next)}`,
+    });
+  },
+
+  // --- Show completed / deleted toggles ---
+  _showingCompleted: false,
+  _showingDeleted: false,
+
+  async _toggleShowCompleted() {
+    const notesContainer = document.getElementById("notes");
+    if (this._showingCompleted) {
+      // Remove all completed ghost cards
+      notesContainer.querySelectorAll(".takkr.completed").forEach(el => el.remove());
+      this._showingCompleted = false;
+      return;
+    }
+    const canvas = document.getElementById("canvas");
+    const slug = canvas?.dataset.slug;
+    if (!slug) return;
+    const res = await fetch(`/api/boards/${slug}/completed`);
+    if (!res.ok) return;
+    const html = await res.text();
+    notesContainer.insertAdjacentHTML("beforeend", html);
+    // Mark them as completed visually (they already have the class from server)
+    this._showingCompleted = true;
+  },
+
+  async _toggleShowDeleted() {
+    const notesContainer = document.getElementById("notes");
+    if (this._showingDeleted) {
+      notesContainer.querySelectorAll(".takkr.deleted").forEach(el => el.remove());
+      this._showingDeleted = false;
+      return;
+    }
+    const canvas = document.getElementById("canvas");
+    const slug = canvas?.dataset.slug;
+    if (!slug) return;
+    const res = await fetch(`/api/boards/${slug}/deleted`);
+    if (!res.ok) return;
+    const html = await res.text();
+    notesContainer.insertAdjacentHTML("beforeend", html);
+    // Add deleted visual class to the newly added cards
+    const allCards = notesContainer.querySelectorAll(".takkr");
+    allCards.forEach(el => {
+      if (el.dataset.completed || (el.classList.contains("takkr") && !el.classList.contains("deleted") && !el.classList.contains("completed"))) return;
+      // Cards from the deleted endpoint won't have the deleted class from server, add it
+    });
+    // Actually the server-rendered cards won't have `deleted` class. Let me add it to cards that have deleted_at.
+    // Since we don't have deleted_at in the data attributes, let's just add the class to all newly added cards.
+    const existingIds = new Set();
+    notesContainer.querySelectorAll(".takkr:not(.deleted)").forEach(el => existingIds.add(el.dataset.id));
+    // Wait for DOM to settle, then mark new ones as deleted
+    requestAnimationFrame(() => {
+      notesContainer.querySelectorAll(".takkr").forEach(el => {
+        if (!existingIds.has(el.dataset.id)) {
+          el.classList.add("deleted");
+        }
+      });
+    });
+    this._showingDeleted = true;
+  },
+
+  // --- Layout: Tidy Up (smart compact) ---
+  _tidyUp() {
+    const cards = Array.from(document.querySelectorAll("#notes > .takkr:not(.fading):not(.completed):not(.deleted)"));
+    if (!cards.length) return;
+
+    // Sort by x-position to detect columns
+    const sorted = cards.map(el => ({
+      el,
+      x: Number(el.dataset.x) || 0,
+      y: Number(el.dataset.y) || 0,
+    })).sort((a, b) => a.x - b.x);
+
+    // Group into clusters by x proximity (cards within 300px = same column)
+    const clusters = [];
+    let currentCluster = [sorted[0]];
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i].x - sorted[i - 1].x > 300) {
+        clusters.push(currentCluster);
+        currentCluster = [sorted[i]];
+      } else {
+        currentCluster.push(sorted[i]);
+      }
+    }
+    clusters.push(currentCluster);
+
+    // For each cluster: find median x, sort by y, re-space evenly
+    for (const cluster of clusters) {
+      const xs = cluster.map(c => c.x).sort((a, b) => a - b);
+      const medianX = xs[Math.floor(xs.length / 2)];
+
+      // Sort by y within the cluster
+      cluster.sort((a, b) => a.y - b.y);
+
+      const startY = cluster[0].y;
+      const gap = 220; // 180px card + 40px spacing
+
+      cluster.forEach((card, i) => {
+        const newX = medianX;
+        const newY = startY + i * gap;
+        card.el.style.left = `${newX}px`;
+        card.el.style.top = `${newY}px`;
+        card.el.dataset.x = newX;
+        card.el.dataset.y = newY;
+
+        // Persist silently
+        fetch(`/api/notes/${card.el.dataset.id}?silent=1`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `x=${newX}&y=${newY}`,
+        });
+      });
+    }
+  },
+
+  // --- Layout: Auto-arrange (fresh grid) ---
+  _autoArrange() {
+    const cards = Array.from(document.querySelectorAll("#notes > .takkr:not(.fading):not(.completed):not(.deleted)"));
+    if (!cards.length) return;
+
+    // Sort by z-index to preserve stacking order
+    cards.sort((a, b) => (Number(a.style.zIndex) || 0) - (Number(b.style.zIndex) || 0));
+
+    const cols = 4;
+    const colWidth = 280; // 240px card + 40px gap
+    const rowHeight = 220; // 180px card + 40px gap
+
+    // Start position: near viewport center
+    const canvas = document.getElementById("canvas");
+    const z = this.zoomLevel || 1;
+    const startX = Math.max(40, Math.round((canvas.scrollLeft + canvas.clientWidth / 4) / z));
+    const startY = Math.max(40, Math.round((canvas.scrollTop + canvas.clientHeight / 4) / z));
+
+    cards.forEach((el, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const newX = startX + col * colWidth;
+      const newY = startY + row * rowHeight;
+
+      el.style.left = `${newX}px`;
+      el.style.top = `${newY}px`;
+      el.dataset.x = newX;
+      el.dataset.y = newY;
+
+      fetch(`/api/notes/${el.dataset.id}?silent=1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `x=${newX}&y=${newY}`,
+      });
     });
   },
 
@@ -1493,6 +1757,7 @@ window.board = () => ({
       case "Delete":
       case "Backspace":
         e.preventDefault(); this._deleteSelected(); break;
+      case " ": e.preventDefault(); this._toggleCompleteSelected(); break;
       case "d": e.preventDefault(); this._duplicateSelected(); break;
       case "c": e.preventDefault(); this._cycleColor(); break;
       case "s": e.preventDefault(); document.getElementById("settings-modal")?.showModal(); break;

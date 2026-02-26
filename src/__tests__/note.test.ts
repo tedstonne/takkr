@@ -209,4 +209,71 @@ describe("note", () => {
     const found = notes.find(n => n.id === note.id);
     expect(found!.assigned_to).toBe("sam");
   });
+
+  // --- Completion tests ---
+
+  test("new note has empty completed", () => {
+    const note = Note.create(boardId, "Not done", "noteuser");
+    expect(note.completed).toBeFalsy();
+  });
+
+  test("update completed", () => {
+    const note = Note.create(boardId, "Complete me", "noteuser");
+    const ts = new Date().toISOString();
+    const updated = Note.update(note.id, { completed: ts });
+    expect(updated!.completed).toBe(ts);
+  });
+
+  test("forBoard excludes completed notes", () => {
+    const note = Note.create(boardId, "Will complete", "noteuser");
+    Note.update(note.id, { completed: new Date().toISOString() });
+    const notes = Note.forBoard(boardId);
+    expect(notes.find(n => n.id === note.id)).toBeUndefined();
+  });
+
+  test("completedForBoard returns only completed notes", () => {
+    const note = Note.create(boardId, "Completed one", "noteuser");
+    Note.update(note.id, { completed: new Date().toISOString() });
+    const completed = Note.completedForBoard(boardId);
+    expect(completed.find(n => n.id === note.id)).toBeDefined();
+  });
+
+  // --- Soft delete tests ---
+
+  test("softDelete sets deleted_at", () => {
+    const note = Note.create(boardId, "Soft del", "noteuser");
+    const deleted = Note.softDelete(note.id);
+    expect(deleted).not.toBeNull();
+    expect(deleted!.deleted_at).toBeTruthy();
+  });
+
+  test("forBoard excludes soft-deleted notes", () => {
+    const note = Note.create(boardId, "Will soft delete", "noteuser");
+    Note.softDelete(note.id);
+    const notes = Note.forBoard(boardId);
+    expect(notes.find(n => n.id === note.id)).toBeUndefined();
+  });
+
+  test("deletedForBoard returns only soft-deleted notes", () => {
+    const note = Note.create(boardId, "Deleted one", "noteuser");
+    Note.softDelete(note.id);
+    const deleted = Note.deletedForBoard(boardId);
+    expect(deleted.find(n => n.id === note.id)).toBeDefined();
+  });
+
+  test("restore clears deleted_at", () => {
+    const note = Note.create(boardId, "Restore me", "noteuser");
+    Note.softDelete(note.id);
+    const restored = Note.restore(note.id);
+    expect(restored).not.toBeNull();
+    expect(restored!.deleted_at).toBeFalsy();
+  });
+
+  test("restore makes note appear in forBoard again", () => {
+    const note = Note.create(boardId, "Back again", "noteuser");
+    Note.softDelete(note.id);
+    expect(Note.forBoard(boardId).find(n => n.id === note.id)).toBeUndefined();
+    Note.restore(note.id);
+    expect(Note.forBoard(boardId).find(n => n.id === note.id)).toBeDefined();
+  });
 });

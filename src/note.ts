@@ -16,6 +16,8 @@ export type Record = {
   color: Color;
   created_by: string;
   assigned_to: string;
+  completed: string;
+  deleted_at: string;
   created?: string;
 };
 
@@ -37,10 +39,36 @@ export const byId = (id: number): Record | null => {
 
 export const forBoard = (boardId: number): Record[] => {
   const notes = db
-    .query("SELECT * FROM notes WHERE board_id = ? ORDER BY z ASC, id ASC")
+    .query("SELECT * FROM notes WHERE board_id = ? AND (deleted_at IS NULL OR deleted_at = '') AND (completed IS NULL OR completed = '') ORDER BY z ASC, id ASC")
     .all(boardId);
 
   return notes as Record[];
+};
+
+export const completedForBoard = (boardId: number): Record[] => {
+  return db
+    .query("SELECT * FROM notes WHERE board_id = ? AND (deleted_at IS NULL OR deleted_at = '') AND completed != '' ORDER BY z ASC, id ASC")
+    .all(boardId) as Record[];
+};
+
+export const deletedForBoard = (boardId: number): Record[] => {
+  return db
+    .query("SELECT * FROM notes WHERE board_id = ? AND deleted_at != '' ORDER BY z ASC, id ASC")
+    .all(boardId) as Record[];
+};
+
+export const softDelete = (id: number): Record | null => {
+  const result = db
+    .query("UPDATE notes SET deleted_at = ? WHERE id = ? RETURNING *")
+    .get(new Date().toISOString(), id);
+  return result ? (result as Record) : null;
+};
+
+export const restore = (id: number): Record | null => {
+  const result = db
+    .query("UPDATE notes SET deleted_at = '' WHERE id = ? RETURNING *")
+    .get(id);
+  return result ? (result as Record) : null;
 };
 
 export const create = (
@@ -70,7 +98,7 @@ export const create = (
 
 export const update = (
   id: number,
-  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to">>,
+  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to" | "completed">>,
 ): Record | null => {
   const note = byId(id);
   if (!note) return null;
@@ -84,14 +112,15 @@ export const update = (
   const z = data.z ?? note.z;
   const color = data.color ?? note.color;
   const assigned_to = data.assigned_to ?? note.assigned_to ?? "";
+  const completed = data.completed ?? note.completed ?? "";
 
   const result = db
     .query(
-      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?, assigned_to = ?
+      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?, assigned_to = ?, completed = ?
        WHERE id = ?
        RETURNING *`,
     )
-    .get(content, description, tags, checklist, x, y, z, color, assigned_to, id);
+    .get(content, description, tags, checklist, x, y, z, color, assigned_to, completed, id);
 
   return result as Record;
 };

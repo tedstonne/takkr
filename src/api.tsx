@@ -410,6 +410,7 @@ api.openapi(updateNoteRoute, async (c) => {
   if (body.z) data.z = Number(body.z);
   if (body.color) data.color = body.color as Note.Color;
   if (body.assigned_to !== undefined) data.assigned_to = body.assigned_to as string;
+  if (body.completed !== undefined) data.completed = body.completed as string;
 
   const updated = Note.update(noteId, data);
   if (!updated) throw new HTTPException(404, { message: "Note not found" });
@@ -453,8 +454,8 @@ const deleteNoteRoute = createRoute({
   method: "delete",
   path: "/notes/{id}",
   tags: ["Notes"],
-  summary: "Delete a note",
-  description: "Permanently delete a note and all its file attachments from disk. Broadcasts a note:deleted SSE event that triggers client-side removal of the card element. Keyboard shortcut: 'x' or Delete/Backspace in the board view. This action cannot be undone.",
+  summary: "Soft-delete a note",
+  description: "Soft-delete a note by setting its deleted_at timestamp. The note remains in the database and can be restored. Broadcasts a note:deleted SSE event that triggers client-side removal of the card element. Keyboard shortcut: 'x' or Delete/Backspace in the board view.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: { 200: { description: "OK" } },
@@ -467,13 +468,90 @@ api.openapi(deleteNoteRoute, async (c) => {
   if (!note) throw new HTTPException(404, { message: "Note not found" });
   const hasAccess = Board.access(note.board_id, username);
   if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
-  Note.remove(noteId);
+  Note.softDelete(noteId);
   events.broadcast(
     note.board_id,
     events.Event.Note.Deleted,
     `<script>document.querySelector('[data-id="${noteId}"]')?.remove()</script>`,
   );
   return c.text("OK") as any;
+});
+
+const toggleCompleteRoute = createRoute({
+  method: "post",
+  path: "/notes/{id}/complete",
+  tags: ["Notes"],
+  summary: "Toggle note completion",
+  description: "Toggle a note's completed state. If the note is not completed, marks it as completed with the current timestamp. If already completed, clears the completed state. Broadcasts note:updated SSE event. Keyboard shortcut: Space in the board view.",
+  middleware: [secure] as any,
+  request: { params: S.NoteIdParam },
+  responses: { 200: { description: "HTML updated card" } },
+});
+
+api.openapi(toggleCompleteRoute, async (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  const completed = note.completed ? "" : new Date().toISOString();
+  const updated = Note.update(noteId, { completed });
+  if (!updated) throw new HTTPException(404, { message: "Note not found" });
+
+  const attCount = Note.attachmentCount(noteId);
+  const html = <Takkr note={updated} attachmentCount={attCount} oob />;
+  events.broadcast(updated.board_id, events.Event.Note.Updated, html.toString());
+  return c.html(<Takkr note={updated} attachmentCount={attCount} />) as any;
+});
+
+const restoreNoteRoute = createRoute({
+  method: "post",
+  path: "/notes/{id}/restore",
+  tags: ["Notes"],
+  summary: "Restore a soft-deleted or completed note",
+  description: "Clears the deleted_at and completed fields on a note, restoring it to the active board view. Broadcasts a note:created SSE event so other clients see the card reappear.",
+  middleware: [secure] as any,
+  request: { params: S.NoteIdParam },
+  responses: { 200: { description: "HTML restored card" } },
+});
+
+api.openapi(restoreNoteRoute, async (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  const restored = Note.restore(noteId);
+  if (!restored) throw new HTTPException(404, { message: "Note not found" });
+
+  // Also clear completed state if it was completed
+  const updated = restored.completed ? Note.update(noteId, { completed: "" }) ?? restored : restored;
+
+  const attCount = Note.attachmentCount(noteId);
+  const html = <Takkr note={updated} attachmentCount={attCount} />;
+  events.broadcast(updated.board_id, events.Event.Note.Created, html.toString());
+  return c.html(html) as any;
+});
+
+// Board-level filter endpoints for completed and deleted cards
+api.get("/boards/:slug/completed", secure, boardAccess, (c) => {
+  const board: Board.Record = c.get("board");
+  const notes = Note.completedForBoard(board.id);
+  const attCounts = Note.attachmentCountsForBoard(board.id);
+  const html = notes.map((n) => <Takkr note={n} attachmentCount={attCounts.get(n.id) ?? 0} />);
+  return c.html(<>{html}</>) as any;
+});
+
+api.get("/boards/:slug/deleted", secure, boardAccess, (c) => {
+  const board: Board.Record = c.get("board");
+  const notes = Note.deletedForBoard(board.id);
+  const attCounts = Note.attachmentCountsForBoard(board.id);
+  const html = notes.map((n) => <Takkr note={n} attachmentCount={attCounts.get(n.id) ?? 0} />);
+  return c.html(<>{html}</>) as any;
 });
 
 const bringToFrontRoute = createRoute({

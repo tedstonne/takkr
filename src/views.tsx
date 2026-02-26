@@ -174,36 +174,47 @@ export const Takkr = (props: {
   selected?: boolean;
   oob?: boolean;
   attachmentCount?: number;
-}) => (
-  <div
-    id={`note-${props.note.id}`}
-    class={`takkr takkr-${props.note.color}${props.selected ? " selected" : ""}`}
-    data-id={props.note.id}
-    data-x={props.note.x}
-    data-y={props.note.y}
-    data-description={props.note.description || ""}
-    data-tags={props.note.tags || ""}
-    data-checklist={props.note.checklist || "[]"}
-    data-author={props.note.created_by || ""}
-    data-created={props.note.created || ""}
-    data-assigned={props.note.assigned_to || ""}
-    style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
-    tabindex={0}
-    {...(props.oob
-      ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
-      : {})}
-  >
-    <div class="takkr-title">{props.note.content}</div>
-    {(props.attachmentCount ?? 0) > 0 && (
-      <div class="takkr-attachments">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-        </svg>
-        <span>{props.attachmentCount}</span>
-      </div>
-    )}
-  </div>
-);
+}) => {
+  const isCompleted = !!props.note.completed;
+  return (
+    <div
+      id={`note-${props.note.id}`}
+      class={`takkr takkr-${props.note.color}${props.selected ? " selected" : ""}${isCompleted ? " completed" : ""}`}
+      data-id={props.note.id}
+      data-x={props.note.x}
+      data-y={props.note.y}
+      data-description={props.note.description || ""}
+      data-tags={props.note.tags || ""}
+      data-checklist={props.note.checklist || "[]"}
+      data-author={props.note.created_by || ""}
+      data-created={props.note.created || ""}
+      data-assigned={props.note.assigned_to || ""}
+      data-completed={props.note.completed || ""}
+      style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
+      tabindex={0}
+      {...(props.oob
+        ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
+        : {})}
+    >
+      <div class="takkr-title">{props.note.content}</div>
+      {isCompleted && (
+        <div class="takkr-check">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+      )}
+      {(props.attachmentCount ?? 0) > 0 && (
+        <div class="takkr-attachments">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+          </svg>
+          <span>{props.attachmentCount}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Zoom overlay — rendered once, populated by JS
 export const ZoomOverlay = () => (
@@ -285,7 +296,23 @@ export const ZoomOverlay = () => (
             </div>
           </div>
           <div class="zoom-back-actions">
-            <button type="button" class="btn btn-ghost btn-sm text-red-500 hover:text-red-700" id="zoom-delete-btn">Delete note</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="zoom-complete-btn">
+              <svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              <span id="zoom-complete-label">Mark complete</span>
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm text-red-500 hover:text-red-700" id="zoom-delete-btn">
+              <svg class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <line x1="10" x2="10" y1="11" y2="17" />
+                <line x1="14" x2="14" y1="11" y2="17" />
+              </svg>
+              <span id="zoom-delete-label">Delete note</span>
+            </button>
           </div>
         </div>
       </div>
@@ -409,6 +436,7 @@ const HelpModal = () => (
           ["↑↓←→", "Navigate notes"],
           ["n", "New note"],
           ["Enter", "Open card detail"],
+          ["Space", "Toggle complete"],
           ["x", "Delete selected note"],
           ["d", "Duplicate selected note"],
           ["c", "Cycle note color"],
