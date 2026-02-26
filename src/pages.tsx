@@ -8,7 +8,7 @@ import { secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
 import { getLandingData } from "@/landing";
-import { BoardView, Help, Home, Join, Landing, Login } from "@/views";
+import { ApiDocs, BoardView, Help, Home, Join, Landing, Login } from "@/views";
 
 const resolveFont = (c: any, username?: string): string => {
   // URL param override (backdoor)
@@ -76,6 +76,19 @@ pages.get("/~/join", (c) => {
   return c.html(
     <Layout title="Join" id="join" scripts={["/www/auth.js"]}>
       <Join />
+    </Layout>,
+  );
+});
+
+// API docs page
+pages.get("/~/docs", (c) => {
+  return c.html(
+    <Layout
+      title="API Reference"
+      id="docs"
+      description="takkr API documentation. REST endpoints for boards, notes, attachments, user preferences, and real-time events."
+    >
+      <ApiDocs />
     </Layout>,
   );
 });
