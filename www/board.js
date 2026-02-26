@@ -35,6 +35,27 @@ window.noteDialog = () => ({
 
   show() {
     this.open = true;
+
+    // Inject viewport-center position into form
+    const canvas = document.getElementById("canvas");
+    if (canvas && this.$refs.form) {
+      const boardComp = Alpine.$data(canvas);
+      const z = boardComp?.zoomLevel || 1;
+      const cx = (canvas.scrollLeft + canvas.clientWidth / 2) / z;
+      const cy = (canvas.scrollTop + canvas.clientHeight / 2) / z;
+      // Small random offset so sequential cards don't stack exactly
+      const ox = (Math.random() - 0.5) * 60;
+      const oy = (Math.random() - 0.5) * 60;
+      const x = Math.max(20, Math.round(cx + ox));
+      const y = Math.max(20, Math.round(cy + oy));
+
+      // Remove old hidden inputs if any, then add fresh ones
+      this.$refs.form.querySelectorAll("input[name=x], input[name=y]").forEach(el => el.remove());
+      const ix = Object.assign(document.createElement("input"), { type: "hidden", name: "x", value: x });
+      const iy = Object.assign(document.createElement("input"), { type: "hidden", name: "y", value: y });
+      this.$refs.form.append(ix, iy);
+    }
+
     this.$el.showModal();
     this.$nextTick(() => this.$refs.content?.focus());
   },
@@ -43,6 +64,8 @@ window.noteDialog = () => ({
     this.open = false;
     this.$el.close();
     this.$refs.form?.reset();
+    // Remove injected position inputs
+    this.$refs.form?.querySelectorAll("input[name=x], input[name=y]").forEach(el => el.remove());
   },
 });
 
