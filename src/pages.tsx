@@ -37,7 +37,12 @@ pages.get("/", secure.optional, (c) => {
 
   if (!username) {
     return c.html(
-      <Layout title="Collaborative sticky notes" id="landing" scripts={["/www/landing.js"]}>
+      <Layout
+        title="Collaborative sticky notes for your ideas"
+        id="landing"
+        scripts={["/www/landing.js"]}
+        description="Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source."
+      >
         <Landing />
       </Layout>,
     );

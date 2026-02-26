@@ -58,11 +58,25 @@ function showZoomIndicator() {
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("canvas");
 
-  // Center the view on the hero cluster
+  // Center the view so all content is visible
   if (canvas) {
-    // Notes are centered around x:500, y:400 — scroll to show them nicely
-    canvas.scrollLeft = 200;
-    canvas.scrollTop = 0;
+    const vw = canvas.clientWidth;
+    const vh = canvas.clientHeight;
+    // Content spans roughly x:40-1400, y:60-940
+    // On mobile (< 768), zoom out to fit; on desktop, just scroll to origin
+    if (vw < 768) {
+      zoomLevel = Math.min(vw / 1500, vh / 1000, 0.5);
+      const notes = document.getElementById("notes");
+      if (notes) {
+        notes.style.transform = `scale(${zoomLevel})`;
+        notes.style.transformOrigin = "0 0";
+      }
+      canvas.scrollLeft = 0;
+      canvas.scrollTop = 0;
+    } else {
+      canvas.scrollLeft = 0;
+      canvas.scrollTop = 0;
+    }
   }
 
   // Pinch-to-zoom

@@ -876,8 +876,58 @@ export const Landing = () => {
 
   return (
     <div class="h-full overflow-hidden">
+      {/* SEO: semantic content for crawlers (sr-only) */}
+      <div class="sr-only">
+        <h1>takkr — Collaborative Sticky Notes for Your Ideas</h1>
+        <p>Free, real-time collaborative sticky note boards. Organize ideas visually with your team.</p>
+
+        <h2>Features</h2>
+        <ul>
+          <li>Drag and drop sticky notes on an infinite canvas</li>
+          <li>Real-time collaboration — see changes as they happen</li>
+          <li>Vim-style keyboard shortcuts for power users</li>
+          <li>Command palette (⌘P) to search notes, boards, and actions</li>
+          <li>Zoom in and out to see the big picture or focus on details</li>
+          <li>File attachments on any note (up to 5MB)</li>
+          <li>Checklists and tags for organizing notes</li>
+          <li>Multiple board backgrounds: grid, cork, chalkboard, blueprint, and more</li>
+          <li>Custom handwriting fonts</li>
+        </ul>
+
+        <h2>How It Works</h2>
+        <ol>
+          <li>Go to any URL like /my-project to instantly claim a board</li>
+          <li>Invite teammates by username to collaborate in real time</li>
+          <li>Sign in with passkeys — no passwords, ever</li>
+        </ol>
+
+        <h2>Free and Open Source</h2>
+        <p>takkr is free to use and open source. No credit card required. Get started in seconds.</p>
+      </div>
+
+      {/* JSON-LD structured data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "takkr",
+        "description": "Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source.",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "Drag and drop sticky notes",
+          "Real-time collaboration",
+          "Vim keyboard shortcuts",
+          "Command palette",
+          "Zoom and pan",
+          "File attachments",
+          "Checklists and tags",
+          "Passkey authentication"
+        ]
+      })}} />
+
       {/* Floating header */}
-      <div class="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
+      <header class="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
         <div class="flex items-center gap-2">
           <span class="text-xl font-bold text-slate-900">takkr</span>
         </div>
@@ -896,7 +946,7 @@ export const Landing = () => {
             Sign In
           </a>
         </div>
-      </div>
+      </header>
 
       {/* The board */}
       <div

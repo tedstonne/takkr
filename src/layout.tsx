@@ -11,6 +11,9 @@ export type Page = {
   children: Child;
   scripts?: string[];
   font?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
 };
 
 const pageTitle = (title: string): string =>
@@ -23,9 +26,24 @@ export const Layout = (props: Page) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta
         name="description"
-        content="Collaborative sticky note board. Drag, drop, and organize your ideas."
+        content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."}
       />
       <title>{pageTitle(props.title)}</title>
+
+      {/* Open Graph */}
+      <meta property="og:title" content={pageTitle(props.title)} />
+      <meta property="og:description" content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."} />
+      <meta property="og:type" content="website" />
+      {props.canonical && <meta property="og:url" content={props.canonical} />}
+      {props.ogImage && <meta property="og:image" content={props.ogImage} />}
+
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={pageTitle(props.title)} />
+      <meta name="twitter:description" content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."} />
+      {props.ogImage && <meta name="twitter:image" content={props.ogImage} />}
+
+      {props.canonical && <link rel="canonical" href={props.canonical} />}
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Cookie&family=Gochi+Hand&family=Grand+Hotel&family=Handlee&family=Indie+Flower&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=Parisienne&family=Sofia&display=swap"
