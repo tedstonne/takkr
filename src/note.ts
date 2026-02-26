@@ -16,6 +16,9 @@ export type Record = {
   color: Color;
   created_by: string;
   assigned_to: string;
+  due_date: string | null;
+  priority: string | null;
+  status: string;
   created?: string;
 };
 
@@ -70,7 +73,7 @@ export const create = (
 
 export const update = (
   id: number,
-  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to">>,
+  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to" | "due_date" | "priority" | "status">>,
 ): Record | null => {
   const note = byId(id);
   if (!note) return null;
@@ -84,14 +87,17 @@ export const update = (
   const z = data.z ?? note.z;
   const color = data.color ?? note.color;
   const assigned_to = data.assigned_to ?? note.assigned_to ?? "";
+  const due_date = data.due_date !== undefined ? data.due_date : note.due_date;
+  const priority = data.priority !== undefined ? data.priority : note.priority;
+  const status = data.status ?? note.status ?? "todo";
 
   const result = db
     .query(
-      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?, assigned_to = ?
+      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?, assigned_to = ?, due_date = ?, priority = ?, status = ?
        WHERE id = ?
        RETURNING *`,
     )
-    .get(content, description, tags, checklist, x, y, z, color, assigned_to, id);
+    .get(content, description, tags, checklist, x, y, z, color, assigned_to, due_date, priority, status, id);
 
   return result as Record;
 };

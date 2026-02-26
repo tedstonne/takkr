@@ -3,6 +3,16 @@ import type * as Board from "@/board";
 import type * as Member from "@/member";
 import type * as Note from "@/note";
 
+/** Calculate days until a due date from today. Negative = overdue. */
+const daysUntilDue = (dueDate: string | null): number | null => {
+  if (!dueDate) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const due = new Date(dueDate);
+  const diff = due.getTime() - today.getTime();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+
 // Button component using CSS classes from main.css
 const Button = (props: {
   children: Child;
@@ -174,36 +184,62 @@ export const Takkr = (props: {
   selected?: boolean;
   oob?: boolean;
   attachmentCount?: number;
-}) => (
-  <div
-    id={`note-${props.note.id}`}
-    class={`takkr takkr-${props.note.color}${props.selected ? " selected" : ""}`}
-    data-id={props.note.id}
-    data-x={props.note.x}
-    data-y={props.note.y}
-    data-description={props.note.description || ""}
-    data-tags={props.note.tags || ""}
-    data-checklist={props.note.checklist || "[]"}
-    data-author={props.note.created_by || ""}
-    data-created={props.note.created || ""}
-    data-assigned={props.note.assigned_to || ""}
-    style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
-    tabindex={0}
-    {...(props.oob
-      ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
-      : {})}
-  >
-    <div class="takkr-title">{props.note.content}</div>
-    {(props.attachmentCount ?? 0) > 0 && (
-      <div class="takkr-attachments">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-        </svg>
-        <span>{props.attachmentCount}</span>
-      </div>
-    )}
-  </div>
-);
+}) => {
+  const days = daysUntilDue(props.note.due_date);
+  const isDone = props.note.status === "done";
+  const classes = [
+    "takkr",
+    `takkr-${props.note.color}`,
+    props.selected ? "selected" : "",
+    isDone ? "takkr-done" : "",
+  ].filter(Boolean).join(" ");
+
+  return (
+    <div
+      id={`note-${props.note.id}`}
+      class={classes}
+      data-id={props.note.id}
+      data-x={props.note.x}
+      data-y={props.note.y}
+      data-description={props.note.description || ""}
+      data-tags={props.note.tags || ""}
+      data-checklist={props.note.checklist || "[]"}
+      data-author={props.note.created_by || ""}
+      data-created={props.note.created || ""}
+      data-assigned={props.note.assigned_to || ""}
+      data-due-date={props.note.due_date || ""}
+      data-priority={props.note.priority || ""}
+      data-status={props.note.status || "todo"}
+      style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
+      tabindex={0}
+      {...(props.oob
+        ? { "hx-swap-oob": `outerHTML:#note-${props.note.id}` }
+        : {})}
+    >
+      <div class="takkr-title">{props.note.content}</div>
+      {/* Dog-ear: days until due */}
+      {days !== null && (
+        <div class="takkr-ear">{days}</div>
+      )}
+      {/* Priority dot */}
+      {props.note.priority && (
+        <div class={`takkr-priority takkr-priority-${props.note.priority}`} />
+      )}
+      {/* Done checkmark */}
+      {isDone && (
+        <div class="takkr-done-check">{"\u2713"}</div>
+      )}
+      {(props.attachmentCount ?? 0) > 0 && (
+        <div class="takkr-attachments">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+          </svg>
+          <span>{props.attachmentCount}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Zoom overlay — rendered once, populated by JS
 export const ZoomOverlay = () => (
@@ -244,6 +280,60 @@ export const ZoomOverlay = () => (
                     class={`zoom-color-btn bg-takkr-${c}`}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Progressive disclosure: Due Date, Priority, Status */}
+            <div class="zoom-back-extras" id="zoom-back-extras">
+              <button type="button" id="zoom-toggle-due" class="zoom-extras-btn" title="Due date">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+              </button>
+              <button type="button" id="zoom-toggle-priority" class="zoom-extras-btn" title="Priority">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+                </svg>
+              </button>
+              <button type="button" id="zoom-toggle-status" class="zoom-extras-btn" title="Status">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Due Date (hidden by default) */}
+            <div class="zoom-extras-section" id="zoom-section-due">
+              <div class="zoom-back-section-title">Due Date</div>
+              <div class="flex items-center gap-2">
+                <input type="date" id="zoom-back-due-date" class="zoom-due-input" />
+                <button type="button" id="zoom-due-clear" class="btn btn-ghost btn-sm">Clear</button>
+              </div>
+            </div>
+
+            {/* Priority (hidden by default) */}
+            <div class="zoom-extras-section" id="zoom-section-priority">
+              <div class="zoom-back-section-title">Priority</div>
+              <div id="zoom-back-priority" class="flex gap-2 flex-wrap">
+                <button type="button" class="zoom-priority-btn" data-priority="low">
+                  <span class="zoom-priority-dot zoom-priority-dot-low" />Low
+                </button>
+                <button type="button" class="zoom-priority-btn" data-priority="medium">
+                  <span class="zoom-priority-dot zoom-priority-dot-medium" />Medium
+                </button>
+                <button type="button" class="zoom-priority-btn" data-priority="high">
+                  <span class="zoom-priority-dot zoom-priority-dot-high" />High
+                </button>
+              </div>
+            </div>
+
+            {/* Status (hidden by default) */}
+            <div class="zoom-extras-section" id="zoom-section-status">
+              <div class="zoom-back-section-title">Status</div>
+              <div id="zoom-back-status" class="flex gap-2 flex-wrap">
+                <button type="button" class="zoom-status-btn" data-status="todo">To Do</button>
+                <button type="button" class="zoom-status-btn" data-status="in_progress">In Progress</button>
+                <button type="button" class="zoom-status-btn" data-status="done">Done</button>
               </div>
             </div>
 
@@ -412,6 +502,7 @@ const HelpModal = () => (
           ["x", "Delete selected note"],
           ["d", "Duplicate selected note"],
           ["c", "Cycle note color"],
+          ["f", "Cycle status (todo/in-progress/done)"],
           ["g g", "Jump to first note"],
           ["G", "Jump to last note"],
           ["+ / −", "Zoom in / out"],
@@ -1039,6 +1130,7 @@ export const Help = () => (
             ["x", "Delete note"],
             ["d", "Duplicate note"],
             ["c", "Cycle color"],
+            ["f", "Cycle status"],
             ["g g", "First note"],
             ["G", "Last note"],
             ["+ / −", "Zoom in / out"],

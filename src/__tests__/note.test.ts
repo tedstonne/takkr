@@ -209,4 +209,91 @@ describe("note", () => {
     const found = notes.find(n => n.id === note.id);
     expect(found!.assigned_to).toBe("sam");
   });
+
+  // --- Due date, priority, status tests ---
+
+  test("new note has null due_date", () => {
+    const note = Note.create(boardId, "No due", "noteuser");
+    const fetched = Note.byId(note.id);
+    expect(fetched!.due_date).toBeNull();
+  });
+
+  test("new note has null priority", () => {
+    const note = Note.create(boardId, "No priority", "noteuser");
+    const fetched = Note.byId(note.id);
+    expect(fetched!.priority).toBeNull();
+  });
+
+  test("new note has todo status", () => {
+    const note = Note.create(boardId, "Default status", "noteuser");
+    const fetched = Note.byId(note.id);
+    expect(fetched!.status).toBe("todo");
+  });
+
+  test("update due_date", () => {
+    const note = Note.create(boardId, "Due date", "noteuser");
+    const updated = Note.update(note.id, { due_date: "2026-03-15" });
+    expect(updated!.due_date).toBe("2026-03-15");
+  });
+
+  test("clear due_date", () => {
+    const note = Note.create(boardId, "Clear due", "noteuser");
+    Note.update(note.id, { due_date: "2026-03-15" });
+    const cleared = Note.update(note.id, { due_date: null });
+    expect(cleared!.due_date).toBeNull();
+  });
+
+  test("update priority", () => {
+    const note = Note.create(boardId, "Priority", "noteuser");
+    const updated = Note.update(note.id, { priority: "high" });
+    expect(updated!.priority).toBe("high");
+  });
+
+  test("clear priority", () => {
+    const note = Note.create(boardId, "Clear priority", "noteuser");
+    Note.update(note.id, { priority: "medium" });
+    const cleared = Note.update(note.id, { priority: null });
+    expect(cleared!.priority).toBeNull();
+  });
+
+  test("update status", () => {
+    const note = Note.create(boardId, "Status", "noteuser");
+    const updated = Note.update(note.id, { status: "in_progress" });
+    expect(updated!.status).toBe("in_progress");
+  });
+
+  test("update status to done", () => {
+    const note = Note.create(boardId, "Done", "noteuser");
+    const updated = Note.update(note.id, { status: "done" });
+    expect(updated!.status).toBe("done");
+  });
+
+  test("update preserves PM fields when not provided", () => {
+    const note = Note.create(boardId, "Preserve PM", "noteuser");
+    Note.update(note.id, { due_date: "2026-04-01", priority: "low", status: "in_progress" });
+    const updated = Note.update(note.id, { content: "New title" });
+    expect(updated!.due_date).toBe("2026-04-01");
+    expect(updated!.priority).toBe("low");
+    expect(updated!.status).toBe("in_progress");
+    expect(updated!.content).toBe("New title");
+  });
+
+  test("PM fields persist via byId", () => {
+    const note = Note.create(boardId, "PM persist", "noteuser");
+    Note.update(note.id, { due_date: "2026-05-10", priority: "high", status: "done" });
+    const fetched = Note.byId(note.id);
+    expect(fetched!.due_date).toBe("2026-05-10");
+    expect(fetched!.priority).toBe("high");
+    expect(fetched!.status).toBe("done");
+  });
+
+  test("PM fields included in forBoard results", () => {
+    const note = Note.create(boardId, "PM board", "noteuser");
+    Note.update(note.id, { due_date: "2026-06-01", priority: "medium", status: "in_progress" });
+    const notes = Note.forBoard(boardId);
+    const found = notes.find(n => n.id === note.id);
+    expect(found!.due_date).toBe("2026-06-01");
+    expect(found!.priority).toBe("medium");
+    expect(found!.status).toBe("in_progress");
+  });
 });

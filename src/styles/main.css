@@ -271,6 +271,62 @@
     font-size: 0.75rem;
   }
 
+  /* ── Dog-ear: top-right corner fold with days-until-due number ── */
+  .takkr-ear {
+    @apply absolute pointer-events-none;
+    top: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 2px 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    color: rgba(0,0,0,0.55);
+    background: linear-gradient(225deg, rgba(0,0,0,0.1) 50%, transparent 50%);
+    border-bottom-left-radius: 4px;
+    z-index: 1;
+  }
+  .takkr-yellow .takkr-ear { background: linear-gradient(225deg, rgba(180,170,0,0.25) 50%, transparent 50%); }
+  .takkr-pink .takkr-ear { background: linear-gradient(225deg, rgba(180,60,120,0.25) 50%, transparent 50%); }
+  .takkr-green .takkr-ear { background: linear-gradient(225deg, rgba(60,180,180,0.25) 50%, transparent 50%); }
+  .takkr-blue .takkr-ear { background: linear-gradient(225deg, rgba(60,140,180,0.25) 50%, transparent 50%); }
+  .takkr-orange .takkr-ear { background: linear-gradient(225deg, rgba(180,100,60,0.25) 50%, transparent 50%); }
+
+  /* ── Priority dot ── */
+  .takkr-priority {
+    @apply absolute rounded-full;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+  }
+  /* When ear is present, move priority dot to avoid overlap */
+  .takkr-ear ~ .takkr-priority {
+    top: 8px;
+    right: 34px;
+  }
+  .takkr-priority-high { background: #ef4444; }
+  .takkr-priority-medium { background: #f59e0b; }
+  .takkr-priority-low { background: #94a3b8; }
+
+  /* ── Done state ── */
+  .takkr-done { opacity: 0.6; }
+  .takkr-done .takkr-title {
+    text-decoration: line-through;
+    text-decoration-color: rgba(0,0,0,0.25);
+  }
+  .takkr-done-check {
+    @apply absolute text-black/35;
+    bottom: 6px;
+    right: 10px;
+    font-size: 0.7rem;
+    font-family: var(--font-sans);
+  }
+
   .takkr-yellow { @apply bg-takkr-yellow; }
   .takkr-pink { @apply bg-takkr-pink; }
   .takkr-green { @apply bg-takkr-green; }
@@ -497,6 +553,80 @@
     font-weight: 700;
     font-family: var(--font-sans);
   }
+
+  /* ── Progressive disclosure toggle row ── */
+  .zoom-back-extras {
+    @apply flex gap-2 mt-4 pt-4 border-t border-black/10;
+  }
+  .zoom-extras-btn {
+    @apply flex items-center justify-center cursor-pointer transition-all duration-150;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.03);
+    color: rgba(0,0,0,0.4);
+  }
+  .zoom-extras-btn:hover {
+    background: rgba(0,0,0,0.08);
+    color: rgba(0,0,0,0.6);
+  }
+  .zoom-extras-btn.active {
+    background: rgba(0,0,0,0.12);
+    border-color: rgba(0,0,0,0.2);
+    color: rgba(0,0,0,0.7);
+  }
+
+  /* Hidden by default, shown when toggled */
+  .zoom-extras-section {
+    display: none;
+    @apply mt-3;
+  }
+  .zoom-extras-section.open {
+    display: block;
+  }
+
+  /* Due date input */
+  .zoom-due-input {
+    @apply text-sm rounded border border-black/15 px-2 py-1 outline-none;
+    font-family: var(--font-sans);
+    background: rgba(0,0,0,0.03);
+    color: rgba(0,0,0,0.7);
+  }
+  .zoom-due-input:focus {
+    @apply ring-1 ring-black/20 border-black/25;
+  }
+
+  /* Priority pill buttons */
+  .zoom-priority-btn, .zoom-status-btn {
+    @apply flex items-center gap-1.5 cursor-pointer transition-all duration-150;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.05);
+    color: rgba(0,0,0,0.6);
+  }
+  .zoom-priority-btn:hover, .zoom-status-btn:hover {
+    background: rgba(0,0,0,0.1);
+  }
+  .zoom-priority-btn.active, .zoom-status-btn.active {
+    background: rgba(0,0,0,0.15);
+    border-color: rgba(0,0,0,0.25);
+    color: rgba(0,0,0,0.85);
+    font-weight: 600;
+  }
+
+  /* Priority dots inside buttons */
+  .zoom-priority-dot {
+    @apply inline-block rounded-full;
+    width: 6px;
+    height: 6px;
+  }
+  .zoom-priority-dot-high { background: #ef4444; }
+  .zoom-priority-dot-medium { background: #f59e0b; }
+  .zoom-priority-dot-low { background: #94a3b8; }
 
   .zoom-back-actions {
     @apply flex justify-end pt-4 mt-4 border-t border-black/10;

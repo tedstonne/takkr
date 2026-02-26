@@ -111,6 +111,21 @@ try {
   db.exec(`ALTER TABLE notes ADD COLUMN assigned_to TEXT DEFAULT ''`);
 } catch (_) {}
 
+// Migration: add due_date column
+try {
+  db.exec("ALTER TABLE notes ADD COLUMN due_date TEXT DEFAULT NULL");
+} catch (_) {}
+
+// Migration: add priority column
+try {
+  db.exec("ALTER TABLE notes ADD COLUMN priority TEXT DEFAULT NULL");
+} catch (_) {}
+
+// Migration: add status column
+try {
+  db.exec("ALTER TABLE notes ADD COLUMN status TEXT DEFAULT 'todo'");
+} catch (_) {}
+
 // Attachments table
 db.exec(`
   CREATE TABLE IF NOT EXISTS attachments (

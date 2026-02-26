@@ -412,6 +412,9 @@ api.openapi(updateNoteRoute, async (c) => {
   if (body.z) data.z = Number(body.z);
   if (body.color) data.color = body.color as Note.Color;
   if (body.assigned_to !== undefined) data.assigned_to = body.assigned_to as string;
+  if (body.due_date !== undefined) data.due_date = (body.due_date as string) || null;
+  if (body.priority !== undefined) data.priority = (body.priority as string) || null;
+  if (body.status !== undefined) data.status = body.status as string;
 
   const updated = Note.update(noteId, data);
   if (!updated) throw new HTTPException(404, { message: "Note not found" });
@@ -444,7 +447,7 @@ api.openapi(duplicateNoteRoute, async (c) => {
   if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
 
   const dup = Note.create(note.board_id, note.content, username, note.x + 30, note.y + 30, note.color as Note.Color);
-  Note.update(dup.id, { description: note.description, tags: note.tags, checklist: note.checklist });
+  Note.update(dup.id, { description: note.description, tags: note.tags, checklist: note.checklist, due_date: note.due_date, priority: note.priority, status: note.status });
   const updated = Note.byId(dup.id)!;
   const html = <Takkr note={updated} />;
   events.broadcast(note.board_id, events.Event.Note.Created, html.toString());

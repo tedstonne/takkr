@@ -183,4 +183,64 @@ describe("schemas", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  // PriorityEnum
+  test("PriorityEnum accepts valid priorities", () => {
+    for (const p of ["low", "medium", "high"]) {
+      expect(S.PriorityEnum.safeParse(p).success).toBe(true);
+    }
+  });
+
+  test("PriorityEnum rejects invalid", () => {
+    expect(S.PriorityEnum.safeParse("critical").success).toBe(false);
+    expect(S.PriorityEnum.safeParse("").success).toBe(false);
+  });
+
+  // StatusEnum
+  test("StatusEnum accepts valid statuses", () => {
+    for (const s of ["todo", "in_progress", "done"]) {
+      expect(S.StatusEnum.safeParse(s).success).toBe(true);
+    }
+  });
+
+  test("StatusEnum rejects invalid", () => {
+    expect(S.StatusEnum.safeParse("cancelled").success).toBe(false);
+    expect(S.StatusEnum.safeParse("").success).toBe(false);
+  });
+
+  // CreateNoteBody with PM fields
+  test("CreateNoteBody accepts PM fields", () => {
+    const result = S.CreateNoteBody.safeParse({
+      content: "Task",
+      due_date: "2026-03-15",
+      priority: "high",
+      status: "todo",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("CreateNoteBody PM fields are optional", () => {
+    const result = S.CreateNoteBody.safeParse({ content: "Simple" });
+    expect(result.success).toBe(true);
+  });
+
+  // UpdateNoteBody with PM fields
+  test("UpdateNoteBody accepts PM fields", () => {
+    const result = S.UpdateNoteBody.safeParse({
+      due_date: "2026-03-15",
+      priority: "medium",
+      status: "in_progress",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("UpdateNoteBody accepts empty due_date to clear", () => {
+    const result = S.UpdateNoteBody.safeParse({ due_date: "" });
+    expect(result.success).toBe(true);
+  });
+
+  test("UpdateNoteBody accepts empty priority to clear", () => {
+    const result = S.UpdateNoteBody.safeParse({ priority: "" });
+    expect(result.success).toBe(true);
+  });
 });

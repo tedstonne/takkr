@@ -59,7 +59,7 @@ describe("views", () => {
     const note: Note.Record = {
       id: 1, board_id: 1, content: "Test", description: "desc",
       tags: "a,b", checklist: "[]", x: 10, y: 20, z: 1,
-      color: "yellow", created_by: "viewuser", assigned_to: "", created: "2026-01-01",
+      color: "yellow", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo", created: "2026-01-01",
     };
     const html = (<Takkr note={note} />).toString();
     expect(html).toContain("Test");
@@ -72,7 +72,7 @@ describe("views", () => {
     const note: Note.Record = {
       id: 2, board_id: 1, content: "Sel", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
-      color: "pink", created_by: "viewuser", assigned_to: "",
+      color: "pink", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo",
     };
     const html = (<Takkr note={note} selected />).toString();
     expect(html).toContain("selected");
@@ -82,7 +82,7 @@ describe("views", () => {
     const note: Note.Record = {
       id: 3, board_id: 1, content: "OOB", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
-      color: "green", created_by: "viewuser", assigned_to: "",
+      color: "green", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo",
     };
     const html = (<Takkr note={note} oob />).toString();
     expect(html).toContain("hx-swap-oob");
@@ -92,7 +92,7 @@ describe("views", () => {
     const note: Note.Record = {
       id: 4, board_id: 1, content: "Att", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
-      color: "blue", created_by: "viewuser", assigned_to: "",
+      color: "blue", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo",
     };
     const html = (<Takkr note={note} attachmentCount={3} />).toString();
     expect(html).toContain("takkr-attachments");
@@ -103,7 +103,7 @@ describe("views", () => {
     const note: Note.Record = {
       id: 5, board_id: 1, content: "No att", description: "",
       tags: "", checklist: "[]", x: 0, y: 0, z: 1,
-      color: "orange", created_by: "viewuser", assigned_to: "",
+      color: "orange", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo",
     };
     const html = (<Takkr note={note} attachmentCount={0} />).toString();
     expect(html).not.toContain("takkr-attachments");
@@ -143,7 +143,7 @@ describe("views", () => {
     };
     const notes: Note.Record[] = [{
       id: 1, board_id: 1, content: "Note1", description: "", tags: "",
-      checklist: "[]", x: 0, y: 0, z: 1, color: "yellow", created_by: "viewuser", assigned_to: "",
+      checklist: "[]", x: 0, y: 0, z: 1, color: "yellow", created_by: "viewuser", assigned_to: "", due_date: null, priority: null, status: "todo",
     }];
     const html = (<BoardView
       board={board}

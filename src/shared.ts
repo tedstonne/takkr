@@ -18,6 +18,12 @@ export const FONTS: Record<string, string> = {
 export const COLORS = ["yellow", "pink", "green", "blue", "orange"] as const;
 export type Color = (typeof COLORS)[number];
 
+export const PRIORITIES = ["low", "medium", "high"] as const;
+export type Priority = (typeof PRIORITIES)[number];
+
+export const STATUSES = ["todo", "in_progress", "done"] as const;
+export type Status = (typeof STATUSES)[number];
+
 export const BACKGROUNDS = [
   "plain",
   "grid",
@@ -50,4 +56,6 @@ export const clientConfig = () => JSON.stringify({
   backgrounds: BACKGROUNDS,
   darkBackgrounds: DARK_BACKGROUNDS,
   themes: THEMES,
+  priorities: PRIORITIES,
+  statuses: STATUSES,
 });

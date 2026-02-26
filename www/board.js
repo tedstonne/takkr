@@ -99,6 +99,9 @@ const zoom = {
   checklist: [],
   tags: [],
   attachments: [],
+  dueDate: "",
+  priority: "",
+  status: "todo",
 
   init() {
     this.overlay = document.getElementById("zoom-overlay");
@@ -166,6 +169,57 @@ const zoom = {
       });
     }
 
+    // Toggle buttons for progressive disclosure
+    document.getElementById("zoom-toggle-due")?.addEventListener("click", () => {
+      const section = document.getElementById("zoom-section-due");
+      const btn = document.getElementById("zoom-toggle-due");
+      section?.classList.toggle("open");
+      btn?.classList.toggle("active");
+    });
+    document.getElementById("zoom-toggle-priority")?.addEventListener("click", () => {
+      const section = document.getElementById("zoom-section-priority");
+      const btn = document.getElementById("zoom-toggle-priority");
+      section?.classList.toggle("open");
+      btn?.classList.toggle("active");
+    });
+    document.getElementById("zoom-toggle-status")?.addEventListener("click", () => {
+      const section = document.getElementById("zoom-section-status");
+      const btn = document.getElementById("zoom-toggle-status");
+      section?.classList.toggle("open");
+      btn?.classList.toggle("active");
+    });
+
+    // Due date input
+    document.getElementById("zoom-back-due-date")?.addEventListener("change", (e) => {
+      this.dueDate = e.target.value || "";
+      this.saveDueDate();
+    });
+    document.getElementById("zoom-due-clear")?.addEventListener("click", () => {
+      this.dueDate = "";
+      document.getElementById("zoom-back-due-date").value = "";
+      this.saveDueDate();
+    });
+
+    // Priority buttons
+    document.getElementById("zoom-back-priority")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-priority]");
+      if (!btn) return;
+      const val = btn.dataset.priority;
+      // Toggle: click active = deselect
+      this.priority = this.priority === val ? "" : val;
+      this.renderPriorityButtons();
+      this.savePriority();
+    });
+
+    // Status buttons
+    document.getElementById("zoom-back-status")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-status]");
+      if (!btn) return;
+      this.status = btn.dataset.status;
+      this.renderStatusButtons();
+      this.saveStatus();
+    });
+
     // Escape to close
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && this.isOpen) {
@@ -192,6 +246,11 @@ const zoom = {
     try { this.checklist = JSON.parse(noteEl.dataset.checklist || "[]"); } catch (_) { this.checklist = []; }
     this.tags = (noteEl.dataset.tags || "").split(",").map(t => t.trim()).filter(Boolean);
     this.assignedTo = noteEl.dataset.assigned || "";
+
+    // Parse PM fields
+    this.dueDate = noteEl.dataset.dueDate || "";
+    this.priority = noteEl.dataset.priority || "";
+    this.status = noteEl.dataset.status || "todo";
 
     // Set front
     document.getElementById("zoom-title").textContent = title;
@@ -221,6 +280,9 @@ const zoom = {
 
     // Render assignee picker (only if board has collaborators)
     this.renderAssign();
+
+    // Set up PM fields
+    this.initExtrasUI();
 
     // Render checklist
     this.renderChecklist();
@@ -294,10 +356,12 @@ const zoom = {
     this.overlay.querySelector(".zoom-front").className = `zoom-front ${colorClass}`;
     this.overlay.querySelector(".zoom-back").className = `zoom-back ${colorClass}`;
 
-    // Update canvas card
+    // Update canvas card (preserve takkr-done class)
     const noteEl = document.querySelector(`[data-id="${this.noteId}"]`);
     if (noteEl) {
+      const wasDone = noteEl.classList.contains("takkr-done");
       noteEl.className = noteEl.className.replace(/takkr-\w+/g, "").trim() + ` takkr-${newColor}`;
+      if (wasDone) noteEl.classList.add("takkr-done");
     }
 
     // Save
@@ -308,7 +372,146 @@ const zoom = {
     });
   },
 
-  // Checklist
+  // --- PM fields: progressive disclosure ---
+  initExtrasUI() {
+    // Reset all sections to collapsed
+    document.getElementById("zoom-section-due")?.classList.remove("open");
+    document.getElementById("zoom-section-priority")?.classList.remove("open");
+    document.getElementById("zoom-section-status")?.classList.remove("open");
+    document.getElementById("zoom-toggle-due")?.classList.remove("active");
+    document.getElementById("zoom-toggle-priority")?.classList.remove("active");
+    document.getElementById("zoom-toggle-status")?.classList.remove("active");
+
+    // Populate due date
+    const dueDateInput = document.getElementById("zoom-back-due-date");
+    if (dueDateInput) dueDateInput.value = this.dueDate || "";
+
+    // Auto-expand sections that have values
+    if (this.dueDate) {
+      document.getElementById("zoom-section-due")?.classList.add("open");
+      document.getElementById("zoom-toggle-due")?.classList.add("active");
+    }
+    if (this.priority) {
+      document.getElementById("zoom-section-priority")?.classList.add("open");
+      document.getElementById("zoom-toggle-priority")?.classList.add("active");
+    }
+    if (this.status && this.status !== "todo") {
+      document.getElementById("zoom-section-status")?.classList.add("open");
+      document.getElementById("zoom-toggle-status")?.classList.add("active");
+    }
+
+    this.renderPriorityButtons();
+    this.renderStatusButtons();
+  },
+
+  renderPriorityButtons() {
+    document.querySelectorAll("#zoom-back-priority .zoom-priority-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.priority === this.priority);
+    });
+  },
+
+  renderStatusButtons() {
+    document.querySelectorAll("#zoom-back-status .zoom-status-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.status === this.status);
+    });
+  },
+
+  saveDueDate() {
+    if (!this.noteId) return;
+    const noteEl = document.getElementById(`note-${this.noteId}`);
+    if (noteEl) {
+      noteEl.dataset.dueDate = this.dueDate;
+      this._refreshCardIndicators(noteEl);
+    }
+    fetch(`/api/notes/${this.noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `due_date=${encodeURIComponent(this.dueDate)}`,
+    });
+  },
+
+  savePriority() {
+    if (!this.noteId) return;
+    const noteEl = document.getElementById(`note-${this.noteId}`);
+    if (noteEl) {
+      noteEl.dataset.priority = this.priority;
+      this._refreshCardIndicators(noteEl);
+    }
+    fetch(`/api/notes/${this.noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `priority=${encodeURIComponent(this.priority)}`,
+    });
+  },
+
+  saveStatus() {
+    if (!this.noteId) return;
+    const noteEl = document.getElementById(`note-${this.noteId}`);
+    if (noteEl) {
+      noteEl.dataset.status = this.status;
+      this._refreshCardIndicators(noteEl);
+    }
+    fetch(`/api/notes/${this.noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `status=${encodeURIComponent(this.status)}`,
+    });
+  },
+
+  /** Refresh visual indicators on a note card based on data-* attributes */
+  _refreshCardIndicators(noteEl) {
+    if (!noteEl) return;
+
+    // Dog-ear: days until due
+    let ear = noteEl.querySelector(".takkr-ear");
+    const dueDate = noteEl.dataset.dueDate;
+    if (dueDate) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const due = new Date(dueDate);
+      const days = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (!ear) {
+        ear = document.createElement("div");
+        ear.className = "takkr-ear";
+        noteEl.appendChild(ear);
+      }
+      ear.textContent = String(days);
+    } else if (ear) {
+      ear.remove();
+    }
+
+    // Priority dot
+    let dot = noteEl.querySelector(".takkr-priority");
+    const priority = noteEl.dataset.priority;
+    if (priority) {
+      if (!dot) {
+        dot = document.createElement("div");
+        noteEl.appendChild(dot);
+      }
+      dot.className = `takkr-priority takkr-priority-${priority}`;
+    } else if (dot) {
+      dot.remove();
+    }
+
+    // Done state
+    const status = noteEl.dataset.status || "todo";
+    const isDone = status === "done";
+    noteEl.classList.toggle("takkr-done", isDone);
+
+    let check = noteEl.querySelector(".takkr-done-check");
+    if (isDone) {
+      if (!check) {
+        check = document.createElement("div");
+        check.className = "takkr-done-check";
+        check.textContent = "\u2713";
+        noteEl.appendChild(check);
+      }
+    } else if (check) {
+      check.remove();
+    }
+  },
+
+  // Assignee
   renderAssign() {
     const section = document.getElementById("zoom-back-assign-section");
     const container = document.getElementById("zoom-back-assign");
@@ -639,6 +842,9 @@ const zoom = {
         this.checklist = [];
         this.tags = [];
         this.attachments = [];
+        this.dueDate = "";
+        this.priority = "";
+        this.status = "todo";
       }, 350);
     }, shrinkDelay);
   },
@@ -1279,6 +1485,7 @@ window.board = () => ({
       { label: "Delete note", icon: "🗑️", hint: "x", action: () => { this.closePalette(); this._deleteSelected(); } },
       { label: "Duplicate note", icon: "📋", hint: "d", action: () => { this.closePalette(); this._duplicateSelected(); } },
       { label: "Cycle color", icon: "🎨", hint: "c", action: () => { this.closePalette(); this._cycleColor(); } },
+      { label: "Cycle status", icon: "📊", hint: "f", action: () => { this.closePalette(); this._cycleStatus(); } },
       { label: "Settings", icon: "⚙️", hint: "s", action: () => { this.closePalette(); document.getElementById("settings-modal")?.showModal(); } },
       { label: "Members", icon: "👥", hint: "m", action: () => { this.closePalette(); document.getElementById("members-modal")?.showModal(); } },
       { label: "Zoom in", icon: "🔍", hint: "+", action: () => { this.closePalette(); this.zoomIn(); } },
@@ -1404,6 +1611,23 @@ window.board = () => ({
     } catch (_) {}
   },
 
+  _cycleStatus() {
+    if (!this.selected) return;
+    const statuses = _T.statuses || ["todo", "in_progress", "done"];
+    const current = this.selected.dataset.status || "todo";
+    const idx = statuses.indexOf(current);
+    const next = statuses[(idx + 1) % statuses.length];
+
+    this.selected.dataset.status = next;
+    zoom._refreshCardIndicators(this.selected);
+
+    fetch(`/api/notes/${this.selected.dataset.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `status=${encodeURIComponent(next)}`,
+    });
+  },
+
   _cycleColor() {
     if (!this.selected) return;
     const colors = _T.colors || ["yellow", "pink", "green", "blue", "orange"];
@@ -1495,6 +1719,7 @@ window.board = () => ({
         e.preventDefault(); this._deleteSelected(); break;
       case "d": e.preventDefault(); this._duplicateSelected(); break;
       case "c": e.preventDefault(); this._cycleColor(); break;
+      case "f": e.preventDefault(); this._cycleStatus(); break;
       case "s": e.preventDefault(); document.getElementById("settings-modal")?.showModal(); break;
       case "m": e.preventDefault(); document.getElementById("members-modal")?.showModal(); break;
       case "/": e.preventDefault(); this.openPalette(); break;

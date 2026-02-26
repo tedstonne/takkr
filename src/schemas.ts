@@ -68,12 +68,17 @@ export const MemberBody = z.object({
 
 // --- Note ---
 export const ColorEnum = z.enum(["yellow", "pink", "green", "blue", "orange"]);
+export const PriorityEnum = z.enum(["low", "medium", "high"]);
+export const StatusEnum = z.enum(["todo", "in_progress", "done"]);
 
 export const CreateNoteBody = z.object({
   content: z.string().min(1).max(80).openapi({ description: "Note title" }),
   color: ColorEnum.optional().openapi({ description: "Note color" }),
   x: z.coerce.number().optional().openapi({ description: "X position" }),
   y: z.coerce.number().optional().openapi({ description: "Y position" }),
+  due_date: z.string().optional().openapi({ description: "Due date (ISO format, e.g. 2026-03-15)" }),
+  priority: PriorityEnum.optional().openapi({ description: "Priority level" }),
+  status: StatusEnum.optional().openapi({ description: "Task status" }),
 });
 
 export const UpdateNoteBody = z.object({
@@ -85,6 +90,9 @@ export const UpdateNoteBody = z.object({
   y: z.coerce.number().optional(),
   z: z.coerce.number().optional(),
   color: ColorEnum.optional(),
+  due_date: z.string().optional().openapi({ description: "Due date (ISO format) or empty to clear" }),
+  priority: z.string().optional().openapi({ description: "Priority (low/medium/high) or empty to clear" }),
+  status: StatusEnum.optional().openapi({ description: "Task status" }),
 });
 
 export const NoteResponse = z.object({
@@ -99,6 +107,10 @@ export const NoteResponse = z.object({
   tags: z.string(),
   checklist: z.string(),
   created_by: z.string(),
+  assigned_to: z.string().optional(),
+  due_date: z.string().nullable().optional(),
+  priority: z.string().nullable().optional(),
+  status: z.string().optional(),
   created: z.string().optional(),
 });
 
