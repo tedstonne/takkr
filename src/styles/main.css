@@ -252,9 +252,18 @@
     border-radius: 16px;
     padding: 16px;
   }
-  /* Carousel board inherits data-background styles, override dotted default */
-  .landing-board[data-background] {
+  /* Board zone heading colors — dark text by default, light on dark backgrounds */
+  .board-zone-heading { color: #0f172a; }
+  .board-zone-subtext { color: #94a3b8; }
+  [data-background="chalkboard"] .board-zone-heading,
+  [data-background="blueprint"] .board-zone-heading { color: #f1f5f9; }
+  [data-background="chalkboard"] .board-zone-subtext,
+  [data-background="blueprint"] .board-zone-subtext { color: rgba(255,255,255,0.5); }
+
+  /* Remove dotted grid from note sub-boards when parent board-zone has a background */
+  #board-zone .landing-board {
     background-image: none;
+    background-color: transparent;
   }
 
   .takkr-attachments {

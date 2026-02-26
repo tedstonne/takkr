@@ -149,12 +149,12 @@ document.addEventListener("DOMContentLoaded", () => {
     { bg: "canvas",     font: "Sofia",         label: "Canvas" },
   ];
 
-  const board = document.getElementById("carousel-board");
+  const zone = document.getElementById("board-zone");
   const prev = document.getElementById("carousel-prev");
   const next = document.getElementById("carousel-next");
   const dots = document.getElementById("carousel-dots");
 
-  if (board && prev && next && dots) {
+  if (zone && prev && next && dots) {
     let current = 0;
 
     // Build dots
@@ -166,53 +166,30 @@ document.addEventListener("DOMContentLoaded", () => {
       dots.appendChild(dot);
     });
 
-    function reshuffleCarousel() {
-      const notes = Array.from(board.querySelectorAll(".carousel-note"));
-      if (!notes.length) return;
-      const cw = board.clientWidth;
-      // Spread notes out nicely — no clustering for the carousel demo
-      const cols = Math.max(2, Math.min(3, Math.floor(cw / (CARD_W + 40))));
-      const totalW = cols * CARD_W;
-      const gapX = (cw - totalW) / (cols + 1);
-      const gapY = 20;
-      notes.forEach((note, i) => {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const baseX = gapX + col * (CARD_W + gapX);
-        const baseY = row * (CARD_H + gapY);
-        const ox = (Math.random() - 0.5) * 50;
-        const oy = (Math.random() - 0.5) * 30;
-        const rot = (Math.random() - 0.5) * 8;
-        const x = Math.max(8, Math.min(baseX + ox, cw - CARD_W - 8));
-        const y = Math.max(8, baseY + oy);
-        note.style.transition = "left 0.5s ease, top 0.5s ease, transform 0.5s ease";
-        note.style.left = `${x}px`;
-        note.style.top = `${y}px`;
-        note.style.transform = `rotate(${rot}deg)`;
-        note.style.zIndex = `${i + 1}`;
-        note.dataset.rot = rot;
-      });
-      const maxBottom = notes.reduce((max, n) =>
-        Math.max(max, parseFloat(n.style.top) + CARD_H + 20), 0);
-      board.style.minHeight = `${Math.max(340, maxBottom)}px`;
+    function reshuffleAll() {
+      // Reshuffle all landing boards inside the zone for liveliness
+      zone.querySelectorAll(".landing-board").forEach(layoutBoard);
     }
 
     function goTo(idx) {
       current = ((idx % THEMES.length) + THEMES.length) % THEMES.length;
       const theme = THEMES[current];
-      board.setAttribute("data-background", theme.bg);
-      // Apply font to all carousel notes
-      board.querySelectorAll(".carousel-note").forEach(n => {
+      zone.setAttribute("data-background", theme.bg);
+      // Apply font to all notes in the zone
+      zone.querySelectorAll(".landing-note").forEach(n => {
         n.style.setProperty("--takkr-font", `"${theme.font}"`);
       });
-      // Update dots
+      // Update dots — use light dots on dark backgrounds
+      const isDark = theme.bg === "chalkboard" || theme.bg === "blueprint";
       Array.from(dots.children).forEach((d, i) => {
-        d.className = i === current
-          ? "w-3 h-3 rounded-full bg-slate-800 transition-all duration-300"
-          : "w-2 h-2 rounded-full bg-slate-300 transition-all duration-300";
+        if (i === current) {
+          d.className = `w-3 h-3 rounded-full transition-all duration-300 ${isDark ? "bg-white" : "bg-slate-800"}`;
+        } else {
+          d.className = `w-2 h-2 rounded-full transition-all duration-300 ${isDark ? "bg-white/30" : "bg-slate-300"}`;
+        }
       });
       // Reshuffle positions for liveliness
-      reshuffleCarousel();
+      reshuffleAll();
     }
 
     prev.addEventListener("click", () => goTo(current - 1));

@@ -930,74 +930,59 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         <p class="mt-4 text-xs text-slate-400">No credit card. No setup. Just go.</p>
       </section>
 
-      {/* ── Theme Carousel ── */}
-      <section class="relative mx-auto max-w-5xl px-6 pt-4 pb-12">
-        <p class="text-center text-sm text-slate-400 mb-4">
-          pick a vibe — backgrounds, fonts, and more
-        </p>
-        <div class="relative">
+      {/* ── Board Zone — one unified background for all note sections ── */}
+      <div
+        id="board-zone"
+        class="relative transition-all duration-500 py-20"
+        data-background="grid"
+      >
+        {/* Theme switcher arrows */}
+        <div class="sticky top-4 z-30 flex justify-between px-3 sm:px-6 pointer-events-none" style="margin-bottom: -40px;">
           <button
             id="carousel-prev"
-            class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
+            class="pointer-events-auto w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
             aria-label="Previous theme"
           >
             ←
           </button>
-          <div
-            id="carousel-board"
-            class="landing-board relative rounded-2xl overflow-hidden transition-all duration-500"
-            data-background="grid"
-            style="min-height: 340px;"
-          >
-            {/* Demo notes for carousel — use first 6 feature notes */}
-            {features.slice(0, 6).map((note, i) => (
-              <div
-                key={`demo-${note.id}`}
-                class={`takkr takkr-${note.color} landing-note carousel-note`}
-                data-id={`demo-${note.id}`}
-                data-idx={i}
-              >
-                <div class="takkr-title">{note.content}</div>
-              </div>
-            ))}
-          </div>
           <button
             id="carousel-next"
-            class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
+            class="pointer-events-auto w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
             aria-label="Next theme"
           >
             →
           </button>
         </div>
-        <div id="carousel-dots" class="flex justify-center gap-2 mt-4"></div>
-      </section>
 
-      {/* ── Features ── */}
-      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">What's inside</h2>
-        <p class="text-center text-sm text-slate-400 mb-10">
-          go ahead, drag them around
-        </p>
-        <NoteGrid notes={features} id="landing-features" />
-      </section>
+        <div id="carousel-dots" class="flex justify-center gap-2 mb-10"></div>
 
-      {/* ── Use cases ── */}
-      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">Use it for anything</h2>
-        <p class="text-center text-sm text-slate-400 mb-10">
-          boards that fit how you work
-        </p>
-        <NoteGrid notes={usecases} id="landing-usecases" />
-      </section>
+        {/* ── Features ── */}
+        <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">What's inside</h2>
+          <p class="text-center text-sm board-zone-subtext mb-10">
+            go ahead, drag them around
+          </p>
+          <NoteGrid notes={features} id="landing-features" />
+        </section>
 
-      {/* ── Philosophy ── */}
-      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">The takkr way</h2>
-        <p class="text-center text-sm text-slate-400 mb-10">
-          minimalist by default, powerful on demand
-        </p>
-        <NoteGrid notes={philosophy} id="landing-philosophy" />
-      </section>
+        {/* ── Use cases ── */}
+        <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">Use it for anything</h2>
+          <p class="text-center text-sm board-zone-subtext mb-10">
+            boards that fit how you work
+          </p>
+          <NoteGrid notes={usecases} id="landing-usecases" />
+        </section>
+
+        {/* ── Philosophy ── */}
+        <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">The takkr way</h2>
+          <p class="text-center text-sm board-zone-subtext mb-10">
+            minimalist by default, powerful on demand
+          </p>
+          <NoteGrid notes={philosophy} id="landing-philosophy" />
+        </section>
+      </div>
 
       {/* ── Bottom CTA ── */}
       <section class="py-20 text-center border-t border-slate-100">
