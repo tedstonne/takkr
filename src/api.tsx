@@ -249,6 +249,42 @@ api.put("/notes/:id", secure, async (c) => {
   return c.html(<Takkr note={updated} />);
 });
 
+// Duplicate a note
+api.post("/notes/:id/duplicate", secure, async (c) => {
+  const username: string = c.get("username");
+  const noteId = Number(c.req.param("id"));
+
+  const note = Note.byId(noteId);
+  if (!note) throw new HTTPException(404, { message: "Note not found" });
+
+  const hasAccess = Board.access(note.board_id, username);
+  if (!hasAccess) throw new HTTPException(403, { message: "Forbidden" });
+
+  const dup = Note.create(
+    note.board_id,
+    note.content,
+    username,
+    note.x + 30,
+    note.y + 30,
+    note.color as Note.Color,
+  );
+
+  // Copy description, tags, checklist
+  Note.update(dup.id, {
+    description: note.description,
+    tags: note.tags,
+    checklist: note.checklist,
+  });
+
+  const updated = Note.byId(dup.id)!;
+
+  // Broadcast
+  const html = <Takkr note={updated} />;
+  events.broadcast(note.board_id, events.Event.Note.Created, html.toString());
+
+  return c.html(<Takkr note={updated} />);
+});
+
 api.delete("/notes/:id", secure, async (c) => {
   const username: string = c.get("username");
   const noteId = Number(c.req.param("id"));

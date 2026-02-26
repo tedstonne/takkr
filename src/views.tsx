@@ -397,15 +397,19 @@ const HelpModal = () => (
       </div>
       <div class="space-y-2 text-sm">
         {[
-          ["n", "New note"],
-          ["Enter", "Edit selected note"],
-          ["Delete", "Remove selected note"],
-          ["Space", "Flip note"],
+          ["⌘P / /", "Command palette"],
+          ["h j k l", "Navigate notes (vim)"],
           ["↑↓←→", "Navigate notes"],
-          ["Tab", "Next note"],
-          ["⌘/Ctrl +", "Zoom in"],
-          ["⌘/Ctrl −", "Zoom out"],
+          ["n", "New note"],
+          ["Enter", "Open card detail"],
+          ["x", "Delete selected note"],
+          ["d", "Duplicate selected note"],
+          ["c", "Cycle note color"],
+          ["g g", "Jump to first note"],
+          ["G", "Jump to last note"],
+          ["+ / −", "Zoom in / out"],
           ["⌘/Ctrl 0", "Reset zoom"],
+          ["Tab", "Next note"],
           ["Escape", "Deselect / Close"],
           ["?", "Show this help"],
         ].map(([key, desc]) => (
@@ -748,6 +752,8 @@ export const BoardView = (props: {
       id="canvas"
       x-data="board()"
       data-background={props.board.background || "grid"}
+      data-boards={JSON.stringify((props.allBoards || []).map(b => ({ slug: b.board.slug, role: b.role })))}
+      data-slug={props.board.slug}
     >
       <div id="notes" sse-swap="note:created" hx-swap="beforeend" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
         {props.notes.map((note) => (
@@ -807,6 +813,22 @@ export const BoardView = (props: {
       </button>
     </div>
 
+    {/* Command palette */}
+    <div id="command-palette" class="fixed inset-0 z-50 hidden">
+      <div class="palette-backdrop" />
+      <div class="palette-container">
+        <input
+          type="text"
+          id="palette-input"
+          class="palette-input"
+          placeholder="Search notes, boards, commands..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div id="palette-results" class="palette-results" />
+      </div>
+    </div>
+
     <ZoomOverlay />
     <AddNoteDialog slug={props.board.slug} />
     <HelpModal />
@@ -848,14 +870,17 @@ export const Help = () => (
         <h2 class="text-lg font-semibold text-slate-900">Keyboard Shortcuts</h2>
         <div class="mt-4 space-y-2">
           {[
-            ["n", "New note"],
-            ["Enter", "Edit selected note"],
-            ["Delete", "Remove selected note"],
-            ["Space", "Flip note"],
+            ["⌘P / /", "Command palette"],
+            ["h j k l", "Navigate (vim)"],
             ["Arrows", "Navigate notes"],
-            ["Tab", "Next note"],
-            ["⌘/Ctrl +", "Zoom in"],
-            ["⌘/Ctrl −", "Zoom out"],
+            ["n", "New note"],
+            ["Enter", "Open card detail"],
+            ["x", "Delete note"],
+            ["d", "Duplicate note"],
+            ["c", "Cycle color"],
+            ["g g", "First note"],
+            ["G", "Last note"],
+            ["+ / −", "Zoom in / out"],
             ["⌘/Ctrl 0", "Reset zoom"],
             ["Escape", "Deselect / Close"],
           ].map(([key, desc]) => (

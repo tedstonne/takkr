@@ -1117,22 +1117,229 @@ window.board = () => ({
     });
   },
 
+  // --- Command Palette ---
+  _paletteOpen: false,
+  _paletteIndex: 0,
+  _paletteItems: [],
+  _gPending: false,
+
+  openPalette() {
+    const el = document.getElementById("command-palette");
+    const input = document.getElementById("palette-input");
+    if (!el || !input) return;
+    el.classList.remove("hidden");
+    this._paletteOpen = true;
+    this._paletteIndex = 0;
+    input.value = "";
+    input.focus();
+    this._updatePalette("");
+
+    // Wire events (once)
+    if (!el._wired) {
+      el._wired = true;
+      el.querySelector(".palette-backdrop").addEventListener("click", () => this.closePalette());
+      input.addEventListener("input", () => {
+        this._paletteIndex = 0;
+        this._updatePalette(input.value);
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { e.preventDefault(); this.closePalette(); return; }
+        if (e.key === "ArrowDown") { e.preventDefault(); this._paletteNav(1); return; }
+        if (e.key === "ArrowUp") { e.preventDefault(); this._paletteNav(-1); return; }
+        if (e.key === "Enter") { e.preventDefault(); this._paletteExec(); return; }
+      });
+    }
+  },
+
+  closePalette() {
+    const el = document.getElementById("command-palette");
+    if (!el) return;
+    el.classList.add("hidden");
+    this._paletteOpen = false;
+    this._paletteItems = [];
+  },
+
+  _fuzzyMatch(text, query) {
+    text = text.toLowerCase();
+    query = query.toLowerCase();
+    if (!query) return true;
+    let qi = 0;
+    for (let i = 0; i < text.length && qi < query.length; i++) {
+      if (text[i] === query[qi]) qi++;
+    }
+    return qi === query.length;
+  },
+
+  _updatePalette(query) {
+    const results = document.getElementById("palette-results");
+    if (!results) return;
+    const q = query.trim();
+    const items = [];
+
+    // Notes on current board
+    const notes = Array.from(document.querySelectorAll(".takkr"));
+    for (const note of notes) {
+      const title = note.querySelector(".takkr-title")?.textContent || "";
+      const tags = note.dataset.tags || "";
+      const searchText = `${title} ${tags}`;
+      if (this._fuzzyMatch(searchText, q)) {
+        items.push({ type: "note", icon: "📝", label: title, hint: tags ? `#${tags.split(",")[0]}` : "", el: note });
+      }
+    }
+
+    // Boards
+    const canvas = document.getElementById("canvas");
+    const boards = JSON.parse(canvas?.dataset.boards || "[]");
+    const currentSlug = canvas?.dataset.slug || "";
+    for (const b of boards) {
+      if (b.slug === currentSlug) continue;
+      if (this._fuzzyMatch(b.slug, q)) {
+        items.push({ type: "board", icon: "📋", label: `/${b.slug}`, hint: b.role, slug: b.slug });
+      }
+    }
+
+    // Commands
+    const commands = [
+      { label: "New note", icon: "✨", hint: "n", action: () => { this.closePalette(); document.getElementById("add-note-dialog")?.showModal(); } },
+      { label: "Delete note", icon: "🗑️", hint: "x", action: () => { this.closePalette(); this._deleteSelected(); } },
+      { label: "Duplicate note", icon: "📋", hint: "d", action: () => { this.closePalette(); this._duplicateSelected(); } },
+      { label: "Cycle color", icon: "🎨", hint: "c", action: () => { this.closePalette(); this._cycleColor(); } },
+      { label: "Settings", icon: "⚙️", hint: "s", action: () => { this.closePalette(); document.getElementById("settings-modal")?.showModal(); } },
+      { label: "Members", icon: "👥", hint: "m", action: () => { this.closePalette(); document.getElementById("members-modal")?.showModal(); } },
+      { label: "Zoom in", icon: "🔍", hint: "+", action: () => { this.closePalette(); this.zoomIn(); } },
+      { label: "Zoom out", icon: "🔍", hint: "−", action: () => { this.closePalette(); this.zoomOut(); } },
+      { label: "Reset zoom", icon: "🔍", hint: "0", action: () => { this.closePalette(); this.zoomReset(); } },
+      { label: "Help", icon: "❓", hint: "?", action: () => { this.closePalette(); document.getElementById("help-modal")?.showModal(); } },
+    ];
+    for (const cmd of commands) {
+      if (this._fuzzyMatch(cmd.label, q)) {
+        items.push({ type: "command", icon: cmd.icon, label: cmd.label, hint: cmd.hint, action: cmd.action });
+      }
+    }
+
+    this._paletteItems = items;
+    if (this._paletteIndex >= items.length) this._paletteIndex = Math.max(0, items.length - 1);
+
+    // Render
+    let html = "";
+    let lastType = "";
+    const sectionLabels = { note: "Notes", board: "Boards", command: "Commands" };
+    items.forEach((item, i) => {
+      if (item.type !== lastType) {
+        html += `<div class="palette-section">${sectionLabels[item.type]}</div>`;
+        lastType = item.type;
+      }
+      html += `<div class="palette-item${i === this._paletteIndex ? " active" : ""}" data-index="${i}">
+        <span class="palette-item-icon">${item.icon}</span>
+        <span class="palette-item-label">${this._escapeHtml(item.label)}</span>
+        <span class="palette-item-hint">${this._escapeHtml(item.hint || "")}</span>
+      </div>`;
+    });
+    if (!items.length && q) {
+      html = '<div class="palette-item text-slate-400"><span class="palette-item-icon">🔍</span><span>No results</span></div>';
+    }
+    results.innerHTML = html;
+
+    // Click handler on items
+    results.querySelectorAll(".palette-item[data-index]").forEach((el) => {
+      el.addEventListener("click", () => {
+        this._paletteIndex = Number(el.dataset.index);
+        this._paletteExec();
+      });
+      el.addEventListener("mouseenter", () => {
+        results.querySelector(".palette-item.active")?.classList.remove("active");
+        el.classList.add("active");
+        this._paletteIndex = Number(el.dataset.index);
+      });
+    });
+  },
+
+  _escapeHtml(text) {
+    const el = document.createElement("span");
+    el.textContent = text;
+    return el.innerHTML;
+  },
+
+  _paletteNav(dir) {
+    const results = document.getElementById("palette-results");
+    if (!this._paletteItems.length) return;
+    results.querySelector(".palette-item.active")?.classList.remove("active");
+    this._paletteIndex += dir;
+    if (this._paletteIndex < 0) this._paletteIndex = this._paletteItems.length - 1;
+    if (this._paletteIndex >= this._paletteItems.length) this._paletteIndex = 0;
+    const active = results.querySelector(`[data-index="${this._paletteIndex}"]`);
+    active?.classList.add("active");
+    active?.scrollIntoView({ block: "nearest" });
+  },
+
+  _paletteExec() {
+    const item = this._paletteItems[this._paletteIndex];
+    if (!item) return;
+    this.closePalette();
+
+    if (item.type === "note") {
+      this.select(item.el);
+    } else if (item.type === "board") {
+      window.location.href = `/${item.slug}`;
+    } else if (item.action) {
+      item.action();
+    }
+  },
+
+  // --- Actions ---
+  _deleteSelected() {
+    if (!this.selected) return;
+    fetch(`/api/notes/${this.selected.dataset.id}`, { method: "DELETE" });
+    this.selected.remove();
+    this.selected = null;
+  },
+
+  async _duplicateSelected() {
+    if (!this.selected) return;
+    const noteId = this.selected.dataset.id;
+    try {
+      const res = await fetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+      if (!res.ok) return;
+      const html = await res.text();
+      document.getElementById("notes").insertAdjacentHTML("beforeend", html);
+    } catch (_) {}
+  },
+
+  _cycleColor() {
+    if (!this.selected) return;
+    const colors = ["yellow", "pink", "green", "blue", "orange"];
+    const current = Array.from(this.selected.classList)
+      .find(c => c.startsWith("takkr-") && c !== "takkr")?.replace("takkr-", "") || "yellow";
+    const idx = colors.indexOf(current);
+    const next = colors[(idx + 1) % colors.length];
+
+    this.selected.className = this.selected.className.replace(/takkr-\w+/g, "").trim() + ` takkr-${next}`;
+
+    fetch(`/api/notes/${this.selected.dataset.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `color=${encodeURIComponent(next)}`,
+    });
+  },
+
   handleKey(e) {
-    // Zoom shortcuts work everywhere (except inputs)
+    // Palette open — let palette input handle everything
+    if (this._paletteOpen) return;
+
+    // Zoom shortcuts work everywhere
     if ((e.metaKey || e.ctrlKey) && (e.key === "=" || e.key === "+")) {
-      e.preventDefault();
-      this.zoomIn();
-      return;
+      e.preventDefault(); this.zoomIn(); return;
     }
     if ((e.metaKey || e.ctrlKey) && e.key === "-") {
-      e.preventDefault();
-      this.zoomOut();
-      return;
+      e.preventDefault(); this.zoomOut(); return;
     }
     if ((e.metaKey || e.ctrlKey) && e.key === "0") {
-      e.preventDefault();
-      this.zoomReset();
-      return;
+      e.preventDefault(); this.zoomReset(); return;
+    }
+
+    // Cmd+P / Ctrl+P → palette
+    if ((e.metaKey || e.ctrlKey) && e.key === "p") {
+      e.preventDefault(); this.openPalette(); return;
     }
 
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
@@ -1151,38 +1358,60 @@ window.board = () => ({
       return;
     }
 
+    // gg (double-g) detection
+    if (e.key === "g" && !e.metaKey && !e.ctrlKey) {
+      if (this._gPending) {
+        e.preventDefault();
+        this._gPending = false;
+        // gg → first note
+        const notes = Array.from(document.querySelectorAll(".takkr"));
+        if (notes.length) this.select(notes[0]);
+        return;
+      }
+      this._gPending = true;
+      setTimeout(() => { this._gPending = false; }, 400);
+      return;
+    }
+    this._gPending = false;
+
     switch (e.key) {
-      case "n":
+      // Vim navigation
+      case "h": e.preventDefault(); this.selectNearest("left"); break;
+      case "j": e.preventDefault(); this.selectNearest("down"); break;
+      case "k": e.preventDefault(); this.selectNearest("up"); break;
+      case "l": e.preventDefault(); this.selectNearest("right"); break;
+
+      // G → last note
+      case "G":
         e.preventDefault();
-        document.getElementById("add-note-dialog")?.showModal();
+        { const notes = Array.from(document.querySelectorAll(".takkr"));
+          if (notes.length) this.select(notes[notes.length - 1]); }
         break;
-      case "?":
-        e.preventDefault();
-        document.getElementById("help-modal")?.showModal();
-        break;
+
+      // Actions
+      case "n": e.preventDefault(); document.getElementById("add-note-dialog")?.showModal(); break;
+      case "x":
       case "Delete":
       case "Backspace":
-        e.preventDefault();
-        if (this.selected) {
-          fetch(`/api/notes/${this.selected.dataset.id}`, { method: "DELETE" });
-          this.selected.remove();
-          this.selected = null;
-        }
-        break;
+        e.preventDefault(); this._deleteSelected(); break;
+      case "d": e.preventDefault(); this._duplicateSelected(); break;
+      case "c": e.preventDefault(); this._cycleColor(); break;
+      case "s": e.preventDefault(); document.getElementById("settings-modal")?.showModal(); break;
+      case "m": e.preventDefault(); document.getElementById("members-modal")?.showModal(); break;
+      case "/": e.preventDefault(); this.openPalette(); break;
+
+      // Zoom without modifier
+      case "+": case "=": e.preventDefault(); this.zoomIn(); break;
+      case "-": e.preventDefault(); this.zoomOut(); break;
+
+      case "?": e.preventDefault(); document.getElementById("help-modal")?.showModal(); break;
       case "Escape":
-        if (this.selected) {
-          this.selected.classList.remove("selected");
-          this.selected = null;
-        }
+        if (this.selected) { this.selected.classList.remove("selected"); this.selected = null; }
         break;
-      case "Tab":
-        e.preventDefault();
-        this.selectNext(e.shiftKey ? -1 : 1);
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (this.selected) zoom.open(this.selected);
-        break;
+      case "Tab": e.preventDefault(); this.selectNext(e.shiftKey ? -1 : 1); break;
+      case "Enter": e.preventDefault(); if (this.selected) zoom.open(this.selected); break;
+
+      // Arrow keys
       case "ArrowUp": e.preventDefault(); this.selectNearest("up"); break;
       case "ArrowDown": e.preventDefault(); this.selectNearest("down"); break;
       case "ArrowLeft": e.preventDefault(); this.selectNearest("left"); break;

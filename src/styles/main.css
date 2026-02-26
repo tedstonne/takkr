@@ -486,6 +486,42 @@
     @apply text-black/30 italic;
   }
 
+  /* ── Command Palette ── */
+  .palette-backdrop {
+    @apply absolute inset-0 bg-black/50;
+  }
+  .palette-container {
+    @apply absolute left-1/2 top-[15%] -translate-x-1/2 w-[90vw] max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden;
+  }
+  .palette-input {
+    @apply w-full px-5 py-4 text-base border-0 outline-none bg-white placeholder:text-slate-400;
+  }
+  .palette-results {
+    @apply max-h-[50vh] overflow-y-auto border-t border-slate-100;
+  }
+  .palette-results:empty {
+    @apply border-0;
+  }
+  .palette-item {
+    @apply flex items-center gap-3 px-5 py-3 cursor-pointer text-sm text-slate-700 transition-colors;
+  }
+  .palette-item:hover,
+  .palette-item.active {
+    @apply bg-slate-100;
+  }
+  .palette-item-icon {
+    @apply text-base w-6 text-center flex-shrink-0;
+  }
+  .palette-item-label {
+    @apply flex-1 truncate;
+  }
+  .palette-item-hint {
+    @apply text-xs text-slate-400 flex-shrink-0;
+  }
+  .palette-section {
+    @apply px-5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400;
+  }
+
   /* ── Modal/Dialog ── */
   .modal-backdrop {
     @apply fixed inset-0 bg-black/50 z-40;
