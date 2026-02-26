@@ -31,7 +31,7 @@ const registerRoute = createRoute({
   path: "/user/register",
   tags: ["Authentication"],
   summary: "Start passkey registration",
-  description: "Returns WebAuthn creation options for a new username.",
+  description: "Initiates WebAuthn passkey registration for a new user. Pass the desired username as a query parameter. Returns PublicKeyCredentialCreationOptions that your client passes to navigator.credentials.create(). Username must be 3-30 chars, lowercase alphanumeric + hyphens. Returns 409 if the username is already taken.",
   request: { query: S.RegisterQuery },
   responses: { 200: { description: "WebAuthn PublicKeyCredentialCreationOptions" } },
 });
@@ -62,7 +62,7 @@ const registerVerifyRoute = createRoute({
   path: "/user/register/verify",
   tags: ["Authentication"],
   summary: "Complete registration",
-  description: "Verifies the WebAuthn credential and creates the account. Sets session cookie.",
+  description: "Verifies the WebAuthn attestation response from the browser. On success, creates the user account, sets an HTTP-only session cookie (30-day expiry), and returns the user's home page HTML. The credential should be base64-encoded JSON from navigator.credentials.create().",
   responses: { 200: { description: "HTML redirect to home" } },
 });
 
@@ -90,7 +90,7 @@ const discoverRoute = createRoute({
   path: "/user/discover",
   tags: ["Authentication"],
   summary: "Start passkey discovery (sign-in)",
-  description: "Returns WebAuthn request options for discoverable credentials.",
+  description: "Initiates WebAuthn discoverable credential authentication. Returns PublicKeyCredentialRequestOptions for navigator.credentials.get(). No username needed — the browser presents all registered passkeys for this origin.",
   responses: { 200: { description: "WebAuthn PublicKeyCredentialRequestOptions" } },
 });
 
@@ -104,7 +104,7 @@ const discoverVerifyRoute = createRoute({
   path: "/user/discover/verify",
   tags: ["Authentication"],
   summary: "Complete sign-in",
-  description: "Verifies the WebAuthn assertion and sets session cookie.",
+  description: "Verifies the WebAuthn assertion response from the browser. On success, identifies the user from the credential, sets an HTTP-only session cookie (30-day expiry), and returns the home page. Returns an error alert HTML if verification fails.",
   responses: { 200: { description: "HTML redirect to home" } },
 });
 
@@ -131,7 +131,7 @@ const logoutRoute = createRoute({
   path: "/user/logout",
   tags: ["Authentication"],
   summary: "Sign out",
-  description: "Clears the session cookie.",
+  description: "Clears the session cookie and redirects to the landing page. The session token is invalidated server-side.",
   responses: { 302: { description: "Redirect to /" } },
 });
 
@@ -149,7 +149,7 @@ const listBoardsRoute = createRoute({
   path: "/boards",
   tags: ["Boards"],
   summary: "List boards",
-  description: "List all boards the authenticated user has access to (owned + member).",
+  description: "Returns all boards the authenticated user can access, including boards they own and boards they've been invited to as a member. Each board includes its slug, name, owner, background, and creation date.",
   middleware: [secure] as any,
   responses: {
     200: { description: "Array of boards", content: { "application/json": { schema: z.array(S.BoardResponse) } } },
@@ -167,7 +167,7 @@ const deleteBoardRoute = createRoute({
   path: "/boards/{slug}",
   tags: ["Boards"],
   summary: "Delete a board",
-  description: "Delete a board and all its notes. Owner only.",
+  description: "Permanently delete a board and all its notes, attachments, and member associations. This action cannot be undone. Only the board owner can delete it. Redirects to the home page after deletion.",
   middleware: [secure, boardAccess, boardOwner] as any,
   request: { params: S.SlugParam },
   responses: { 302: { description: "Redirect to /" } },
@@ -184,6 +184,7 @@ const setBgRoute = createRoute({
   path: "/boards/{slug}/background",
   tags: ["Boards"],
   summary: "Change board background",
+  description: "Set the visual background style for a board. Available backgrounds: plain (white), grid (dotted), cork (corkboard texture), chalkboard (green chalk), lined (notebook), canvas (linen texture), blueprint (blue grid), doodle (playful sketches). Owner only.",
   middleware: [secure, boardAccess, boardOwner] as any,
   request: { params: S.SlugParam },
   responses: {
@@ -207,7 +208,7 @@ const getViewportRoute = createRoute({
   path: "/boards/{slug}/viewport",
   tags: ["Boards"],
   summary: "Get viewport state",
-  description: "Get the user's saved viewport state (zoom + scroll) for this board.",
+  description: "Retrieve the authenticated user's saved viewport for this board. The viewport stores the zoom level and scroll position so the user returns to exactly where they left off. Each user has their own independent viewport per board. Returns defaults (zoom: 1, scroll: 0,0) if no viewport has been saved yet.",
   middleware: [secure, boardAccess] as any,
   request: { params: S.SlugParam },
   responses: {
@@ -227,7 +228,7 @@ const setViewportRoute = createRoute({
   path: "/boards/{slug}/viewport",
   tags: ["Boards"],
   summary: "Save viewport state",
-  description: "Save zoom level and scroll position. Zoom clamped to 0.25–2.0.",
+  description: "Persist the user's current viewport for this board. The client debounces this call (1s after last change) to avoid excessive saves during scroll/zoom. Zoom is clamped to 0.25 (25%) minimum and 2.0 (200%) maximum. Scroll values are stored as pixel offsets.",
   middleware: [secure, boardAccess] as any,
   request: { params: S.SlugParam },
   responses: {
@@ -286,7 +287,7 @@ const addMemberRoute = createRoute({
   path: "/boards/{slug}/members",
   tags: ["Members"],
   summary: "Invite a member",
-  description: "Add a user to the board. Owner only.",
+  description: "Add an existing user to the board as a collaborator. The invited user will be able to view, create, edit, and delete notes on the board. Owner only. Returns 404 if the user doesn't exist, 409 if they're already a member, 400 if you try to invite the owner. Broadcasts a member:joined SSE event.",
   middleware: [secure, boardAccess, boardOwner] as any,
   request: { params: S.SlugParam },
   responses: { 302: { description: "Redirect to board" } },
@@ -311,6 +312,7 @@ const removeMemberRoute = createRoute({
   path: "/boards/{slug}/members/{username}",
   tags: ["Members"],
   summary: "Remove a member",
+  description: "Remove a collaborator from the board. They will lose access immediately. Owner only. Broadcasts a member:left SSE event.",
   middleware: [secure, boardAccess, boardOwner] as any,
   request: { params: S.SlugParam.merge(S.UsernameParam) },
   responses: { 302: { description: "Redirect to board" } },
@@ -333,7 +335,7 @@ const createNoteRoute = createRoute({
   path: "/boards/{slug}/notes",
   tags: ["Notes"],
   summary: "Create a note",
-  description: "Create a new sticky note on the board. Broadcasts SSE event.",
+  description: "Create a new sticky note on the board. The note appears as a draggable card with the given title and color. If x/y are omitted, the note is placed at a random position near the top-left. The z-index is automatically set to be above all existing notes. Returns the rendered HTML card element. Broadcasts a note:created SSE event to all connected clients so the note appears in real-time for collaborators.",
   middleware: [secure, boardAccess] as any,
   request: { params: S.SlugParam },
   responses: { 200: { description: "HTML card element" } },
@@ -359,7 +361,7 @@ const getNoteRoute = createRoute({
   path: "/notes/{id}",
   tags: ["Notes"],
   summary: "Get note detail",
-  description: "Get a note with its attachments.",
+  description: "Retrieve a note's full data including content, description, position, color, tags, checklist, and all file attachments. Used by the card detail overlay to show the back of the card with rich content. Requires access to the note's board.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: {
@@ -383,7 +385,7 @@ const updateNoteRoute = createRoute({
   path: "/notes/{id}",
   tags: ["Notes"],
   summary: "Update a note",
-  description: "Update note fields. All fields optional. Pass ?silent=1 to suppress SSE broadcast.",
+  description: "Update any combination of note fields. Only provided fields are changed — omitted fields remain untouched. Use this for title edits, position updates (drag), color changes, description edits, tag management, and checklist updates. Pass ?silent=1 as a query parameter to suppress the SSE broadcast (used during drag operations to avoid flooding collaborators with intermediate positions). Broadcasts note:updated SSE event with OOB swap HTML unless silent.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: { 200: { description: "HTML updated card" } },
@@ -424,7 +426,7 @@ const duplicateNoteRoute = createRoute({
   path: "/notes/{id}/duplicate",
   tags: ["Notes"],
   summary: "Duplicate a note",
-  description: "Copy a note with +30px position offset. Copies content, color, description, tags, checklist.",
+  description: "Create an exact copy of a note with a 30px offset in both x and y directions so the duplicate doesn't stack exactly on top. Copies the title, color, description, tags, and checklist. The duplicate gets a new ID and the authenticated user as its creator. File attachments are NOT copied. Broadcasts note:created SSE event. Keyboard shortcut: 'd' in the board view.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: { 200: { description: "HTML new card" } },
@@ -451,7 +453,7 @@ const deleteNoteRoute = createRoute({
   path: "/notes/{id}",
   tags: ["Notes"],
   summary: "Delete a note",
-  description: "Delete a note and its attachments. Broadcasts SSE event.",
+  description: "Permanently delete a note and all its file attachments from disk. Broadcasts a note:deleted SSE event that triggers client-side removal of the card element. Keyboard shortcut: 'x' or Delete/Backspace in the board view. This action cannot be undone.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: { 200: { description: "OK" } },
@@ -478,7 +480,7 @@ const bringToFrontRoute = createRoute({
   path: "/notes/{id}/front",
   tags: ["Notes"],
   summary: "Bring note to front",
-  description: "Set the note to the highest z-index on the board.",
+  description: "Move a note to the top of the visual stack by setting its z-index to one higher than the current maximum on the board. Used when clicking/dragging a note to ensure it renders above all others. Returns the new z-index value.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: {
@@ -507,7 +509,7 @@ const uploadAttachmentRoute = createRoute({
   path: "/notes/{id}/attachments",
   tags: ["Attachments"],
   summary: "Upload attachment",
-  description: "Upload a file to a note. Max 5MB.",
+  description: "Upload a file attachment to a note. Accepts any file type up to 5MB via multipart form data. Files are stored on disk in the uploads/ directory with a generated filename (noteId_timestamp.ext). The original filename, MIME type, and size are stored in the database. Drag files onto a card in the board view to trigger this endpoint.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: {
@@ -545,7 +547,7 @@ const listAttachmentsRoute = createRoute({
   path: "/notes/{id}/attachments",
   tags: ["Attachments"],
   summary: "List attachments",
-  description: "List all attachments for a note.",
+  description: "List all file attachments for a note. Returns an array of attachment metadata including filename, MIME type, size in bytes, and storage path. Used by the card detail overlay to show the attachment list with download links.",
   middleware: [secure] as any,
   request: { params: S.NoteIdParam },
   responses: {
@@ -568,7 +570,7 @@ const getAttachmentRoute = createRoute({
   path: "/attachments/{id}",
   tags: ["Attachments"],
   summary: "Download attachment",
-  description: "Serve an attachment file.",
+  description: "Serve an attachment file with its original MIME type. The file is returned inline (Content-Disposition: inline) so images and PDFs can be previewed in the browser. Requires access to the note's board.",
   middleware: [secure] as any,
   request: { params: S.AttachmentIdParam },
   responses: { 200: { description: "File contents" } },
@@ -599,6 +601,7 @@ const deleteAttachmentRoute = createRoute({
   path: "/attachments/{id}",
   tags: ["Attachments"],
   summary: "Delete attachment",
+  description: "Delete a file attachment. Removes the file from disk and the metadata from the database. Requires access to the note's board. This action cannot be undone.",
   middleware: [secure] as any,
   request: { params: S.AttachmentIdParam },
   responses: {
@@ -634,6 +637,7 @@ const getUserProfileRoute = createRoute({
   path: "/user/profile",
   tags: ["User"],
   summary: "Get profile",
+  description: "Returns the authenticated user's profile including username, display name, email, avatar filename, preferred font, and preferred note color. Used by the settings modal to populate profile fields.",
   middleware: [secure] as any,
   responses: {
     200: { description: "User profile", content: { "application/json": { schema: S.ProfileResponse } } },
@@ -650,6 +654,7 @@ const getUserPrefsRoute = createRoute({
   path: "/user/prefs",
   tags: ["User"],
   summary: "Get preferences",
+  description: "Returns the user's visual preferences: handwriting font, preferred note color, and preferred board background. These are applied when creating new notes or boards.",
   middleware: [secure] as any,
   responses: {
     200: { description: "User preferences", content: { "application/json": { schema: S.PrefsResponse } } },
@@ -666,6 +671,7 @@ const setDisplayNameRoute = createRoute({
   path: "/user/display-name",
   tags: ["User"],
   summary: "Update display name",
+  description: "Set the user's display name shown to collaborators. This appears in the board header and member list. Whitespace is trimmed. Can be empty to clear the display name (falls back to username).",
   middleware: [secure] as any,
   responses: {
     200: { description: "OK", content: { "application/json": { schema: S.OkResponse } } },
@@ -686,6 +692,7 @@ const setEmailRoute = createRoute({
   path: "/user/email",
   tags: ["User"],
   summary: "Update email",
+  description: "Set the user's email address. Used for Gravatar avatar fallback and contact purposes. Not validated for format — any string is accepted. Whitespace is trimmed.",
   middleware: [secure] as any,
   responses: {
     200: { description: "OK", content: { "application/json": { schema: S.OkResponse } } },
@@ -706,6 +713,7 @@ const setFontRoute = createRoute({
   path: "/user/font",
   tags: ["User"],
   summary: "Set handwriting font",
+  description: "Set the handwriting font used for note titles across all boards. Available fonts: caveat (default), indie-flower, kalam, parisienne, cookie, handlee, sofia, gochi-hand, grand-hotel. The font is loaded from Google Fonts. Returns 400 for invalid font names.",
   middleware: [secure] as any,
   responses: {
     200: { description: "OK", content: { "application/json": { schema: z.object({ ok: z.boolean(), font: z.string() }) } } },
@@ -726,6 +734,7 @@ const setColorRoute = createRoute({
   path: "/user/color",
   tags: ["User"],
   summary: "Set default note color",
+  description: "Set the default color for new notes. Available colors: yellow, pink, green, blue, orange. This color is pre-selected in the new note dialog. Individual notes can still be changed to any color after creation.",
   middleware: [secure] as any,
   responses: {
     200: { description: "OK", content: { "application/json": { schema: z.object({ ok: z.boolean(), color: z.string() }) } } },
@@ -745,6 +754,7 @@ const setBgPrefRoute = createRoute({
   path: "/user/background",
   tags: ["User"],
   summary: "Set preferred background",
+  description: "Set the user's preferred board background. This background is used as the default when creating new boards. Existing boards keep their own background setting.",
   middleware: [secure] as any,
   responses: {
     200: { description: "OK", content: { "application/json": { schema: z.object({ ok: z.boolean(), background: z.string() }) } } },
@@ -764,7 +774,7 @@ const uploadAvatarRoute = createRoute({
   path: "/user/avatar",
   tags: ["User"],
   summary: "Upload avatar",
-  description: "Upload an avatar image. Max 2MB, must be an image.",
+  description: "Upload a profile avatar image. Accepts JPEG, PNG, GIF, or WebP up to 2MB via multipart form data. The previous avatar file is automatically deleted from disk. The avatar is displayed in the board header, settings modal, and member lists.",
   middleware: [secure] as any,
   responses: {
     200: { description: "Avatar filename", content: { "application/json": { schema: z.object({ ok: z.boolean(), avatar: z.string() }) } } },
@@ -799,7 +809,7 @@ const getAvatarRoute = createRoute({
   path: "/user/avatar/{filename}",
   tags: ["User"],
   summary: "Serve avatar",
-  description: "Serve an avatar image. Public, no auth required. Cached for 1 year.",
+  description: "Serve a user's avatar image file. This is a public endpoint — no authentication required — so avatars can be displayed to anyone viewing a board. Response is cached for 1 year (Cache-Control: public, max-age=31536000). Returns 404 if the file doesn't exist.",
   request: { params: S.FilenameParam },
   responses: { 200: { description: "Image file" } },
 });
@@ -826,14 +836,26 @@ api.doc31("/openapi.json", {
   info: {
     title: "takkr API",
     version: "1.0.0",
-    description: "REST API for takkr — collaborative sticky note boards. Authentication is via session cookie (set after passkey login).",
+    description: `REST API for **takkr** — free, real-time collaborative sticky note boards.
+
+## Authentication
+All endpoints (except avatar serving and the auth flow itself) require a valid session cookie. Sessions are created via WebAuthn passkey authentication — no passwords. Session cookies are HTTP-only, secure, SameSite=Lax, with a 30-day expiry.
+
+## Real-time Updates
+Board changes are broadcast via Server-Sent Events (SSE). Connect to \`/api/boards/{slug}/events\` to receive live updates. Events include note creation, updates, deletion, and member changes.
+
+## Content Types
+Most write endpoints accept \`application/x-www-form-urlencoded\` bodies. File uploads use \`multipart/form-data\`. Read endpoints return JSON unless noted (some return HTML for HTMX integration).
+
+## Error Handling
+All errors return appropriate HTTP status codes with a JSON or text error message: 400 (bad request), 401 (unauthorized), 403 (forbidden), 404 (not found), 409 (conflict).`,
   },
   tags: [
-    { name: "Authentication", description: "Passkey registration and sign-in" },
-    { name: "Boards", description: "Board management, backgrounds, and viewport state" },
-    { name: "Members", description: "Board membership" },
-    { name: "Notes", description: "Sticky note CRUD, duplicate, and z-ordering" },
-    { name: "Attachments", description: "File attachments on notes" },
-    { name: "User", description: "User profile and preferences" },
+    { name: "Authentication", description: "WebAuthn passkey registration and discoverable credential sign-in. No passwords — authentication uses biometrics or security keys via the Web Authentication API." },
+    { name: "Boards", description: "Create, manage, and configure boards. Each board is an infinite canvas for sticky notes. Boards are claimed by visiting any URL (first visitor owns it). Includes background customization and per-user viewport persistence." },
+    { name: "Members", description: "Invite and manage board collaborators. Members can view, create, edit, and delete notes. Only the board owner can manage membership." },
+    { name: "Notes", description: "CRUD operations for sticky notes. Notes have a title, color, position (x/y), z-index (stacking), description (rich text back-of-card), tags, and checklists. All changes are broadcast in real-time via SSE." },
+    { name: "Attachments", description: "File attachments on notes. Upload files up to 5MB per attachment. Files are stored on disk and served with their original MIME type. Drag files onto cards in the UI to attach them." },
+    { name: "User", description: "User profile and visual preferences. Customize your display name, email, avatar, handwriting font, default note color, and preferred board background." },
   ],
 });
