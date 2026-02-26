@@ -7,6 +7,7 @@ import * as Member from "@/member";
 import { secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
+import { getLandingData } from "@/landing";
 import { BoardView, Help, Home, Join, Landing, Login } from "@/views";
 
 const resolveFont = (c: any, username?: string): string => {
@@ -36,6 +37,7 @@ pages.get("/", secure.optional, (c) => {
   const username: string | undefined = c.get("username");
 
   if (!username) {
+    const landing = getLandingData();
     return c.html(
       <Layout
         title="Collaborative sticky notes for your ideas"
@@ -43,7 +45,10 @@ pages.get("/", secure.optional, (c) => {
         scripts={["/www/landing.js"]}
         description="Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source."
       >
-        <Landing />
+        <Landing
+          notes={landing?.notes || []}
+          background={landing?.board.background}
+        />
       </Layout>,
     );
   }

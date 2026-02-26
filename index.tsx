@@ -3,8 +3,10 @@ import { serveStatic } from "hono/bun";
 import { api } from "@/api";
 import { pages } from "@/pages";
 
-// Initialize schema
+// Initialize schema + seed landing board
 import "@/schema";
+import { ensureLandingBoard } from "@/landing";
+ensureLandingBoard();
 
 const app = new Hono();
 

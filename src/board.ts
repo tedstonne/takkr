@@ -5,7 +5,7 @@ const MAX_LENGTH: number = 50;
 const PATTERN: RegExp = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
 // Reserved slugs that can't be used for boards
-const RESERVED: string[] = ["api", "www", "~"];
+const RESERVED: string[] = ["api", "www", "~", "__landing"];
 
 export const BACKGROUNDS = [
   "plain",
