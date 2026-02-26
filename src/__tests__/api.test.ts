@@ -120,6 +120,35 @@ describe("api", () => {
     expect(res.status).toBe(200);
   });
 
+  test("PUT /notes/:id updates assigned_to", async () => {
+    const res = await authedFetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "assigned_to=testuser",
+    });
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('data-assigned="testuser"');
+  });
+
+  test("PUT /notes/:id clears assigned_to", async () => {
+    // First assign
+    await authedFetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "assigned_to=testuser",
+    });
+    // Then clear
+    const res = await authedFetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "assigned_to=",
+    });
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('data-assigned=""');
+  });
+
   test("PUT /notes/:id returns 404 for unknown", async () => {
     const res = await authedFetch("/api/notes/99999", {
       method: "PUT",

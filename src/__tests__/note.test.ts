@@ -166,4 +166,47 @@ describe("note", () => {
     const note = Note.create(boardId, "No files", "noteuser");
     expect(Note.attachments(note.id)).toEqual([]);
   });
+
+  // --- Assignee tests ---
+
+  test("new note has empty assigned_to", () => {
+    const note = Note.create(boardId, "Unassigned", "noteuser");
+    expect(note.assigned_to).toBe("");
+  });
+
+  test("update assigned_to", () => {
+    const note = Note.create(boardId, "Assign me", "noteuser");
+    const updated = Note.update(note.id, { assigned_to: "jaz" });
+    expect(updated!.assigned_to).toBe("jaz");
+  });
+
+  test("clear assigned_to", () => {
+    const note = Note.create(boardId, "Clear assign", "noteuser");
+    Note.update(note.id, { assigned_to: "ted" });
+    const cleared = Note.update(note.id, { assigned_to: "" });
+    expect(cleared!.assigned_to).toBe("");
+  });
+
+  test("update preserves assigned_to when not provided", () => {
+    const note = Note.create(boardId, "Keep assign", "noteuser");
+    Note.update(note.id, { assigned_to: "ted" });
+    const updated = Note.update(note.id, { content: "New title" });
+    expect(updated!.assigned_to).toBe("ted");
+    expect(updated!.content).toBe("New title");
+  });
+
+  test("assigned_to persists via byId", () => {
+    const note = Note.create(boardId, "Persist", "noteuser");
+    Note.update(note.id, { assigned_to: "jaz" });
+    const fetched = Note.byId(note.id);
+    expect(fetched!.assigned_to).toBe("jaz");
+  });
+
+  test("assigned_to included in forBoard results", () => {
+    const note = Note.create(boardId, "Board assign", "noteuser");
+    Note.update(note.id, { assigned_to: "sam" });
+    const notes = Note.forBoard(boardId);
+    const found = notes.find(n => n.id === note.id);
+    expect(found!.assigned_to).toBe("sam");
+  });
 });
