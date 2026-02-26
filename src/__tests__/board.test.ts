@@ -143,4 +143,38 @@ describe("board", () => {
   test("valid accepts good slug", () => {
     expect(Board.valid("fresh-board").ok).toBe(true);
   });
+
+  // Viewport
+  test("getViewport returns null when none set", () => {
+    const board = Board.bySlug("my-board")!;
+    expect(Board.getViewport("owner1", board.id)).toBeNull();
+  });
+
+  test("setViewport stores viewport state", () => {
+    const board = Board.bySlug("my-board")!;
+    Board.setViewport("owner1", board.id, 0.75, 100, 200);
+    const vp = Board.getViewport("owner1", board.id);
+    expect(vp).not.toBeNull();
+    expect(vp!.zoom).toBe(0.75);
+    expect(vp!.scroll_x).toBe(100);
+    expect(vp!.scroll_y).toBe(200);
+  });
+
+  test("setViewport upserts on conflict", () => {
+    const board = Board.bySlug("my-board")!;
+    Board.setViewport("owner1", board.id, 1.5, 300, 400);
+    const vp = Board.getViewport("owner1", board.id);
+    expect(vp!.zoom).toBe(1.5);
+    expect(vp!.scroll_x).toBe(300);
+    expect(vp!.scroll_y).toBe(400);
+  });
+
+  test("viewport is per-user per-board", () => {
+    const board = Board.bySlug("my-board")!;
+    Board.setViewport("member1", board.id, 0.5, 10, 20);
+    const vp1 = Board.getViewport("owner1", board.id);
+    const vp2 = Board.getViewport("member1", board.id);
+    expect(vp1!.zoom).toBe(1.5);
+    expect(vp2!.zoom).toBe(0.5);
+  });
 });

@@ -338,6 +338,124 @@ describe("api", () => {
     expect(res.status === 200 || res.status === 302).toBe(true);
   });
 
+  // Viewport
+  test("GET /boards/:slug/viewport returns defaults", async () => {
+    const res = await authedFetch(`/api/boards/${boardSlug}/viewport`);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.zoom).toBe(1);
+    expect(data.scroll_x).toBe(0);
+    expect(data.scroll_y).toBe(0);
+  });
+
+  test("PUT /boards/:slug/viewport saves state", async () => {
+    const res = await authedFetch(`/api/boards/${boardSlug}/viewport`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "zoom=0.75&scroll_x=150&scroll_y=300",
+    });
+    expect(res.status).toBe(200);
+  });
+
+  test("GET /boards/:slug/viewport returns saved state", async () => {
+    const res = await authedFetch(`/api/boards/${boardSlug}/viewport`);
+    const data = await res.json();
+    expect(data.zoom).toBe(0.75);
+    expect(data.scroll_x).toBe(150);
+    expect(data.scroll_y).toBe(300);
+  });
+
+  test("PUT /boards/:slug/viewport clamps zoom", async () => {
+    const res = await authedFetch(`/api/boards/${boardSlug}/viewport`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "zoom=10&scroll_x=0&scroll_y=0",
+    });
+    expect(res.status).toBe(200);
+    const res2 = await authedFetch(`/api/boards/${boardSlug}/viewport`);
+    const data = await res2.json();
+    expect(data.zoom).toBe(2); // clamped to max
+  });
+
+  test("PUT /boards/:slug/viewport clamps zoom min", async () => {
+    await authedFetch(`/api/boards/${boardSlug}/viewport`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "zoom=0.01&scroll_x=0&scroll_y=0",
+    });
+    const res = await authedFetch(`/api/boards/${boardSlug}/viewport`);
+    const data = await res.json();
+    expect(data.zoom).toBe(0.25); // clamped to min
+  });
+
+  test("GET /boards/:slug/viewport 404 for unknown board", async () => {
+    const res = await authedFetch("/api/boards/nonexistent-board-xyz/viewport");
+    expect(res.status).toBe(404);
+  });
+
+  // Duplicate note
+  test("POST /notes/:id/duplicate creates copy", async () => {
+    // Set up the source note with extra data
+    await authedFetch(`/api/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "description=details&tags=tag1,tag2&color=green",
+    });
+
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain("takkr-green"); // same color
+  });
+
+  test("POST /notes/:id/duplicate offsets position", async () => {
+    const original = Note.byId(noteId)!;
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    expect(res.status).toBe(200);
+    // The duplicated note should have offset position
+    const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
+    const dup = allNotes[allNotes.length - 1];
+    expect(dup.x).toBe(original.x + 30);
+    expect(dup.y).toBe(original.y + 30);
+  });
+
+  test("POST /notes/:id/duplicate copies description and tags", async () => {
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    expect(res.status).toBe(200);
+    const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
+    const dup = allNotes[allNotes.length - 1];
+    expect(dup.description).toBe("details");
+    expect(dup.tags).toBe("tag1,tag2");
+  });
+
+  test("POST /notes/:id/duplicate returns 404 for unknown", async () => {
+    const res = await authedFetch("/api/notes/99999/duplicate", { method: "POST" });
+    expect(res.status).toBe(404);
+  });
+
+  test("POST /notes/:id/duplicate respects access control", async () => {
+    // Create a board owned by 'other' with no access for 'apiuser'
+    const secret = Board.create("secret-board", "other");
+    const secretNote = Note.create(secret.id, "Secret", "other");
+    const res = await authedFetch(`/api/notes/${secretNote.id}/duplicate`, { method: "POST" });
+    expect(res.status).toBe(403);
+  });
+
+  // Note creation with custom x/y
+  test("POST /boards/:slug/notes accepts x and y", async () => {
+    const res = await authedFetch(`/api/boards/${boardSlug}/notes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "content=Positioned&x=500&y=600",
+    });
+    expect(res.status).toBe(200);
+    const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
+    const positioned = allNotes.find(n => n.content === "Positioned");
+    expect(positioned).toBeDefined();
+    expect(positioned!.x).toBe(500);
+    expect(positioned!.y).toBe(600);
+  });
+
   // Board deletion
   test("DELETE /boards/:slug deletes board", async () => {
     const b = Board.create("del-board", "apiuser");
