@@ -186,6 +186,7 @@ export const Takkr = (props: {
     data-checklist={props.note.checklist || "[]"}
     data-author={props.note.created_by || ""}
     data-created={props.note.created || ""}
+    data-assigned={props.note.assigned_to || ""}
     style={`left: ${props.note.x}px; top: ${props.note.y}px; z-index: ${props.note.z};`}
     tabindex={0}
     {...(props.oob
@@ -193,6 +194,11 @@ export const Takkr = (props: {
       : {})}
   >
     <div class="takkr-title">{props.note.content}</div>
+    {props.note.assigned_to && (
+      <div class="takkr-assignee" title={`Assigned to ${props.note.assigned_to}`}>
+        {props.note.assigned_to.slice(0, 2).toUpperCase()}
+      </div>
+    )}
     {(props.attachmentCount ?? 0) > 0 && (
       <div class="takkr-attachments">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -244,6 +250,12 @@ export const ZoomOverlay = () => (
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Assignee — only shown when board has collaborators */}
+            <div class="zoom-back-section" id="zoom-back-assign-section" style="display:none;">
+              <div class="zoom-back-section-title">Assign</div>
+              <div id="zoom-back-assign" class="zoom-back-assign"></div>
             </div>
 
             {/* Checklist */}
@@ -754,6 +766,7 @@ export const BoardView = (props: {
       data-background={props.board.background || "grid"}
       data-boards={JSON.stringify((props.allBoards || []).map(b => ({ slug: b.board.slug, role: b.role })))}
       data-slug={props.board.slug}
+      data-members={JSON.stringify([props.board.owner, ...props.members.map(m => m.username)])}
     >
       <div id="notes" sse-swap="note:created" hx-swap="beforeend" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
         {props.notes.map((note) => (

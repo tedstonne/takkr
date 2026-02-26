@@ -409,6 +409,7 @@ api.openapi(updateNoteRoute, async (c) => {
   if (body.y) data.y = Number(body.y);
   if (body.z) data.z = Number(body.z);
   if (body.color) data.color = body.color as Note.Color;
+  if (body.assigned_to !== undefined) data.assigned_to = body.assigned_to as string;
 
   const updated = Note.update(noteId, data);
   if (!updated) throw new HTTPException(404, { message: "Note not found" });

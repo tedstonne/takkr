@@ -197,9 +197,10 @@ const zoom = {
     const author = noteEl.dataset.author || "";
     const created = noteEl.dataset.created || "";
 
-    // Parse checklist & tags
+    // Parse checklist, tags, assigned
     try { this.checklist = JSON.parse(noteEl.dataset.checklist || "[]"); } catch (_) { this.checklist = []; }
     this.tags = (noteEl.dataset.tags || "").split(",").map(t => t.trim()).filter(Boolean);
+    this.assignedTo = noteEl.dataset.assigned || "";
 
     // Set front
     document.getElementById("zoom-title").textContent = title;
@@ -226,6 +227,9 @@ const zoom = {
     document.querySelectorAll("#zoom-back-colors .zoom-color-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.color === this.color);
     });
+
+    // Render assignee picker (only if board has collaborators)
+    this.renderAssign();
 
     // Render checklist
     this.renderChecklist();
@@ -314,6 +318,64 @@ const zoom = {
   },
 
   // Checklist
+  renderAssign() {
+    const section = document.getElementById("zoom-back-assign-section");
+    const container = document.getElementById("zoom-back-assign");
+    const canvas = document.getElementById("canvas");
+    let members = [];
+    try { members = JSON.parse(canvas?.dataset?.members || "[]"); } catch (_) {}
+
+    // Only show if >1 collaborator
+    if (members.length <= 1) {
+      section.style.display = "none";
+      return;
+    }
+    section.style.display = "";
+
+    container.innerHTML = members.map(username => {
+      const initials = username.slice(0, 2).toUpperCase();
+      const active = this.assignedTo === username;
+      return `<button class="zoom-assign-btn${active ? " active" : ""}" data-assign="${username}">
+        <span class="zoom-assign-avatar">${initials}</span>
+        ${username}
+      </button>`;
+    }).join("") + `<button class="zoom-assign-btn${!this.assignedTo ? " active" : ""}" data-assign="">
+      <span class="zoom-assign-avatar">—</span>
+      none
+    </button>`;
+
+    // Click handlers
+    container.querySelectorAll(".zoom-assign-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const assignTo = btn.dataset.assign;
+        this.assignedTo = assignTo;
+        fetch(`/api/notes/${this.noteId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `assigned_to=${encodeURIComponent(assignTo)}`,
+        });
+        this.renderAssign();
+        // Update the card's assignee badge
+        const noteEl = document.getElementById(`note-${this.noteId}`);
+        if (noteEl) {
+          noteEl.dataset.assigned = assignTo;
+          let badge = noteEl.querySelector(".takkr-assignee");
+          if (assignTo) {
+            if (!badge) {
+              badge = document.createElement("div");
+              badge.className = "takkr-assignee";
+              noteEl.querySelector(".takkr-title").after(badge);
+            }
+            badge.textContent = assignTo.slice(0, 2).toUpperCase();
+            badge.title = `Assigned to ${assignTo}`;
+          } else if (badge) {
+            badge.remove();
+          }
+        }
+      });
+    });
+  }
+
   renderChecklist() {
     const container = document.getElementById("zoom-back-checklist");
     container.innerHTML = this.checklist.map((item, i) => `

@@ -266,6 +266,16 @@
     background-color: transparent;
   }
 
+  .takkr-assignee {
+    @apply absolute bottom-2 left-3 flex items-center justify-center rounded-full bg-black/15 text-black/60;
+    width: 24px;
+    height: 24px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+  }
+
   .takkr-attachments {
     @apply absolute bottom-2 right-3 flex items-center gap-1 text-black/40;
     font-size: 0.75rem;
@@ -468,6 +478,34 @@
   }
   .zoom-upload-btn.dragover {
     @apply border-black/40 bg-black/5 text-black/60;
+  }
+
+  .zoom-back-assign {
+    @apply flex flex-wrap gap-2;
+  }
+  .zoom-assign-btn {
+    @apply flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer border;
+    font-family: var(--font-sans);
+    border-color: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.05);
+    color: rgba(0,0,0,0.6);
+  }
+  .zoom-assign-btn:hover {
+    background: rgba(0,0,0,0.1);
+  }
+  .zoom-assign-btn.active {
+    background: rgba(0,0,0,0.15);
+    border-color: rgba(0,0,0,0.25);
+    color: rgba(0,0,0,0.85);
+    font-weight: 600;
+  }
+  .zoom-assign-avatar {
+    @apply flex items-center justify-center rounded-full bg-black/15 text-black/70;
+    width: 20px;
+    height: 20px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    font-family: var(--font-sans);
   }
 
   .zoom-back-actions {

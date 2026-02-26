@@ -16,6 +16,7 @@ export type Record = {
   z: number;
   color: Color;
   created_by: string;
+  assigned_to: string;
   created?: string;
 };
 
@@ -70,7 +71,7 @@ export const create = (
 
 export const update = (
   id: number,
-  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color">>,
+  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to">>,
 ): Record | null => {
   const note = byId(id);
   if (!note) return null;
@@ -83,14 +84,15 @@ export const update = (
   const y = data.y ?? note.y;
   const z = data.z ?? note.z;
   const color = data.color ?? note.color;
+  const assigned_to = data.assigned_to ?? note.assigned_to ?? "";
 
   const result = db
     .query(
-      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?
+      `UPDATE notes SET content = ?, description = ?, tags = ?, checklist = ?, x = ?, y = ?, z = ?, color = ?, assigned_to = ?
        WHERE id = ?
        RETURNING *`,
     )
-    .get(content, description, tags, checklist, x, y, z, color, id);
+    .get(content, description, tags, checklist, x, y, z, color, assigned_to, id);
 
   return result as Record;
 };

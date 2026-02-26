@@ -106,6 +106,11 @@ try {
   db.exec(`ALTER TABLE notes ADD COLUMN checklist TEXT DEFAULT '[]'`);
 } catch (_) {}
 
+// Migration: add assigned_to column
+try {
+  db.exec(`ALTER TABLE notes ADD COLUMN assigned_to TEXT DEFAULT ''`);
+} catch (_) {}
+
 // Attachments table
 db.exec(`
   CREATE TABLE IF NOT EXISTS attachments (
