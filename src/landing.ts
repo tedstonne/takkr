@@ -15,105 +15,94 @@ const SEED_NOTES: Array<{
   tags?: string;
   description?: string;
 }> = [
-  // Hero cluster (center)
+  // Hero (filtered out of features grid, used for SEO)
   { content: "takkr", color: "yellow", x: 520, y: 80, tags: "hero" },
   {
     content: "Collaborative sticky notes for your ideas",
     color: "pink",
     x: 480,
     y: 300,
+    tags: "hero",
     description:
       "Free, real-time collaborative sticky note boards. Organize ideas visually with your team.",
   },
 
-  // Features (right side)
-  { content: "✨ Features", color: "orange", x: 900, y: 60 },
+  // Features
   {
     content: "Drag & drop everything",
     color: "yellow",
-    x: 870,
-    y: 240,
+    x: 0, y: 0,
+    tags: "feature",
     description: "Move sticky notes anywhere on an infinite canvas.",
   },
   {
     content: "Real-time collaboration",
     color: "green",
-    x: 1140,
-    y: 200,
+    x: 0, y: 0,
+    tags: "feature",
     description: "Invite teammates and see changes as they happen via SSE.",
   },
   {
     content: "Vim keyboard shortcuts",
     color: "blue",
-    x: 880,
-    y: 420,
-    description:
-      "Navigate with h/j/k/l, delete with x, duplicate with d, cycle colors with c.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Navigate with h/j/k/l, delete with x, duplicate with d, cycle colors with c.",
   },
   {
     content: "Command palette (⌘P)",
     color: "pink",
-    x: 1150,
-    y: 380,
-    description:
-      "Search notes, jump between boards, and run commands from one input.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Search notes, jump between boards, and run commands from one input.",
   },
   {
     content: "Zoom in & out",
     color: "yellow",
-    x: 1130,
-    y: 560,
-    description:
-      "Cmd+/- or pinch to zoom. Viewport state persists per user per board.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Cmd+/- or pinch to zoom. Viewport state persists per user per board.",
   },
   {
     content: "File attachments",
     color: "green",
-    x: 890,
-    y: 590,
+    x: 0, y: 0,
+    tags: "feature",
     description: "Drag files onto any note. Up to 5MB per attachment.",
   },
   {
     content: "Checklists & tags",
     color: "orange",
-    x: 1160,
-    y: 730,
+    x: 0, y: 0,
+    tags: "feature",
     description: "Add checklists and tags to organize notes within a board.",
   },
-
-  // How it works (left side)
-  { content: "🚀 How it works", color: "blue", x: 60, y: 80 },
   {
     content: "Go to /anything to claim a board",
     color: "green",
-    x: 40,
-    y: 260,
-    description:
-      "Just type a URL like /my-project. First visitor claims it as their board.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Just type a URL like /my-project. First visitor claims it as their board.",
   },
   {
     content: "Invite teammates by username",
     color: "yellow",
-    x: 70,
-    y: 440,
-    description:
-      "Share your board by inviting collaborators. They can add and edit notes in real time.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Share your board by inviting collaborators. They can add and edit notes in real time.",
   },
   {
-    content: "Passkey login — no passwords ever",
+    content: "Passkey login — no passwords",
     color: "pink",
-    x: 50,
-    y: 620,
-    description:
-      "Sign in with biometrics or security keys. No passwords to remember or leak.",
+    x: 0, y: 0,
+    tags: "feature",
+    description: "Sign in with biometrics or security keys. No passwords to remember or leak.",
   },
-
-  // CTA (bottom center)
   {
     content: "Free & open source",
-    color: "green",
-    x: 440,
-    y: 540,
+    color: "orange",
+    x: 0, y: 0,
+    tags: "feature",
     description: "takkr is free to use. No credit card required.",
   },
   {

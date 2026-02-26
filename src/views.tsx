@@ -848,91 +848,102 @@ export const BoardView = (props: {
 );
 
 // Landing page — the board IS the pitch
-// Landing page — renders real notes from the __landing board
-export const Landing = (props: { notes: Note.Record[]; background?: string }) => (
-  <div class="h-full overflow-hidden">
-    {/* SEO: semantic content from actual notes */}
-    <article class="sr-only">
-      <h1>takkr — Collaborative Sticky Notes for Your Ideas</h1>
-      <p>Free, real-time collaborative sticky note boards. Organize ideas visually with your team.</p>
-      {props.notes.map((note) => (
-        <section key={note.id}>
-          <h2>{note.content}</h2>
-          {note.description && <p>{note.description}</p>}
-          {note.tags && <p>Tags: {note.tags}</p>}
-        </section>
-      ))}
-    </article>
+// Landing page — hero + draggable feature notes from DB
+export const Landing = (props: { notes: Note.Record[]; background?: string }) => {
+  const features = props.notes.filter(n => n.tags?.includes("feature"));
 
-    {/* JSON-LD structured data */}
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "takkr",
-      "description": "Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source.",
-      "applicationCategory": "ProductivityApplication",
-      "operatingSystem": "Web",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "featureList": props.notes.map(n => n.content),
-    })}} />
+  return (
+    <div class="h-full overflow-y-auto overflow-x-hidden" id="landing-scroll">
+      {/* SEO: semantic content from actual notes */}
+      <article class="sr-only">
+        <h1>takkr — Collaborative Sticky Notes for Your Ideas</h1>
+        <p>Free, real-time collaborative sticky note boards. Organize ideas visually with your team.</p>
+        {props.notes.map((note) => (
+          <section key={note.id}>
+            <h2>{note.content}</h2>
+            {note.description && <p>{note.description}</p>}
+          </section>
+        ))}
+      </article>
 
-    {/* Floating header */}
-    <header class="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
-      <div class="flex items-center gap-2">
-        <span class="text-xl font-bold text-slate-900">takkr</span>
-      </div>
-      <nav class="flex items-center gap-3">
+      {/* JSON-LD structured data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "takkr",
+        "description": "Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source.",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": features.map(n => n.content),
+      })}} />
+
+      {/* Hero section */}
+      <section class="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
+        <h1 class="text-6xl sm:text-7xl font-bold text-slate-900 tracking-tight font-handwriting">takkr</h1>
+        <p class="mt-4 text-xl sm:text-2xl text-slate-600 max-w-lg">
+          Collaborative sticky notes for your ideas
+        </p>
+        <p class="mt-2 text-sm text-slate-400">
+          Free &amp; open source. No passwords. Real-time.
+        </p>
+        <div class="mt-8 flex items-center gap-4">
+          <a
+            href="/~/join"
+            class="rounded-lg bg-slate-900 px-6 py-3 text-base font-medium text-white hover:bg-slate-800 transition-colors shadow-lg"
+          >
+            Get Started
+          </a>
+          <a
+            href="/~/login"
+            class="rounded-lg border border-slate-300 px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            Sign In
+          </a>
+        </div>
+      </section>
+
+      {/* Features section — real draggable notes */}
+      <section class="relative mx-auto max-w-5xl px-6 pb-24" data-background="grid">
+        <p class="text-center text-sm text-slate-400 mb-12">
+          ↓ go ahead, drag them around ↓
+        </p>
+        <div
+          id="landing-features"
+          class="relative"
+          style="min-height: 700px;"
+          data-background="grid"
+        >
+          {features.map((note, i) => (
+            <div
+              key={note.id}
+              class={`takkr takkr-${note.color} landing-note`}
+              data-id={note.id}
+              data-idx={i}
+            >
+              <div class="takkr-title">{note.content}</div>
+              {note.description && (
+                <div class="landing-note-desc">{note.description}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section class="py-20 text-center border-t border-slate-100">
+        <h2 class="text-3xl font-bold text-slate-900 font-handwriting">Ready to try?</h2>
+        <p class="mt-3 text-slate-500">Claim a board in seconds. No signup required to start.</p>
         <a
           href="/~/join"
-          class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+          class="mt-6 inline-block rounded-lg bg-slate-900 px-8 py-3 text-base font-medium text-white hover:bg-slate-800 transition-colors shadow-lg"
         >
-          Get Started
+          Create Your Board →
         </a>
-        <a
-          href="/~/login"
-          class="rounded-md border border-slate-300 bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white transition-colors"
-        >
-          Sign In
-        </a>
-      </nav>
-    </header>
-
-    {/* The board — real notes rendered server-side */}
-    <div
-      class="relative h-full overflow-auto"
-      id="canvas"
-      data-background={props.background || "grid"}
-    >
-      <div id="notes" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
-        {props.notes.map((note) => (
-          <div
-            key={note.id}
-            class={`takkr takkr-${note.color}${note.tags?.includes("hero") ? " takkr-hero" : ""}${note.tags?.includes("cta") ? " takkr-cta" : ""}`}
-            style={`left:${note.x}px;top:${note.y}px;z-index:${note.z};`}
-            data-x={note.x}
-            data-y={note.y}
-          >
-            {note.tags?.includes("cta") ? (
-              <a href="/~/join" class="takkr-title" style="text-decoration:none;color:inherit;">
-                {note.content}
-              </a>
-            ) : (
-              <div class="takkr-title">{note.content}</div>
-            )}
-          </div>
-        ))}
-      </div>
+      </section>
     </div>
-
-    {/* Zoom indicator */}
-    <div
-      id="zoom-indicator"
-      class="fixed bottom-6 left-6 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none z-10"
-    >
-      100%
-    </div>
-  </div>
-);
+  );
+};
 
 // Help page
 export const Help = () => (

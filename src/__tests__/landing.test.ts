@@ -31,7 +31,7 @@ describe("landing", () => {
   test("ensureLandingBoard seeds notes", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    expect(notes.length).toBeGreaterThanOrEqual(15);
+    expect(notes.length).toBeGreaterThanOrEqual(13);
   });
 
   test("seeded notes have content", () => {
@@ -85,7 +85,7 @@ describe("landing", () => {
     const data = getLandingData();
     expect(data).not.toBeNull();
     expect(data!.board.slug).toBe("__landing");
-    expect(data!.notes.length).toBeGreaterThanOrEqual(15);
+    expect(data!.notes.length).toBeGreaterThanOrEqual(13);
   });
 
   test("__landing slug is reserved", () => {

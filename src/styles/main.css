@@ -235,12 +235,28 @@
     transform: rotate(0deg) scale(1.06) !important;
   }
 
-  /* Landing page read-only cards — no grab cursor */
-  #landing .takkr {
-    cursor: default;
+  /* Landing page feature notes */
+  .landing-note {
+    position: absolute;
+    cursor: grab;
+    height: auto;
+    min-height: 180px;
+    width: 240px;
   }
-  #landing .takkr-cta {
-    cursor: pointer;
+  .landing-note.dragging {
+    cursor: grabbing;
+    z-index: 9999 !important;
+  }
+  .landing-note-desc {
+    @apply px-4 pb-3 text-xs text-black/50 text-center leading-snug;
+    font-family: var(--font-sans);
+  }
+
+  /* Grid bg for features area */
+  #landing-features {
+    background-image: radial-gradient(circle, oklch(0.8 0 0) 1px, transparent 1px);
+    background-size: 24px 24px;
+    border-radius: 12px;
   }
 
   .takkr-attachments {
