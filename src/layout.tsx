@@ -46,10 +46,7 @@ export const Layout = (props: Page) => (
 
       {props.canonical && <link rel="canonical" href={props.canonical} />}
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Cookie&family=Gochi+Hand&family=Grand+Hotel&family=Handlee&family=Indie+Flower&family=Kalam:wght@400;700&family=Inter:wght@400;500;600&family=Parisienne&family=Sofia&display=swap"
-        rel="stylesheet"
-      />
+      <link rel="stylesheet" href="/www/fonts.css" />
       <link rel="stylesheet" href="/www/styles.css" />
       <script
         defer

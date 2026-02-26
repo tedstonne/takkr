@@ -13,9 +13,14 @@ export default defineConfig({
     copyPublicDir: false,
     emptyOutDir: false,
     cssCodeSplit: false,
+    assetsInlineLimit: 0, // Never inline fonts as base64
     rollupOptions: {
       output: {
-        assetFileNames: "styles.css",
+        assetFileNames: (info) => {
+          if (info.name?.endsWith(".css")) return "styles.css";
+          if (info.name?.match(/\.(woff2?|ttf|eot)$/)) return "fonts/[name][extname]";
+          return "[name][extname]";
+        },
       },
     },
   },
