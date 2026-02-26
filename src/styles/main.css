@@ -252,6 +252,10 @@
     border-radius: 16px;
     padding: 16px;
   }
+  /* Carousel board inherits data-background styles, override dotted default */
+  .landing-board[data-background] {
+    background-image: none;
+  }
 
   .takkr-attachments {
     @apply absolute bottom-2 right-3 flex items-center gap-1 text-black/40;

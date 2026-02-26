@@ -860,16 +860,20 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
       class="landing-board relative"
       style="min-height: 500px;"
     >
-      {gridProps.notes.map((note, i) => (
-        <div
-          key={note.id}
-          class={`takkr takkr-${note.color} landing-note`}
-          data-id={note.id}
-          data-idx={i}
-        >
-          <div class="takkr-title">{note.content}</div>
-        </div>
-      ))}
+      {gridProps.notes.map((note, i) => {
+        const grp = (note.tags || "").split(",").find(t => t.startsWith("grp-")) || "";
+        return (
+          <div
+            key={note.id}
+            class={`takkr takkr-${note.color} landing-note`}
+            data-id={note.id}
+            data-idx={i}
+            data-grp={grp}
+          >
+            <div class="takkr-title">{note.content}</div>
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -924,6 +928,48 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
           </a>
         </div>
         <p class="mt-4 text-xs text-slate-400">No credit card. No setup. Just go.</p>
+      </section>
+
+      {/* ── Theme Carousel ── */}
+      <section class="relative mx-auto max-w-5xl px-6 pt-4 pb-12">
+        <p class="text-center text-sm text-slate-400 mb-4">
+          pick a vibe — backgrounds, fonts, and more
+        </p>
+        <div class="relative">
+          <button
+            id="carousel-prev"
+            class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
+            aria-label="Previous theme"
+          >
+            ←
+          </button>
+          <div
+            id="carousel-board"
+            class="landing-board relative rounded-2xl overflow-hidden transition-all duration-500"
+            data-background="grid"
+            style="min-height: 340px;"
+          >
+            {/* Demo notes for carousel — use first 6 feature notes */}
+            {features.slice(0, 6).map((note, i) => (
+              <div
+                key={`demo-${note.id}`}
+                class={`takkr takkr-${note.color} landing-note carousel-note`}
+                data-id={`demo-${note.id}`}
+                data-idx={i}
+              >
+                <div class="takkr-title">{note.content}</div>
+              </div>
+            ))}
+          </div>
+          <button
+            id="carousel-next"
+            class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
+            aria-label="Next theme"
+          >
+            →
+          </button>
+        </div>
+        <div id="carousel-dots" class="flex justify-center gap-2 mt-4"></div>
       </section>
 
       {/* ── Features ── */}
