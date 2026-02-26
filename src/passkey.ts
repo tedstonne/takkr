@@ -59,6 +59,12 @@ export const register = async (
     credential_id: credential.id,
     public_key: Buffer.from(credential.publicKey),
     counter: credential.counter,
+    font: "caveat",
+    preferred_color: "yellow",
+    preferred_background: "grid",
+    display_name: "",
+    email: "",
+    avatar: "",
   };
 
   return user;

@@ -3,11 +3,11 @@ import * as events from "@/events";
 
 describe("events", () => {
   test("Event enums have correct values", () => {
-    expect(events.Event.Note.Created).toBe("note:created");
-    expect(events.Event.Note.Updated).toBe("note:updated");
-    expect(events.Event.Note.Deleted).toBe("note:deleted");
-    expect(events.Event.Member.Joined).toBe("member:joined");
-    expect(events.Event.Member.Left).toBe("member:left");
+    expect(events.Event.Note.Created as string).toBe("note:created");
+    expect(events.Event.Note.Updated as string).toBe("note:updated");
+    expect(events.Event.Note.Deleted as string).toBe("note:deleted");
+    expect(events.Event.Member.Joined as string).toBe("member:joined");
+    expect(events.Event.Member.Left as string).toBe("member:left");
   });
 
   test("names returns comma-separated event names", () => {

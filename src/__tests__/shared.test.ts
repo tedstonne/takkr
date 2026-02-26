@@ -25,7 +25,7 @@ describe("shared config", () => {
 
   test("DARK_BACKGROUNDS are subset of BACKGROUNDS", () => {
     for (const bg of DARK_BACKGROUNDS) {
-      expect(BACKGROUNDS).toContain(bg);
+      expect([...BACKGROUNDS] as string[]).toContain(bg);
     }
   });
 

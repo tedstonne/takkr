@@ -192,6 +192,7 @@ const setBgRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setBgRoute, async (c) => {
   const board: Board.Record = c.get("board");
   const body = await c.req.parseBody();
@@ -236,6 +237,7 @@ const setViewportRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setViewportRoute, async (c) => {
   const username: string = c.get("username");
   const board: Board.Record = c.get("board");
@@ -489,6 +491,7 @@ const bringToFrontRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(bringToFrontRoute, async (c) => {
   const username: string = c.get("username");
   const noteId = Number(c.req.param("id"));
@@ -518,6 +521,7 @@ const uploadAttachmentRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(uploadAttachmentRoute, async (c) => {
   const username: string = c.get("username");
   const noteId = Number(c.req.param("id"));
@@ -610,6 +614,7 @@ const deleteAttachmentRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(deleteAttachmentRoute, async (c) => {
   const username: string = c.get("username");
   const attId = Number(c.req.param("id"));
@@ -679,6 +684,7 @@ const setDisplayNameRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setDisplayNameRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();
@@ -700,6 +706,7 @@ const setEmailRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setEmailRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();
@@ -721,6 +728,7 @@ const setFontRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setFontRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();
@@ -742,6 +750,7 @@ const setColorRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setColorRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();
@@ -762,6 +771,7 @@ const setBgPrefRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(setBgPrefRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();
@@ -782,6 +792,7 @@ const uploadAvatarRoute = createRoute({
   },
 });
 
+// @ts-expect-error — Hono OpenAPI handler return type
 api.openapi(uploadAvatarRoute, async (c) => {
   const username: string = c.get("username");
   const body = await c.req.parseBody();

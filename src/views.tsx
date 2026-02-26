@@ -831,7 +831,7 @@ export const BoardView = (props: {
           class="palette-input"
           placeholder="Search notes, boards, commands..."
           autocomplete="off"
-          spellcheck="false"
+          spellcheck={false}
         />
         <div id="palette-results" class="palette-results" />
       </div>
