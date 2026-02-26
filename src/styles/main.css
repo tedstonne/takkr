@@ -213,6 +213,36 @@
     height: 100%;
   }
 
+  /* Hero-sized landing card */
+  .takkr-hero {
+    width: 320px;
+    height: 220px;
+  }
+  .takkr-hero .takkr-title {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  /* CTA card */
+  .takkr-cta {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .takkr-cta:hover {
+    @apply shadow-2xl;
+    transform: rotate(0deg) scale(1.06) !important;
+  }
+
+  /* Landing page read-only cards — no grab cursor */
+  #landing .takkr {
+    cursor: default;
+  }
+  #landing .takkr-cta {
+    cursor: pointer;
+  }
+
   .takkr-attachments {
     @apply absolute bottom-2 right-3 flex items-center gap-1 text-black/40;
     font-size: 0.75rem;

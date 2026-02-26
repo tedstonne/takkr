@@ -48,7 +48,7 @@ export const Login = () => (
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="w-full max-w-sm space-y-8 text-center">
       <div>
-        <h1 class="text-4xl font-bold text-slate-900">takkr</h1>
+        <a href="/" class="text-4xl font-bold text-slate-900 hover:text-slate-700 transition-colors no-underline">takkr</a>
         <p class="mt-2 text-slate-600">
           Collaborative sticky notes for your ideas
         </p>
@@ -102,7 +102,7 @@ export const Join = () => (
         class="text-sm text-red-600 text-center min-h-[1.25rem]"
       />
       <p class="text-center text-sm text-slate-600">
-        <a href="/" class="text-slate-900 hover:underline">
+        <a href="/~/login" class="text-slate-900 hover:underline">
           Already have an account? Sign in
         </a>
       </p>
@@ -846,6 +846,98 @@ export const BoardView = (props: {
     />
   </div>
 );
+
+// Landing page — the board IS the pitch
+export const Landing = () => {
+  const notes = [
+    // Hero cluster (center-ish)
+    { id: "h1", content: "takkr", color: "yellow", x: 520, y: 80, z: 10, size: "large" },
+    { id: "h2", content: "Collaborative sticky notes for your ideas", color: "pink", x: 480, y: 300, z: 9 },
+
+    // Features (right side)
+    { id: "f0", content: "✨ Features", color: "orange", x: 900, y: 60, z: 8 },
+    { id: "f1", content: "Drag & drop everything", color: "yellow", x: 870, y: 240, z: 7 },
+    { id: "f2", content: "Real-time collaboration", color: "green", x: 1140, y: 200, z: 6 },
+    { id: "f3", content: "Vim keyboard shortcuts", color: "blue", x: 880, y: 420, z: 5 },
+    { id: "f4", content: "Command palette (⌘P)", color: "pink", x: 1150, y: 380, z: 4 },
+    { id: "f5", content: "Zoom in & out", color: "yellow", x: 1130, y: 560, z: 3 },
+    { id: "f6", content: "File attachments", color: "green", x: 890, y: 590, z: 2 },
+    { id: "f7", content: "Checklists & tags", color: "orange", x: 1160, y: 730, z: 1 },
+
+    // How it works (left side)
+    { id: "w0", content: "🚀 How it works", color: "blue", x: 60, y: 80, z: 8 },
+    { id: "w1", content: "Go to /anything to claim a board", color: "green", x: 40, y: 260, z: 7 },
+    { id: "w2", content: "Invite teammates by username", color: "yellow", x: 70, y: 440, z: 6 },
+    { id: "w3", content: "Passkey login — no passwords ever", color: "pink", x: 50, y: 620, z: 5 },
+
+    // CTA (bottom center)
+    { id: "c1", content: "Free & open source", color: "green", x: 440, y: 540, z: 8 },
+  ];
+
+  return (
+    <div class="h-full overflow-hidden">
+      {/* Floating header */}
+      <div class="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
+        <div class="flex items-center gap-2">
+          <span class="text-xl font-bold text-slate-900">takkr</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a
+            href="/~/join"
+            class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+          >
+            Get Started
+          </a>
+          <a
+            href="/~/login"
+            class="rounded-md border border-slate-300 bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white transition-colors"
+            id="landing-signin"
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
+
+      {/* The board */}
+      <div
+        class="relative h-full overflow-auto"
+        id="canvas"
+        data-background="grid"
+      >
+        <div id="notes" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
+          {notes.map((note) => (
+            <div
+              key={note.id}
+              class={`takkr takkr-${note.color}${note.size === "large" ? " takkr-hero" : ""}`}
+              style={`left:${note.x}px;top:${note.y}px;z-index:${note.z};`}
+              data-x={note.x}
+              data-y={note.y}
+            >
+              <div class="takkr-title">{note.content}</div>
+            </div>
+          ))}
+
+          {/* CTA card is a link */}
+          <a
+            href="/~/join"
+            class="takkr takkr-orange takkr-hero takkr-cta"
+            style="left:500px;top:720px;z-index:10;text-decoration:none;"
+          >
+            <div class="takkr-title">Try it now →</div>
+          </a>
+        </div>
+      </div>
+
+      {/* Zoom indicator */}
+      <div
+        id="zoom-indicator"
+        class="fixed bottom-6 left-6 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none z-10"
+      >
+        100%
+      </div>
+    </div>
+  );
+};
 
 // Help page
 export const Help = () => (

@@ -7,7 +7,7 @@ import * as Member from "@/member";
 import { secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
-import { BoardView, Help, Home, Join, Login } from "@/views";
+import { BoardView, Help, Home, Join, Landing, Login } from "@/views";
 
 const resolveFont = (c: any, username?: string): string => {
   // URL param override (backdoor)
@@ -37,8 +37,8 @@ pages.get("/", secure.optional, (c) => {
 
   if (!username) {
     return c.html(
-      <Layout title="Welcome" id="login" scripts={["/www/auth.js"]}>
-        <Login />
+      <Layout title="Collaborative sticky notes" id="landing" scripts={["/www/landing.js"]}>
+        <Landing />
       </Layout>,
     );
   }
@@ -48,6 +48,15 @@ pages.get("/", secure.optional, (c) => {
   return c.html(
     <Layout title="Home" id="home" scripts={["/www/home.js"]}>
       <Home username={username} boards={boards} />
+    </Layout>,
+  );
+});
+
+// Sign in page
+pages.get("/~/login", (c) => {
+  return c.html(
+    <Layout title="Sign In" id="login" scripts={["/www/auth.js"]}>
+      <Login />
     </Layout>,
   );
 });
