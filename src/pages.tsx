@@ -93,6 +93,7 @@ pages.get(
       title: "takkr API Reference",
       description: "REST API documentation for takkr — collaborative sticky note boards.",
     },
+    customCss: ".scalar-app footer { display: none; }",
   }),
 );
 
