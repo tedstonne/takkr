@@ -355,23 +355,9 @@ const zoom = {
           body: `assigned_to=${encodeURIComponent(assignTo)}`,
         });
         this.renderAssign();
-        // Update the card's assignee badge
+        // Update the card's data attribute
         const noteEl = document.getElementById(`note-${this.noteId}`);
-        if (noteEl) {
-          noteEl.dataset.assigned = assignTo;
-          let badge = noteEl.querySelector(".takkr-assignee");
-          if (assignTo) {
-            if (!badge) {
-              badge = document.createElement("div");
-              badge.className = "takkr-assignee";
-              noteEl.querySelector(".takkr-title").after(badge);
-            }
-            badge.textContent = assignTo.slice(0, 2).toUpperCase();
-            badge.title = `Assigned to ${assignTo}`;
-          } else if (badge) {
-            badge.remove();
-          }
-        }
+        if (noteEl) noteEl.dataset.assigned = assignTo;
       });
     });
   }
@@ -1238,14 +1224,50 @@ window.board = () => ({
     const q = query.trim();
     const items = [];
 
+    // Check for @username filter
+    const atMatch = q.match(/^@(\S*)$/);
+    if (atMatch) {
+      const userQuery = atMatch[1].toLowerCase();
+      const canvas = document.getElementById("canvas");
+      let members = [];
+      try { members = JSON.parse(canvas?.dataset.members || "[]"); } catch (_) {}
+      const matchedMembers = members.filter(m => m.toLowerCase().includes(userQuery));
+
+      for (const username of matchedMembers) {
+        items.push({
+          type: "command",
+          icon: "👤",
+          label: `Show ${username}'s cards`,
+          hint: `@${username}`,
+          action: () => { this.closePalette(); this._filterByAssignee(username); },
+        });
+      }
+      if (matchedMembers.length > 0) {
+        items.push({
+          type: "command",
+          icon: "✕",
+          label: "Clear filter",
+          hint: "",
+          action: () => { this.closePalette(); this._filterByAssignee(null); },
+        });
+      }
+
+      this._paletteItems = items;
+      if (this._paletteIndex >= items.length) this._paletteIndex = Math.max(0, items.length - 1);
+      this._renderPaletteItems(items, q);
+      return;
+    }
+
     // Notes on current board
-    const notes = Array.from(document.querySelectorAll(".takkr"));
+    const notes = Array.from(document.querySelectorAll("#notes > .takkr"));
     for (const note of notes) {
       const title = note.querySelector(".takkr-title")?.textContent || "";
       const tags = note.dataset.tags || "";
-      const searchText = `${title} ${tags}`;
+      const assigned = note.dataset.assigned || "";
+      const searchText = `${title} ${tags} ${assigned}`;
       if (this._fuzzyMatch(searchText, q)) {
-        items.push({ type: "note", icon: "📝", label: title, hint: tags ? `#${tags.split(",")[0]}` : "", el: note });
+        const hint = assigned ? `@${assigned}` : (tags ? `#${tags.split(",")[0]}` : "");
+        items.push({ type: "note", icon: "📝", label: title, hint, el: note });
       }
     }
 
@@ -1281,8 +1303,13 @@ window.board = () => ({
 
     this._paletteItems = items;
     if (this._paletteIndex >= items.length) this._paletteIndex = Math.max(0, items.length - 1);
+    this._renderPaletteItems(items, q);
+  },
 
-    // Render
+  _renderPaletteItems(items, q) {
+    const results = document.getElementById("palette-results");
+    if (!results) return;
+
     let html = "";
     let lastType = "";
     const sectionLabels = { note: "Notes", board: "Boards", command: "Commands" };
@@ -1346,6 +1373,25 @@ window.board = () => ({
     } else if (item.action) {
       item.action();
     }
+  },
+
+  // --- Filter by assignee ---
+  _activeAssigneeFilter: null,
+
+  _filterByAssignee(username) {
+    this._activeAssigneeFilter = username;
+    const notes = document.querySelectorAll("#notes > .takkr");
+    if (!username) {
+      // Clear filter — restore all
+      notes.forEach(n => { n.style.opacity = ""; n.style.transition = "opacity 0.3s ease"; });
+      return;
+    }
+    notes.forEach(n => {
+      const assigned = n.dataset.assigned || "";
+      const match = assigned === username;
+      n.style.transition = "opacity 0.3s ease";
+      n.style.opacity = match ? "1" : "0.15";
+    });
   },
 
   // --- Actions ---
@@ -1468,7 +1514,8 @@ window.board = () => ({
 
       case "?": e.preventDefault(); document.getElementById("help-modal")?.showModal(); break;
       case "Escape":
-        if (this.selected) { this.selected.classList.remove("selected"); this.selected = null; }
+        if (this._activeAssigneeFilter) { this._filterByAssignee(null); }
+        else if (this.selected) { this.selected.classList.remove("selected"); this.selected = null; }
         break;
       case "Tab": e.preventDefault(); this.selectNext(e.shiftKey ? -1 : 1); break;
       case "Enter": e.preventDefault(); if (this.selected) zoom.open(this.selected); break;

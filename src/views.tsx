@@ -194,11 +194,6 @@ export const Takkr = (props: {
       : {})}
   >
     <div class="takkr-title">{props.note.content}</div>
-    {props.note.assigned_to && (
-      <div class="takkr-assignee" title={`Assigned to ${props.note.assigned_to}`}>
-        {props.note.assigned_to.slice(0, 2).toUpperCase()}
-      </div>
-    )}
     {(props.attachmentCount ?? 0) > 0 && (
       <div class="takkr-attachments">
         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
