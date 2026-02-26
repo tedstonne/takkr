@@ -7,8 +7,9 @@ import * as Member from "@/member";
 import { secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
+import { Scalar } from "@scalar/hono-api-reference";
 import { getLandingData } from "@/landing";
-import { ApiDocs, BoardView, Help, Home, Join, Landing, Login } from "@/views";
+import { BoardView, Help, Home, Join, Landing, Login } from "@/views";
 
 const resolveFont = (c: any, username?: string): string => {
   // URL param override (backdoor)
@@ -80,18 +81,20 @@ pages.get("/~/join", (c) => {
   );
 });
 
-// API docs page
-pages.get("/~/docs", (c) => {
-  return c.html(
-    <Layout
-      title="API Reference"
-      id="docs"
-      description="takkr API documentation. REST endpoints for boards, notes, attachments, user preferences, and real-time events."
-    >
-      <ApiDocs />
-    </Layout>,
-  );
-});
+// API docs — Scalar renders from auto-generated OpenAPI spec
+pages.get(
+  "/~/docs",
+  Scalar({
+    url: "/api/openapi.json",
+    pageTitle: "takkr API Reference",
+    theme: "default",
+    layout: "modern",
+    metaData: {
+      title: "takkr API Reference",
+      description: "REST API documentation for takkr — collaborative sticky note boards.",
+    },
+  }),
+);
 
 // Help page
 pages.get("/~/help", (c) => {
