@@ -879,28 +879,30 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
       })}} />
 
       {/* Hero section */}
-      <section class="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
-        <h1 class="text-6xl sm:text-7xl font-bold text-slate-900 tracking-tight font-handwriting">takkr</h1>
-        <p class="mt-4 text-xl sm:text-2xl text-slate-600 max-w-lg">
-          Collaborative sticky notes for your ideas
+      <section class="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
+        <h1 class="text-7xl sm:text-8xl font-bold text-slate-900 tracking-tight font-handwriting">takkr</h1>
+        <p class="mt-6 text-2xl sm:text-4xl font-bold text-slate-800 max-w-2xl leading-tight">
+          Collaborative sticky notes<br />for your ideas
         </p>
-        <p class="mt-2 text-sm text-slate-400">
-          Free &amp; open source. No passwords. Real-time.
+        <p class="mt-4 text-lg text-slate-500 max-w-md">
+          Drag, drop, and organize — together, in real-time.<br />
+          Free &amp; open source. No passwords, ever.
         </p>
-        <div class="mt-8 flex items-center gap-4">
+        <div class="mt-10 flex flex-col sm:flex-row items-center gap-4">
           <a
             href="/~/join"
-            class="rounded-lg bg-slate-900 px-6 py-3 text-base font-medium text-white hover:bg-slate-800 transition-colors shadow-lg"
+            class="rounded-xl bg-slate-900 px-10 py-4 text-lg font-semibold text-white hover:bg-slate-800 transition-colors shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
           >
-            Get Started
+            Start for Free →
           </a>
           <a
             href="/~/login"
-            class="rounded-lg border border-slate-300 px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            class="rounded-xl border-2 border-slate-300 px-10 py-4 text-lg font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
           >
             Sign In
           </a>
         </div>
+        <p class="mt-4 text-xs text-slate-400">No credit card. No setup. Just go.</p>
       </section>
 
       {/* Features section — real draggable notes */}
@@ -922,9 +924,6 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
               data-idx={i}
             >
               <div class="takkr-title">{note.content}</div>
-              {note.description && (
-                <div class="landing-note-desc">{note.description}</div>
-              )}
             </div>
           ))}
         </div>

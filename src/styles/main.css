@@ -235,21 +235,14 @@
     transform: rotate(0deg) scale(1.06) !important;
   }
 
-  /* Landing page feature notes */
+  /* Landing page feature notes — same as app cards */
   .landing-note {
     position: absolute;
     cursor: grab;
-    height: auto;
-    min-height: 180px;
-    width: 240px;
   }
   .landing-note.dragging {
     cursor: grabbing;
     z-index: 9999 !important;
-  }
-  .landing-note-desc {
-    @apply px-4 pb-3 text-xs text-black/50 text-center leading-snug;
-    font-family: var(--font-sans);
   }
 
   /* Grid bg for features area */
