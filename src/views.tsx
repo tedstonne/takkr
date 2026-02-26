@@ -851,6 +851,27 @@ export const BoardView = (props: {
 // Landing page — hero + draggable feature notes from DB
 export const Landing = (props: { notes: Note.Record[]; background?: string }) => {
   const features = props.notes.filter(n => n.tags?.includes("feature"));
+  const usecases = props.notes.filter(n => n.tags?.includes("usecase"));
+  const philosophy = props.notes.filter(n => n.tags?.includes("philosophy"));
+
+  const NoteGrid = (gridProps: { notes: Note.Record[]; id: string }) => (
+    <div
+      id={gridProps.id}
+      class="landing-board relative"
+      style="min-height: 500px;"
+    >
+      {gridProps.notes.map((note, i) => (
+        <div
+          key={note.id}
+          class={`takkr takkr-${note.color} landing-note`}
+          data-id={note.id}
+          data-idx={i}
+        >
+          <div class="takkr-title">{note.content}</div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div class="h-full overflow-y-auto overflow-x-hidden" id="landing-scroll">
@@ -858,15 +879,15 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
       <article class="sr-only">
         <h1>takkr — Collaborative Sticky Notes for Your Ideas</h1>
         <p>Free, real-time collaborative sticky note boards. Organize ideas visually with your team.</p>
-        {props.notes.map((note) => (
-          <section key={note.id}>
-            <h2>{note.content}</h2>
-            {note.description && <p>{note.description}</p>}
-          </section>
-        ))}
+        <h2>Features</h2>
+        {features.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
+        <h2>Use Cases</h2>
+        {usecases.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
+        <h2>Philosophy</h2>
+        {philosophy.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
       </article>
 
-      {/* JSON-LD structured data */}
+      {/* JSON-LD */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -875,10 +896,10 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         "applicationCategory": "ProductivityApplication",
         "operatingSystem": "Web",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "featureList": features.map(n => n.content),
+        "featureList": [...features, ...usecases].map(n => n.content),
       })}} />
 
-      {/* Hero section */}
+      {/* ── Hero ── */}
       <section class="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
         <h1 class="text-7xl sm:text-8xl font-bold text-slate-900 tracking-tight font-handwriting">takkr</h1>
         <p class="mt-6 text-2xl sm:text-4xl font-bold text-slate-800 max-w-2xl leading-tight">
@@ -891,7 +912,7 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         <div class="mt-10 flex flex-col sm:flex-row items-center gap-4">
           <a
             href="/~/join"
-            class="rounded-xl bg-slate-900 px-10 py-4 text-lg font-semibold text-white hover:bg-slate-800 transition-colors shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+            class="rounded-xl bg-slate-900 px-10 py-4 text-lg font-semibold text-white hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
           >
             Start for Free →
           </a>
@@ -905,40 +926,44 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         <p class="mt-4 text-xs text-slate-400">No credit card. No setup. Just go.</p>
       </section>
 
-      {/* Features section — real draggable notes */}
-      <section class="relative mx-auto max-w-5xl px-6 pb-24" data-background="grid">
-        <p class="text-center text-sm text-slate-400 mb-12">
-          ↓ go ahead, drag them around ↓
+      {/* ── Features ── */}
+      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">What's inside</h2>
+        <p class="text-center text-sm text-slate-400 mb-10">
+          go ahead, drag them around
         </p>
-        <div
-          id="landing-features"
-          class="relative"
-          style="min-height: 700px;"
-          data-background="grid"
-        >
-          {features.map((note, i) => (
-            <div
-              key={note.id}
-              class={`takkr takkr-${note.color} landing-note`}
-              data-id={note.id}
-              data-idx={i}
-            >
-              <div class="takkr-title">{note.content}</div>
-            </div>
-          ))}
-        </div>
+        <NoteGrid notes={features} id="landing-features" />
       </section>
 
-      {/* Bottom CTA */}
+      {/* ── Use cases ── */}
+      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">Use it for anything</h2>
+        <p class="text-center text-sm text-slate-400 mb-10">
+          boards that fit how you work
+        </p>
+        <NoteGrid notes={usecases} id="landing-usecases" />
+      </section>
+
+      {/* ── Philosophy ── */}
+      <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
+        <h2 class="text-center text-3xl font-bold text-slate-900 mb-2">The takkr way</h2>
+        <p class="text-center text-sm text-slate-400 mb-10">
+          minimalist by default, powerful on demand
+        </p>
+        <NoteGrid notes={philosophy} id="landing-philosophy" />
+      </section>
+
+      {/* ── Bottom CTA ── */}
       <section class="py-20 text-center border-t border-slate-100">
-        <h2 class="text-3xl font-bold text-slate-900 font-handwriting">Ready to try?</h2>
-        <p class="mt-3 text-slate-500">Claim a board in seconds. No signup required to start.</p>
+        <h2 class="text-4xl font-bold text-slate-900 font-handwriting">Ready to try?</h2>
+        <p class="mt-3 text-lg text-slate-500">Claim a board in seconds.</p>
         <a
           href="/~/join"
-          class="mt-6 inline-block rounded-lg bg-slate-900 px-8 py-3 text-base font-medium text-white hover:bg-slate-800 transition-colors shadow-lg"
+          class="mt-8 inline-block rounded-xl bg-slate-900 px-10 py-4 text-lg font-semibold text-white hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
         >
-          Create Your Board →
+          Start for Free →
         </a>
+        <p class="mt-3 text-xs text-slate-400">No credit card. No setup. Just go.</p>
       </section>
     </div>
   );

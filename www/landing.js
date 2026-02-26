@@ -1,63 +1,63 @@
 // Landing page — draggable feature notes, no persistence
 
 document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("landing-features");
-  if (!container) return;
-
-  const notes = Array.from(container.querySelectorAll(".landing-note"));
   const CARD_W = 240;
-  const CARD_H = 200;
+  const CARD_H = 180;
 
-  // Organic layout — scatter notes in a loose grid with random offsets and rotations
-  const cols = Math.max(2, Math.min(4, Math.floor(container.clientWidth / (CARD_W + 40))));
-  const gapX = (container.clientWidth - cols * CARD_W) / (cols + 1);
-  const gapY = 30;
+  // Layout notes organically inside a container
+  function layoutBoard(container) {
+    const notes = Array.from(container.querySelectorAll(".landing-note"));
+    if (!notes.length) return;
 
-  notes.forEach((note, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    // Base position in grid
-    const baseX = gapX + col * (CARD_W + gapX);
-    const baseY = row * (CARD_H + gapY);
-    // Random offset for organic feel
-    const ox = (Math.random() - 0.5) * 40;
-    const oy = (Math.random() - 0.5) * 30;
-    // Random rotation
-    const rot = (Math.random() - 0.5) * 5; // -2.5 to +2.5 degrees
+    const cw = container.clientWidth;
+    const cols = Math.max(2, Math.min(4, Math.floor(cw / (CARD_W + 30))));
+    const totalW = cols * CARD_W;
+    const gapX = (cw - totalW) / (cols + 1);
+    const gapY = 25;
 
-    const x = Math.max(0, Math.min(baseX + ox, container.clientWidth - CARD_W));
-    const y = Math.max(0, baseY + oy);
+    notes.forEach((note, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const baseX = gapX + col * (CARD_W + gapX);
+      const baseY = row * (CARD_H + gapY);
+      // Random jitter
+      const ox = (Math.random() - 0.5) * 50;
+      const oy = (Math.random() - 0.5) * 35;
+      const rot = (Math.random() - 0.5) * 7; // ±3.5 degrees
 
-    note.style.left = `${x}px`;
-    note.style.top = `${y}px`;
-    note.style.transform = `rotate(${rot}deg)`;
-    note.dataset.rot = rot;
-    note.dataset.x = x;
-    note.dataset.y = y;
-  });
+      const x = Math.max(0, Math.min(baseX + ox, cw - CARD_W));
+      const y = Math.max(0, baseY + oy);
 
-  // Set container height to fit all notes
-  const maxBottom = notes.reduce((max, n) => {
-    return Math.max(max, parseFloat(n.style.top) + CARD_H + 40);
-  }, 0);
-  container.style.minHeight = `${maxBottom}px`;
+      note.style.left = `${x}px`;
+      note.style.top = `${y}px`;
+      note.style.transform = `rotate(${rot}deg)`;
+      note.dataset.rot = rot;
+    });
 
-  // Drag support (no save)
+    const maxBottom = notes.reduce((max, n) =>
+      Math.max(max, parseFloat(n.style.top) + CARD_H + 30), 0);
+    container.style.minHeight = `${maxBottom}px`;
+  }
+
+  // Layout all boards
+  document.querySelectorAll(".landing-board").forEach(layoutBoard);
+
+  // Drag support (no save) — works across all boards
   let dragging = null;
+  let dragContainer = null;
   let dragOffset = { x: 0, y: 0 };
-  let dragMoved = false;
 
   const onDown = (e) => {
     const note = e.target.closest(".landing-note");
     if (!note) return;
     dragging = note;
-    dragMoved = false;
+    dragContainer = note.closest(".landing-board");
 
     const rect = note.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    dragOffset.x = clientX - rect.left;
-    dragOffset.y = clientY - rect.top;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffset.x = cx - rect.left;
+    dragOffset.y = cy - rect.top;
 
     note.classList.add("dragging");
     note.style.transform = "rotate(0deg) scale(1.05)";
@@ -65,16 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const onMove = (e) => {
-    if (!dragging) return;
-    dragMoved = true;
+    if (!dragging || !dragContainer) return;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    const cr = dragContainer.getBoundingClientRect();
 
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const containerRect = container.getBoundingClientRect();
-
-    let x = clientX - containerRect.left - dragOffset.x;
-    let y = clientY - containerRect.top - dragOffset.y;
-    x = Math.max(0, Math.min(x, container.clientWidth - CARD_W));
+    let x = cx - cr.left - dragOffset.x;
+    let y = cy - cr.top - dragOffset.y;
+    x = Math.max(0, Math.min(x, dragContainer.clientWidth - CARD_W));
     y = Math.max(0, y);
 
     dragging.style.left = `${x}px`;
@@ -88,10 +86,13 @@ document.addEventListener("DOMContentLoaded", () => {
     dragging.classList.remove("dragging");
     dragging.style.transform = `rotate(${rot}deg)`;
     dragging = null;
+    dragContainer = null;
   };
 
-  container.addEventListener("mousedown", onDown);
-  container.addEventListener("touchstart", onDown, { passive: false });
+  document.querySelectorAll(".landing-board").forEach((board) => {
+    board.addEventListener("mousedown", onDown);
+    board.addEventListener("touchstart", onDown, { passive: false });
+  });
   window.addEventListener("mousemove", onMove);
   window.addEventListener("touchmove", onMove, { passive: false });
   window.addEventListener("mouseup", onUp);

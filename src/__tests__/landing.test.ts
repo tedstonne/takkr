@@ -59,11 +59,18 @@ describe("landing", () => {
     expect(heroes.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("seeded notes include cta tag", () => {
+  test("seeded notes include philosophy tag", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const ctas = notes.filter(n => n.tags?.includes("cta"));
-    expect(ctas.length).toBeGreaterThanOrEqual(1);
+    const phil = notes.filter(n => n.tags?.includes("philosophy"));
+    expect(phil.length).toBeGreaterThanOrEqual(1);
+  });
+
+  test("seeded notes include usecase tag", () => {
+    const board = Board.bySlug("__landing")!;
+    const notes = Note.forBoard(board.id);
+    const usecases = notes.filter(n => n.tags?.includes("usecase"));
+    expect(usecases.length).toBeGreaterThanOrEqual(1);
   });
 
   test("seeded notes have descriptions on feature cards", () => {

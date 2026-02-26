@@ -15,103 +15,51 @@ const SEED_NOTES: Array<{
   tags?: string;
   description?: string;
 }> = [
-  // Hero (filtered out of features grid, used for SEO)
-  { content: "takkr", color: "yellow", x: 520, y: 80, tags: "hero" },
-  {
-    content: "Collaborative sticky notes for your ideas",
-    color: "pink",
-    x: 480,
-    y: 300,
-    tags: "hero",
-    description:
-      "Free, real-time collaborative sticky note boards. Organize ideas visually with your team.",
-  },
+  // Hero (SEO only, filtered from display)
+  { content: "takkr", color: "yellow", x: 0, y: 0, tags: "hero",
+    description: "Free, real-time collaborative sticky note boards. Organize ideas visually with your team." },
 
-  // Features
-  {
-    content: "Drag & drop everything",
-    color: "yellow",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Move sticky notes anywhere on an infinite canvas.",
-  },
-  {
-    content: "Real-time collaboration",
-    color: "green",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Invite teammates and see changes as they happen via SSE.",
-  },
-  {
-    content: "Vim keyboard shortcuts",
-    color: "blue",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Navigate with h/j/k/l, delete with x, duplicate with d, cycle colors with c.",
-  },
-  {
-    content: "Command palette (⌘P)",
-    color: "pink",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Search notes, jump between boards, and run commands from one input.",
-  },
-  {
-    content: "Zoom in & out",
-    color: "yellow",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Cmd+/- or pinch to zoom. Viewport state persists per user per board.",
-  },
-  {
-    content: "File attachments",
-    color: "green",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Drag files onto any note. Up to 5MB per attachment.",
-  },
-  {
-    content: "Checklists & tags",
-    color: "orange",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Add checklists and tags to organize notes within a board.",
-  },
-  {
-    content: "Go to /anything to claim a board",
-    color: "green",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Just type a URL like /my-project. First visitor claims it as their board.",
-  },
-  {
-    content: "Invite teammates by username",
-    color: "yellow",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Share your board by inviting collaborators. They can add and edit notes in real time.",
-  },
-  {
-    content: "Passkey login — no passwords",
-    color: "pink",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "Sign in with biometrics or security keys. No passwords to remember or leak.",
-  },
-  {
-    content: "Free & open source",
-    color: "orange",
-    x: 0, y: 0,
-    tags: "feature",
-    description: "takkr is free to use. No credit card required.",
-  },
-  {
-    content: "Try it now →",
-    color: "orange",
-    x: 500,
-    y: 720,
-    tags: "hero,cta",
-  },
+  // ── Features (the how) ──
+  { content: "Drag & drop everything", color: "yellow", x: 0, y: 0, tags: "feature",
+    description: "Move sticky notes anywhere on an infinite canvas." },
+  { content: "Real-time collaboration", color: "green", x: 0, y: 0, tags: "feature",
+    description: "Invite teammates and see changes as they happen." },
+  { content: "Command palette (⌘P)", color: "pink", x: 0, y: 0, tags: "feature",
+    description: "Search notes, jump between boards, and run commands from one input." },
+  { content: "Vim keyboard shortcuts", color: "blue", x: 0, y: 0, tags: "feature",
+    description: "h/j/k/l to navigate, x to delete, d to duplicate, c to cycle colors." },
+  { content: "Zoom & pan", color: "yellow", x: 0, y: 0, tags: "feature",
+    description: "Pinch or Cmd+/- to zoom. Your viewport is saved per board." },
+  { content: "File attachments", color: "green", x: 0, y: 0, tags: "feature",
+    description: "Drag files onto any note. Images, PDFs, anything up to 5MB." },
+  { content: "Checklists & tags", color: "orange", x: 0, y: 0, tags: "feature",
+    description: "Add checklists and tags to organize notes within a board." },
+  { content: "Passkey login", color: "pink", x: 0, y: 0, tags: "feature",
+    description: "No passwords. Ever. Sign in with biometrics or a security key." },
+
+  // ── Use cases (the why) ──
+  { content: "Kanban boards", color: "blue", x: 0, y: 0, tags: "usecase",
+    description: "Track work across columns. To do, doing, done — or whatever you want." },
+  { content: "Project tracking", color: "green", x: 0, y: 0, tags: "usecase",
+    description: "One board per project. See everything at a glance." },
+  { content: "Brainstorming", color: "yellow", x: 0, y: 0, tags: "usecase",
+    description: "Throw ideas on the wall. Rearrange. Cluster. Think out loud." },
+  { content: "Team standups", color: "pink", x: 0, y: 0, tags: "usecase",
+    description: "Each person gets a note. Yesterday, today, blockers. Done in 5 minutes." },
+  { content: "Todo lists", color: "orange", x: 0, y: 0, tags: "usecase",
+    description: "Quick personal boards. Checklists on each card. Check off and move on." },
+  { content: "Design reviews", color: "blue", x: 0, y: 0, tags: "usecase",
+    description: "Attach screenshots. Leave feedback on cards. Visual and collaborative." },
+
+  // ── Philosophy (the vibe) ──
+  { content: "Gets out of your way", color: "green", x: 0, y: 0, tags: "philosophy",
+    description: "No onboarding. No tutorials. No 47 settings to configure. Just start." },
+  { content: "Power when you need it", color: "yellow", x: 0, y: 0, tags: "philosophy",
+    description: "Vim keys, command palette, zoom — there when you want them, invisible when you don't." },
+  { content: "No bloat", color: "pink", x: 0, y: 0, tags: "philosophy",
+    description: "No Gantt charts. No resource leveling. No enterprise pricing page." },
+  { content: "Free & open source", color: "orange", x: 0, y: 0, tags: "philosophy",
+    description: "No credit card. No trial. No catch." },
 ];
 
 /**

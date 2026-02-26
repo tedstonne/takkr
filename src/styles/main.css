@@ -245,11 +245,12 @@
     z-index: 9999 !important;
   }
 
-  /* Grid bg for features area */
-  #landing-features {
-    background-image: radial-gradient(circle, oklch(0.8 0 0) 1px, transparent 1px);
+  /* Dotted grid bg for landing note areas */
+  .landing-board {
+    background-image: radial-gradient(circle, oklch(0.85 0 0) 1px, transparent 1px);
     background-size: 24px 24px;
-    border-radius: 12px;
+    border-radius: 16px;
+    padding: 16px;
   }
 
   .takkr-attachments {
