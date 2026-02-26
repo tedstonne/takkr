@@ -135,6 +135,25 @@ api.put("/boards/:slug/background", secure, boardAccess, boardOwner, async (c) =
   return c.json({ ok: true, background: bg });
 });
 
+// Viewport state (zoom + scroll per user per board)
+api.get("/boards/:slug/viewport", secure, boardAccess, (c) => {
+  const username: string = c.get("username");
+  const board: Board.Record = c.get("board");
+  const vp = Board.getViewport(username, board.id);
+  return c.json(vp || { zoom: 1, scroll_x: 0, scroll_y: 0 });
+});
+
+api.put("/boards/:slug/viewport", secure, boardAccess, async (c) => {
+  const username: string = c.get("username");
+  const board: Board.Record = c.get("board");
+  const body = await c.req.parseBody();
+  const zoom = Math.max(0.25, Math.min(2, Number(body.zoom) || 1));
+  const scrollX = Number(body.scroll_x) || 0;
+  const scrollY = Number(body.scroll_y) || 0;
+  Board.setViewport(username, board.id, zoom, scrollX, scrollY);
+  return c.json({ ok: true });
+});
+
 // SSE events for board
 api.get("/boards/:slug/events", secure, boardAccess, (c) => {
   const HEARTBEAT_INTERVAL_MS: number = Number(

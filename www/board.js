@@ -582,12 +582,18 @@ const zoom = {
   },
 };
 
+// Zoom levels
+const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
 // Board canvas functionality
 window.board = () => ({
   selected: null,
   dragging: null,
   dragOffset: { x: 0, y: 0 },
   dragMoved: false,
+  zoomLevel: 1,
+  _viewportSaveTimer: null,
+  _zoomIndicatorTimer: null,
 
   init() {
     zoom.init();
@@ -595,6 +601,135 @@ window.board = () => ({
     this.setupFileDrop();
     this.setupButtonHandlers();
     this.setupKeyboard();
+    this.setupZoom();
+    this.loadViewport();
+  },
+
+  // --- Zoom ---
+  setupZoom() {
+    const canvas = document.getElementById("canvas");
+
+    // Pinch-to-zoom (ctrl+wheel = trackpad pinch on most browsers)
+    canvas.addEventListener("wheel", (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (e.deltaY < 0) this.zoomIn(e);
+        else this.zoomOut(e);
+      }
+    }, { passive: false });
+  },
+
+  _applyZoom(oldZoom, pivotClientX, pivotClientY) {
+    const canvas = document.getElementById("canvas");
+    const notes = document.getElementById("notes");
+    if (!canvas || !notes) return;
+
+    const newZoom = this.zoomLevel;
+    notes.style.transform = `scale(${newZoom})`;
+    notes.style.transformOrigin = "0 0";
+
+    // Adjust scroll to keep pivot point stable
+    if (pivotClientX != null && oldZoom !== newZoom) {
+      const rect = canvas.getBoundingClientRect();
+      const px = (canvas.scrollLeft + pivotClientX - rect.left) / oldZoom;
+      const py = (canvas.scrollTop + pivotClientY - rect.top) / oldZoom;
+      canvas.scrollLeft = px * newZoom - (pivotClientX - rect.left);
+      canvas.scrollTop = py * newZoom - (pivotClientY - rect.top);
+    }
+
+    this.showZoomIndicator();
+    this.debounceSaveViewport();
+  },
+
+  zoomIn(e) {
+    const old = this.zoomLevel;
+    const idx = ZOOM_LEVELS.indexOf(this.zoomLevel);
+    if (idx < ZOOM_LEVELS.length - 1) {
+      this.zoomLevel = ZOOM_LEVELS[idx + 1];
+    } else if (idx === -1) {
+      // find next level above current
+      this.zoomLevel = ZOOM_LEVELS.find(z => z > old) || ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+    }
+    const cx = e ? e.clientX : window.innerWidth / 2;
+    const cy = e ? e.clientY : window.innerHeight / 2;
+    this._applyZoom(old, cx, cy);
+  },
+
+  zoomOut(e) {
+    const old = this.zoomLevel;
+    const idx = ZOOM_LEVELS.indexOf(this.zoomLevel);
+    if (idx > 0) {
+      this.zoomLevel = ZOOM_LEVELS[idx - 1];
+    } else if (idx === -1) {
+      this.zoomLevel = [...ZOOM_LEVELS].reverse().find(z => z < old) || ZOOM_LEVELS[0];
+    }
+    const cx = e ? e.clientX : window.innerWidth / 2;
+    const cy = e ? e.clientY : window.innerHeight / 2;
+    this._applyZoom(old, cx, cy);
+  },
+
+  zoomReset() {
+    const old = this.zoomLevel;
+    this.zoomLevel = 1;
+    this._applyZoom(old, window.innerWidth / 2, window.innerHeight / 2);
+  },
+
+  showZoomIndicator() {
+    const el = document.getElementById("zoom-indicator");
+    if (!el) return;
+    el.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+    el.style.opacity = "1";
+    clearTimeout(this._zoomIndicatorTimer);
+    this._zoomIndicatorTimer = setTimeout(() => { el.style.opacity = "0"; }, 2000);
+  },
+
+  // --- Viewport persistence ---
+  _boardSlug() {
+    return window.location.pathname.slice(1);
+  },
+
+  debounceSaveViewport() {
+    clearTimeout(this._viewportSaveTimer);
+    this._viewportSaveTimer = setTimeout(() => this.saveViewport(), 1000);
+  },
+
+  saveViewport() {
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
+    const slug = this._boardSlug();
+    fetch(`/api/boards/${slug}/viewport`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `zoom=${this.zoomLevel}&scroll_x=${canvas.scrollLeft}&scroll_y=${canvas.scrollTop}`,
+    });
+  },
+
+  async loadViewport() {
+    const slug = this._boardSlug();
+    try {
+      const res = await fetch(`/api/boards/${slug}/viewport`);
+      if (!res.ok) return;
+      const vp = await res.json();
+      if (vp.zoom && vp.zoom !== 1) {
+        this.zoomLevel = vp.zoom;
+        const notes = document.getElementById("notes");
+        if (notes) {
+          notes.style.transform = `scale(${this.zoomLevel})`;
+          notes.style.transformOrigin = "0 0";
+        }
+      }
+      const canvas = document.getElementById("canvas");
+      if (canvas && (vp.scroll_x || vp.scroll_y)) {
+        canvas.scrollLeft = vp.scroll_x;
+        canvas.scrollTop = vp.scroll_y;
+      }
+    } catch (_) {}
+
+    // Also save viewport on scroll (debounced)
+    const canvas = document.getElementById("canvas");
+    if (canvas) {
+      canvas.addEventListener("scroll", () => this.debounceSaveViewport());
+    }
   },
 
   setupButtonHandlers() {
@@ -907,13 +1042,14 @@ window.board = () => ({
       this.dragMoved = true;
 
       const canvasRect = canvas.getBoundingClientRect();
+      const z = this.zoomLevel || 1;
       const noteWidth = this.dragging.offsetWidth;
       const noteHeight = this.dragging.offsetHeight;
 
-      let x = e.clientX - canvasRect.left - this.dragOffset.x + canvas.scrollLeft;
-      let y = e.clientY - canvasRect.top - this.dragOffset.y + canvas.scrollTop;
-      x = Math.max(0, Math.min(x, canvas.scrollWidth - noteWidth));
-      y = Math.max(0, Math.min(y, canvas.scrollHeight - noteHeight));
+      let x = (e.clientX - canvasRect.left + canvas.scrollLeft) / z - this.dragOffset.x / z;
+      let y = (e.clientY - canvasRect.top + canvas.scrollTop) / z - this.dragOffset.y / z;
+      x = Math.max(0, x);
+      y = Math.max(0, y);
 
       this.dragging.style.left = `${x}px`;
       this.dragging.style.top = `${y}px`;
@@ -959,6 +1095,23 @@ window.board = () => ({
   },
 
   handleKey(e) {
+    // Zoom shortcuts work everywhere (except inputs)
+    if ((e.metaKey || e.ctrlKey) && (e.key === "=" || e.key === "+")) {
+      e.preventDefault();
+      this.zoomIn();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === "-") {
+      e.preventDefault();
+      this.zoomOut();
+      return;
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === "0") {
+      e.preventDefault();
+      this.zoomReset();
+      return;
+    }
+
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
       if (e.key === "Escape") e.target.blur();
       return;

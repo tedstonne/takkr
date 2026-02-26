@@ -403,6 +403,9 @@ const HelpModal = () => (
           ["Space", "Flip note"],
           ["↑↓←→", "Navigate notes"],
           ["Tab", "Next note"],
+          ["⌘/Ctrl +", "Zoom in"],
+          ["⌘/Ctrl −", "Zoom out"],
+          ["⌘/Ctrl 0", "Reset zoom"],
           ["Escape", "Deselect / Close"],
           ["?", "Show this help"],
         ].map(([key, desc]) => (
@@ -741,12 +744,12 @@ export const BoardView = (props: {
     sse-connect={`/api/boards/${props.board.slug}/events`}
   >
     <div
-      class="relative h-full overflow-hidden"
+      class="relative h-full overflow-auto"
       id="canvas"
       x-data="board()"
       data-background={props.board.background || "grid"}
     >
-      <div id="notes" sse-swap="note:created" hx-swap="beforeend">
+      <div id="notes" sse-swap="note:created" hx-swap="beforeend" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
         {props.notes.map((note) => (
           <Takkr note={note} key={note.id} attachmentCount={props.attachmentCounts?.get(note.id) ?? 0} />
         ))}
@@ -762,6 +765,14 @@ export const BoardView = (props: {
     >
       +
     </button>
+
+    {/* Zoom indicator */}
+    <div
+      id="zoom-indicator"
+      class="fixed bottom-6 left-6 rounded-full bg-black/60 px-3 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none z-10"
+    >
+      100%
+    </div>
 
     {/* Left: back button */}
     <a
@@ -843,6 +854,9 @@ export const Help = () => (
             ["Space", "Flip note"],
             ["Arrows", "Navigate notes"],
             ["Tab", "Next note"],
+            ["⌘/Ctrl +", "Zoom in"],
+            ["⌘/Ctrl −", "Zoom out"],
+            ["⌘/Ctrl 0", "Reset zoom"],
             ["Escape", "Deselect / Close"],
           ].map(([key, desc]) => (
             <div class="flex items-center gap-4" key={key}>

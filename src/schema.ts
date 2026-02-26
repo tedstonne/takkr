@@ -119,3 +119,16 @@ db.exec(`
   )
 `);
 db.exec(`CREATE INDEX IF NOT EXISTS idx_attachments_note ON attachments(note_id)`);
+
+// Viewport state per user per board (zoom + scroll position)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS board_viewports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL REFERENCES users(username),
+    board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+    zoom REAL DEFAULT 1.0,
+    scroll_x REAL DEFAULT 0,
+    scroll_y REAL DEFAULT 0,
+    UNIQUE(username, board_id)
+  )
+`);
