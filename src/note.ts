@@ -1,8 +1,7 @@
 import { db } from "@/database";
+import { COLORS, type Color } from "@/shared";
 
-export type Color = "yellow" | "pink" | "green" | "blue" | "orange";
-
-export const COLORS: Color[] = ["yellow", "pink", "green", "blue", "orange"];
+export { COLORS, type Color };
 
 export type Record = {
   id: number;

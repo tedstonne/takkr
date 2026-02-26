@@ -19,17 +19,8 @@ export type Record = {
   created?: string;
 };
 
-export const FONTS: { [key: string]: string } = {
-  caveat: "Caveat",
-  "indie-flower": "Indie Flower",
-  kalam: "Kalam",
-  parisienne: "Parisienne",
-  cookie: "Cookie",
-  handlee: "Handlee",
-  sofia: "Sofia",
-  "gochi-hand": "Gochi Hand",
-  "grand-hotel": "Grand Hotel",
-};
+import { FONTS } from "@/shared";
+export { FONTS };
 
 export const getFont = (username: string): string => {
   const user = find(username);
@@ -41,7 +32,8 @@ export const setFont = (username: string, font: string): void => {
   db.query("UPDATE users SET font = ? WHERE username = ?").run(font, username);
 };
 
-export const COLORS = ["yellow", "pink", "green", "blue", "orange"] as const;
+import { COLORS } from "@/shared";
+export { COLORS };
 
 export const getPreferredColor = (username: string): string => {
   const user = find(username);

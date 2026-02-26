@@ -139,15 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("mouseup", onUp);
   window.addEventListener("touchend", onUp);
 
-  // ── Theme Carousel ──
-  const THEMES = [
-    { bg: "grid",       font: "Caveat",       label: "Classic" },
-    { bg: "cork",       font: "Indie Flower",  label: "Cork Board" },
-    { bg: "chalkboard", font: "Kalam",         label: "Chalkboard" },
-    { bg: "blueprint",  font: "Gochi Hand",    label: "Blueprint" },
-    { bg: "lined",      font: "Handlee",       label: "Notebook" },
-    { bg: "canvas",     font: "Sofia",         label: "Canvas" },
-  ];
+  // ── Theme Carousel — read from server-injected config ──
+  const _T = window.__TAKKR__ || {};
+  const THEMES = _T.themes || [];
+  const DARK_BGS = _T.darkBackgrounds || [];
 
   const zone = document.getElementById("board-zone");
   const prev = document.getElementById("carousel-prev");
@@ -180,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         n.style.setProperty("--takkr-font", `"${theme.font}"`);
       });
       // Update dots — use light dots on dark backgrounds
-      const isDark = theme.bg === "chalkboard" || theme.bg === "blueprint";
+      const isDark = DARK_BGS.includes(theme.bg);
       Array.from(dots.children).forEach((d, i) => {
         if (i === current) {
           d.className = `w-3 h-3 rounded-full transition-all duration-300 ${isDark ? "bg-white" : "bg-slate-800"}`;

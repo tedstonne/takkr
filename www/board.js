@@ -1,15 +1,6 @@
-// Font map for CSS variable
-const FONT_MAP = {
-  caveat: "Caveat",
-  "indie-flower": "Indie Flower",
-  kalam: "Kalam",
-  parisienne: "Parisienne",
-  cookie: "Cookie",
-  handlee: "Handlee",
-  sofia: "Sofia",
-  "gochi-hand": "Gochi Hand",
-  "grand-hotel": "Grand Hotel",
-};
+// Read shared config from server-injected window.__TAKKR__
+const _T = window.__TAKKR__ || {};
+const FONT_MAP = _T.fonts || {};
 
 const font = document.body.dataset.font || "caveat";
 document.documentElement.style.setProperty(
@@ -1415,7 +1406,7 @@ window.board = () => ({
 
   _cycleColor() {
     if (!this.selected) return;
-    const colors = ["yellow", "pink", "green", "blue", "orange"];
+    const colors = _T.colors || ["yellow", "pink", "green", "blue", "orange"];
     const current = Array.from(this.selected.classList)
       .find(c => c.startsWith("takkr-") && c !== "takkr")?.replace("takkr-", "") || "yellow";
     const idx = colors.indexOf(current);

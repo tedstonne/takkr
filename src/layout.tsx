@@ -2,6 +2,7 @@
 import { version as webauthnVersion } from "@simplewebauthn/browser/package.json";
 import { version as alpineVersion } from "alpinejs/package.json";
 import type { Child } from "hono/jsx";
+import { clientConfig } from "@/shared";
 import { version as htmxVersion } from "htmx.org/package.json";
 import { version as htmxSseVersion } from "htmx-ext-sse/package.json";
 
@@ -62,6 +63,7 @@ export const Layout = (props: Page) => (
         defer
         src={`https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@${webauthnVersion}/dist/bundle/index.umd.min.js`}
       />
+      <script dangerouslySetInnerHTML={{ __html: `window.__TAKKR__=${clientConfig()};` }} />
       {props.scripts?.map((script: string) => (
         <script type="module" src={script} />
       ))}

@@ -1,4 +1,7 @@
 import { db } from "@/database";
+import { BACKGROUNDS, type Background } from "@/shared";
+
+export { BACKGROUNDS, type Background };
 
 const MIN_LENGTH: number = 3;
 const MAX_LENGTH: number = 50;
@@ -6,19 +9,6 @@ const PATTERN: RegExp = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
 
 // Reserved slugs that can't be used for boards
 const RESERVED: string[] = ["api", "www", "~", "__landing"];
-
-export const BACKGROUNDS = [
-  "plain",
-  "grid",
-  "cork",
-  "chalkboard",
-  "lined",
-  "canvas",
-  "blueprint",
-  "doodle",
-] as const;
-
-export type Background = (typeof BACKGROUNDS)[number];
 
 export type Record = {
   id: number;
