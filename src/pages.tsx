@@ -1,7 +1,8 @@
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as Board from "@/board";
+import * as Invite from "@/invite";
 import { Layout } from "@/layout";
 import * as Member from "@/member";
 import { secure } from "@/middleware";
@@ -55,10 +56,12 @@ pages.get("/", secure.optional, (c) => {
   }
 
   const boards = Board.all(username);
+  const invitationCount = Member.unseenCount(username);
+  const profile = User.getProfile(username);
 
   return c.html(
     <Layout title="Home" id="home" scripts={["/www/home.js"]}>
-      <Home username={username} boards={boards} />
+      <Home username={username} boards={boards} unseenCount={invitationCount} avatar={profile.avatar} />
     </Layout>,
   );
 });
@@ -105,6 +108,34 @@ pages.get("/~/help", (c) => {
   );
 });
 
+// Invite link consumption
+pages.get("/invite/:token", secure.optional, (c) => {
+  const token = c.req.param("token");
+  const invite = Invite.findByToken(token);
+
+  if (!invite) {
+    throw new HTTPException(404, { message: "Invite link is invalid or has been revoked" });
+  }
+
+  const username: string | undefined = c.get("username");
+
+  if (!username) {
+    // Not logged in — store token in cookie and redirect to login
+    setCookie(c, "invite-token", token, {
+      httpOnly: true, secure: true, sameSite: "Lax",
+      maxAge: 60 * 60, path: "/", // 1 hour expiry
+    });
+    return c.redirect("/~/login");
+  }
+
+  // Already authenticated — join the board if not already a member/owner
+  if (invite.board_owner !== username && !Member.exists(invite.board_id, username)) {
+    Member.add(invite.board_id, username, invite.created_by, 1);
+  }
+
+  return c.redirect(`/${invite.board_slug}`);
+});
+
 // Board view - auto-create on first visit (first-come claims it)
 pages.get("/:slug", secure, (c) => {
   const username: string = c.get("username");
@@ -134,6 +165,8 @@ pages.get("/:slug", secure, (c) => {
   const ownedBoards = Board.owned(username).map((b) => ({ board: b, role: "owner" as const }));
   const memberBoards = Board.member(username).map((b) => ({ board: b, role: "member" as const }));
   const allBoards = [...ownedBoards, ...memberBoards];
+  const invitationCount = Member.unseenCount(username);
+  const inviteLink = isOwner ? Invite.forBoard(board.id) : null;
 
   return c.html(
     <Layout title={slug} id="board" scripts={["/www/board.js"]} font={font}>
@@ -150,6 +183,8 @@ pages.get("/:slug", secure, (c) => {
         avatar={profile.avatar}
         allBoards={allBoards}
         attachmentCounts={attachmentCounts}
+        unseenCount={invitationCount}
+        inviteToken={inviteLink?.token}
       />
     </Layout>,
   );

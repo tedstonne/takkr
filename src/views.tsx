@@ -110,13 +110,33 @@ export const Join = () => (
   </div>
 );
 
+// Notification badge component
+const NotificationBadge = (props: { count: number }) => {
+  if (props.count === 0) return null;
+  return (
+    <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+      {props.count > 9 ? "9+" : props.count}
+    </span>
+  );
+};
+
 // Home page
-export const Home = (props: { username: string; boards: Board.Record[] }) => (
+export const Home = (props: { username: string; boards: Board.Record[]; unseenCount?: number; avatar?: string }) => (
   <div class="min-h-full p-6">
     <div class="mx-auto max-w-2xl space-y-8">
       <header class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-slate-900">takkr</h1>
         <div class="flex items-center gap-4">
+          <div class="relative">
+            {props.avatar ? (
+              <img src={`/api/user/avatar/${props.avatar}`} class="h-8 w-8 rounded-full object-cover" alt="" />
+            ) : (
+              <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-semibold uppercase">
+                {props.username.slice(0, 2)}
+              </span>
+            )}
+            <NotificationBadge count={props.unseenCount || 0} />
+          </div>
           <span class="text-sm text-slate-600">{props.username}</span>
           <form action="/api/user/logout" method="post">
             <Button type="submit" variant="ghost" size="sm">
@@ -147,6 +167,42 @@ export const Home = (props: { username: string; boards: Board.Record[] }) => (
           </Button>
         </div>
       </div>
+
+      {(props.unseenCount || 0) > 0 && (
+        <div
+          id="invitation-banner"
+          class="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm"
+          x-data="{ invitations: [], loaded: false }"
+          x-init={`fetch('/api/invitations').then(r => r.json()).then(d => { invitations = d; loaded = true; })`}
+        >
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-medium text-blue-900">New Board Invitations</h3>
+            <button
+              type="button"
+              class="text-xs text-blue-600 hover:text-blue-800 underline"
+              x-on:click={`fetch('/api/invitations/seen', { method: 'POST' }).then(() => document.getElementById('invitation-banner').remove())`}
+            >
+              Dismiss all
+            </button>
+          </div>
+          <template x-if="loaded">
+            <div class="space-y-2">
+              <template x-for="inv in invitations" x-bind:key="inv.board_slug">
+                <a
+                  x-bind:href="'/' + inv.board_slug"
+                  class="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 transition-colors border border-blue-100"
+                >
+                  <span>
+                    <span class="font-mono font-medium" x-text="'/' + inv.board_slug" />
+                    <span class="text-slate-500 ml-2" x-text="'invited by ' + inv.invited_by" />
+                  </span>
+                  <span class="text-blue-600 text-xs">View →</span>
+                </a>
+              </template>
+            </div>
+          </template>
+        </div>
+      )}
 
       {props.boards.length > 0 && (
         <div>
@@ -520,6 +576,7 @@ const SettingsModal = (props: {
   members: Member.Record[];
   isOwner: boolean;
   allBoards: { board: Board.Record; role: "owner" | "member" }[];
+  inviteToken?: string;
 }) => (
   <dialog
     id="settings-modal"
@@ -692,6 +749,61 @@ const SettingsModal = (props: {
             <Input type="text" name="username" placeholder="Invite by username" class="flex-1" />
             <Button type="submit" variant="outline">Invite</Button>
           </form>
+
+          {/* Invite Link */}
+          <div class="mt-4 pt-4 border-t border-slate-200">
+            <h5 class="text-xs font-medium text-slate-500 mb-2">Invite Link</h5>
+            <div
+              x-data={`{ token: '${props.inviteToken || ''}', url: '', copied: false }`}
+              x-init={`if (token) url = location.origin + '/invite/' + token`}
+            >
+              <template x-if="!token">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  x-on:click={`fetch('/api/boards/${props.board.slug}/invite-link', { method: 'POST' }).then(r => r.json()).then(d => { token = d.token; url = d.url; })`}
+                >
+                  Generate Invite Link
+                </Button>
+              </template>
+              <template x-if="token">
+                <div class="space-y-2">
+                  <div class="flex items-center gap-2">
+                    <input
+                      type="text"
+                      x-bind:value="url"
+                      readonly
+                      class="input flex-1 text-xs font-mono bg-slate-50"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      x-on:click="navigator.clipboard.writeText(url); copied = true; setTimeout(() => copied = false, 2000)"
+                    >
+                      <span x-text="copied ? 'Copied!' : 'Copy'" />
+                    </Button>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      class="text-xs text-slate-500 hover:text-slate-700 underline"
+                      x-on:click={`fetch('/api/boards/${props.board.slug}/invite-link', { method: 'POST' }).then(r => r.json()).then(d => { token = d.token; url = d.url; })`}
+                    >
+                      Regenerate
+                    </button>
+                    <button
+                      type="button"
+                      class="text-xs text-red-500 hover:text-red-700 underline"
+                      x-on:click={`fetch('/api/boards/${props.board.slug}/invite-link', { method: 'DELETE' }).then(() => { token = ''; url = ''; })`}
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Anyone with this link can join the board.</p>
+                </div>
+              </template>
+            </div>
+          </div>
         </div>
       )}
 
@@ -748,6 +860,8 @@ export const BoardView = (props: {
   avatar?: string;
   allBoards?: { board: Board.Record; role: "owner" | "member" }[];
   attachmentCounts?: Map<number, number>;
+  unseenCount?: number;
+  inviteToken?: string;
 }) => (
   <div
     class="h-full overflow-hidden"
@@ -805,20 +919,23 @@ export const BoardView = (props: {
       >
         ?
       </button>
-      <button
-        type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-full shadow hover:ring-2 hover:ring-slate-400 transition-all overflow-hidden"
-        id="settings-btn"
-        title={props.username}
-      >
-        {props.avatar ? (
-          <img src={`/api/user/avatar/${props.avatar}`} class="h-10 w-10 rounded-full object-cover" alt="" />
-        ) : (
-          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold uppercase">
-            {props.username.slice(0, 2)}
-          </span>
-        )}
-      </button>
+      <div class="relative">
+        <button
+          type="button"
+          class="flex h-10 w-10 items-center justify-center rounded-full shadow hover:ring-2 hover:ring-slate-400 transition-all overflow-hidden"
+          id="settings-btn"
+          title={props.username}
+        >
+          {props.avatar ? (
+            <img src={`/api/user/avatar/${props.avatar}`} class="h-10 w-10 rounded-full object-cover" alt="" />
+          ) : (
+            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold uppercase">
+              {props.username.slice(0, 2)}
+            </span>
+          )}
+        </button>
+        <NotificationBadge count={props.unseenCount || 0} />
+      </div>
     </div>
 
     {/* Command palette */}
@@ -851,6 +968,7 @@ export const BoardView = (props: {
       members={props.members}
       isOwner={props.isOwner}
       allBoards={props.allBoards || []}
+      inviteToken={props.inviteToken}
     />
   </div>
 );

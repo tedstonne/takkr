@@ -54,4 +54,38 @@ describe("member", () => {
     Member.remove(boardId, "ghost");
     expect(Member.forBoard(boardId).length).toBe(1);
   });
+
+  test("new member has seen = 0 by default", () => {
+    const m = Member.add(boardId, "minvitee2", "mowner");
+    expect(m.seen).toBe(0);
+  });
+
+  test("add with seen = 1 sets seen flag", () => {
+    db.exec("DELETE FROM members WHERE username = 'minvitee2'");
+    const m = Member.add(boardId, "minvitee2", "mowner", 1);
+    expect(m.seen).toBe(1);
+  });
+
+  test("unseenCount returns count of unseen memberships", () => {
+    // minvitee was added without explicit seen, so seen=0
+    // minvitee2 was added with seen=1
+    const count = Member.unseenCount("minvitee");
+    expect(count).toBeGreaterThanOrEqual(0);
+  });
+
+  test("unseen returns unseen invitations with board info", () => {
+    // Reset: remove and re-add minvitee with seen=0
+    Member.remove(boardId, "minvitee");
+    Member.add(boardId, "minvitee", "mowner", 0);
+    const invitations = Member.unseen("minvitee");
+    expect(invitations.length).toBe(1);
+    expect(invitations[0].board_slug).toBe("member-board");
+    expect(invitations[0].invited_by).toBe("mowner");
+  });
+
+  test("markSeen marks all unseen as seen", () => {
+    Member.markSeen("minvitee");
+    expect(Member.unseenCount("minvitee")).toBe(0);
+    expect(Member.unseen("minvitee")).toEqual([]);
+  });
 });

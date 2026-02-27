@@ -3,11 +3,12 @@ import type {
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { deleteCookie, setCookie } from "hono/cookie";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as auth from "@/auth";
 import * as Board from "@/board";
 import * as events from "@/events";
+import * as Invite from "@/invite";
 import * as Member from "@/member";
 import { boardAccess, boardOwner, secure } from "@/middleware";
 import * as Note from "@/note";
@@ -78,6 +79,21 @@ api.openapi(registerVerifyRoute, async (c) => {
       httpOnly: true, secure: true, sameSite: "Lax",
       maxAge: 30 * 24 * 60 * 60, path: "/",
     });
+
+    // Check for pending invite token cookie
+    const inviteToken = getCookie(c, "invite-token");
+    if (inviteToken) {
+      deleteCookie(c, "invite-token");
+      const invite = Invite.findByToken(inviteToken);
+      if (invite) {
+        if (invite.board_owner !== username && !Member.exists(invite.board_id, username)) {
+          Member.add(invite.board_id, username, invite.created_by, 1);
+        }
+        c.header("HX-Redirect", `/${invite.board_slug}`);
+        return c.html("") as any;
+      }
+    }
+
     const boards = Board.all(username);
     return c.html(<Home username={username} boards={boards} />) as any;
   } catch (err) {
@@ -119,6 +135,21 @@ api.openapi(discoverVerifyRoute, async (c) => {
       httpOnly: true, secure: true, sameSite: "Lax",
       maxAge: 30 * 24 * 60 * 60, path: "/",
     });
+
+    // Check for pending invite token cookie
+    const inviteToken = getCookie(c, "invite-token");
+    if (inviteToken) {
+      deleteCookie(c, "invite-token");
+      const invite = Invite.findByToken(inviteToken);
+      if (invite) {
+        if (invite.board_owner !== username && !Member.exists(invite.board_id, username)) {
+          Member.add(invite.board_id, username, invite.created_by, 1);
+        }
+        c.header("HX-Redirect", `/${invite.board_slug}`);
+        return c.html("") as any;
+      }
+    }
+
     const boards = Board.all(username);
     return c.html(<Home username={username} boards={boards} />) as any;
   } catch (_err) {
@@ -326,6 +357,115 @@ api.openapi(removeMemberRoute, (c) => {
   Member.remove(board.id, username);
   events.broadcast(board.id, events.Event.Member.Left, `${username} left the board`);
   return c.redirect(`/${board.slug}`) as any;
+});
+
+// ============================================================
+// INVITATIONS
+// ============================================================
+
+const listInvitationsRoute = createRoute({
+  method: "get",
+  path: "/invitations",
+  tags: ["Members"],
+  summary: "List unseen invitations",
+  description: "Returns boards the user was recently added to but hasn't seen yet.",
+  middleware: [secure] as any,
+  responses: {
+    200: { description: "Unseen invitations", content: { "application/json": { schema: z.array(S.InvitationResponse) } } },
+  },
+});
+
+api.openapi(listInvitationsRoute, (c) => {
+  const username: string = c.get("username");
+  const invitations = Member.unseen(username);
+  return c.json(invitations.map((i) => ({
+    board_slug: i.board_slug,
+    board_name: i.board_name,
+    invited_by: i.invited_by,
+  }))) as any;
+});
+
+const markSeenRoute = createRoute({
+  method: "post",
+  path: "/invitations/seen",
+  tags: ["Members"],
+  summary: "Mark invitations as seen",
+  description: "Marks all unseen board invitations as seen for the authenticated user.",
+  middleware: [secure] as any,
+  responses: {
+    200: { description: "OK", content: { "application/json": { schema: S.OkResponse } } },
+  },
+});
+
+api.openapi(markSeenRoute, (c) => {
+  const username: string = c.get("username");
+  Member.markSeen(username);
+  return c.json({ ok: true }) as any;
+});
+
+// ============================================================
+// INVITE LINKS
+// ============================================================
+
+const getInviteLinkRoute = createRoute({
+  method: "get",
+  path: "/boards/{slug}/invite-link",
+  tags: ["Members"],
+  summary: "Get invite link",
+  description: "Get the current active invite link for this board. Owner only.",
+  middleware: [secure, boardAccess, boardOwner] as any,
+  request: { params: S.SlugParam },
+  responses: {
+    200: { description: "Invite link or null", content: { "application/json": { schema: S.InviteLinkResponse.nullable() } } },
+  },
+});
+
+api.openapi(getInviteLinkRoute, (c) => {
+  const board: Board.Record = c.get("board");
+  const invite = Invite.forBoard(board.id);
+  if (!invite) return c.json(null) as any;
+  const url = new URL(`/invite/${invite.token}`, c.req.url).toString();
+  return c.json({ token: invite.token, url }) as any;
+});
+
+const createInviteLinkRoute = createRoute({
+  method: "post",
+  path: "/boards/{slug}/invite-link",
+  tags: ["Members"],
+  summary: "Generate invite link",
+  description: "Generate or regenerate the board's shareable invite link. Anyone with this link can join the board. Replaces any existing link. Owner only.",
+  middleware: [secure, boardAccess, boardOwner] as any,
+  request: { params: S.SlugParam },
+  responses: {
+    200: { description: "New invite link", content: { "application/json": { schema: S.InviteLinkResponse } } },
+  },
+});
+
+api.openapi(createInviteLinkRoute, (c) => {
+  const board: Board.Record = c.get("board");
+  const username: string = c.get("username");
+  const invite = Invite.generate(board.id, username);
+  const url = new URL(`/invite/${invite.token}`, c.req.url).toString();
+  return c.json({ token: invite.token, url }) as any;
+});
+
+const revokeInviteLinkRoute = createRoute({
+  method: "delete",
+  path: "/boards/{slug}/invite-link",
+  tags: ["Members"],
+  summary: "Revoke invite link",
+  description: "Deactivate the board's invite link. Existing links will no longer work. Owner only.",
+  middleware: [secure, boardAccess, boardOwner] as any,
+  request: { params: S.SlugParam },
+  responses: {
+    200: { description: "OK", content: { "application/json": { schema: S.OkResponse } } },
+  },
+});
+
+api.openapi(revokeInviteLinkRoute, (c) => {
+  const board: Board.Record = c.get("board");
+  Invite.revoke(board.id);
+  return c.json({ ok: true }) as any;
 });
 
 // ============================================================

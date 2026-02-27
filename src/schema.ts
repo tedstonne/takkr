@@ -137,3 +137,22 @@ db.exec(`
     UNIQUE(username, board_id)
   )
 `);
+
+// Migration: add seen column to members (0 = unseen invitation, 1 = seen)
+try {
+  db.exec(`ALTER TABLE members ADD COLUMN seen INTEGER DEFAULT 0`);
+  db.exec(`UPDATE members SET seen = 1`);
+} catch (_) {}
+
+// Board invite links (one reusable link per board)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS board_invites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+    token TEXT UNIQUE NOT NULL,
+    created_by TEXT NOT NULL,
+    active INTEGER DEFAULT 1,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(board_id)
+  )
+`);

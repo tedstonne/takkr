@@ -174,6 +174,22 @@ export const BoardResponse = z.object({
   created: z.string().optional(),
 });
 
+// --- Invitations ---
+export const InvitationResponse = z.object({
+  board_slug: z.string(),
+  board_name: z.string(),
+  invited_by: z.string(),
+});
+
+export const InviteLinkResponse = z.object({
+  token: z.string(),
+  url: z.string(),
+});
+
+export const TokenParam = z.object({
+  token: z.string().openapi({ description: "Invite token" }),
+});
+
 // --- Generic ---
 export const OkResponse = z.object({ ok: z.boolean() });
 export const OkWithField = (field: string, schema: z.ZodType) =>
