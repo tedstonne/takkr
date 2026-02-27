@@ -1,9 +1,9 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
-import * as Note from "@/note";
 import * as Board from "@/board";
-import * as User from "@/user";
 import { db } from "@/database";
+import * as Note from "@/note";
+import * as User from "@/user";
 
 describe("note", () => {
   let boardId: number;
@@ -13,7 +13,12 @@ describe("note", () => {
     db.exec("DELETE FROM notes");
     db.exec("DELETE FROM boards");
     db.exec("DELETE FROM users");
-    User.create({ username: "noteuser", credential_id: "nc1", public_key: Buffer.from([1]), counter: 0 } as User.Record);
+    User.create({
+      username: "noteuser",
+      credential_id: "nc1",
+      public_key: Buffer.from([1]),
+      counter: 0,
+    } as User.Record);
     const board = Board.create("note-board", "noteuser");
     boardId = board.id;
   });
@@ -37,7 +42,14 @@ describe("note", () => {
   });
 
   test("create with custom position and color", () => {
-    const note = Note.create(boardId, "Pink note", "noteuser", 200, 300, "pink");
+    const note = Note.create(
+      boardId,
+      "Pink note",
+      "noteuser",
+      200,
+      300,
+      "pink",
+    );
     expect(note.x).toBe(200);
     expect(note.y).toBe(300);
     expect(note.color).toBe("pink");
@@ -62,17 +74,23 @@ describe("note", () => {
 
   test("update content", () => {
     const note = Note.create(boardId, "Original", "noteuser");
-    expect(Note.update(note.id, { content: "Updated" })!.content).toBe("Updated");
+    expect(Note.update(note.id, { content: "Updated" })!.content).toBe(
+      "Updated",
+    );
   });
 
   test("update description", () => {
     const note = Note.create(boardId, "Desc", "noteuser");
-    expect(Note.update(note.id, { description: "Details" })!.description).toBe("Details");
+    expect(Note.update(note.id, { description: "Details" })!.description).toBe(
+      "Details",
+    );
   });
 
   test("update tags", () => {
     const note = Note.create(boardId, "Tags", "noteuser");
-    expect(Note.update(note.id, { tags: "bug,urgent" })!.tags).toBe("bug,urgent");
+    expect(Note.update(note.id, { tags: "bug,urgent" })!.tags).toBe(
+      "bug,urgent",
+    );
   });
 
   test("update checklist", () => {
@@ -121,7 +139,13 @@ describe("note", () => {
 
   test("addAttachment and attachments", () => {
     const note = Note.create(boardId, "With file", "noteuser");
-    const att = Note.addAttachment(note.id, "test.pdf", "application/pdf", 1024, "test_123.pdf");
+    const att = Note.addAttachment(
+      note.id,
+      "test.pdf",
+      "application/pdf",
+      1024,
+      "test_123.pdf",
+    );
     expect(att.filename).toBe("test.pdf");
     expect(att.mime_type).toBe("application/pdf");
     expect(att.size).toBe(1024);
@@ -130,7 +154,13 @@ describe("note", () => {
 
   test("attachmentById", () => {
     const note = Note.create(boardId, "Att", "noteuser");
-    const att = Note.addAttachment(note.id, "img.png", "image/png", 2048, "img.png");
+    const att = Note.addAttachment(
+      note.id,
+      "img.png",
+      "image/png",
+      2048,
+      "img.png",
+    );
     expect(Note.attachmentById(att.id)!.filename).toBe("img.png");
   });
 
@@ -140,7 +170,13 @@ describe("note", () => {
 
   test("removeAttachment", () => {
     const note = Note.create(boardId, "Rm att", "noteuser");
-    const att = Note.addAttachment(note.id, "rm.txt", "text/plain", 100, "rm.txt");
+    const att = Note.addAttachment(
+      note.id,
+      "rm.txt",
+      "text/plain",
+      100,
+      "rm.txt",
+    );
     Note.removeAttachment(att.id);
     expect(Note.attachmentById(att.id)).toBeNull();
   });
@@ -206,7 +242,7 @@ describe("note", () => {
     const note = Note.create(boardId, "Board assign", "noteuser");
     Note.update(note.id, { assigned_to: "sam" });
     const notes = Note.forBoard(boardId);
-    const found = notes.find(n => n.id === note.id);
+    const found = notes.find((n) => n.id === note.id);
     expect(found!.assigned_to).toBe("sam");
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import "@/schema";
-import * as passkey from "@/passkey";
 import { challenges } from "@/config";
+import * as passkey from "@/passkey";
 
 describe("passkey", () => {
   test("challenge generates registration options", async () => {
@@ -33,7 +33,11 @@ describe("passkey", () => {
 
   test("register rejects invalid credential", async () => {
     try {
-      await passkey.register("pkuser2", { id: "bad", response: {} } as any, "fake-challenge");
+      await passkey.register(
+        "pkuser2",
+        { id: "bad", response: {} } as any,
+        "fake-challenge",
+      );
       expect(true).toBe(false);
     } catch (e: any) {
       expect(e).toBeDefined();
@@ -43,7 +47,12 @@ describe("passkey", () => {
   test("authenticate rejects invalid credential", async () => {
     try {
       await passkey.authenticate(
-        { username: "pk", credential_id: "c", public_key: Buffer.from([1]), counter: 0 } as any,
+        {
+          username: "pk",
+          credential_id: "c",
+          public_key: Buffer.from([1]),
+          counter: 0,
+        } as any,
         { id: "bad", response: {} } as any,
         "fake-challenge",
       );

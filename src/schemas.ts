@@ -29,21 +29,36 @@ export const UsernameParam = z.object({
 
 // --- Auth ---
 export const RegisterQuery = z.object({
-  username: z.string().min(3).max(30).openapi({ description: "Desired username", example: "alice" }),
+  username: z
+    .string()
+    .min(3)
+    .max(30)
+    .openapi({ description: "Desired username", example: "alice" }),
 });
 
 export const RegisterVerifyBody = z.object({
   username: z.string(),
-  credential: z.string().openapi({ description: "Base64-encoded WebAuthn credential" }),
+  credential: z
+    .string()
+    .openapi({ description: "Base64-encoded WebAuthn credential" }),
 });
 
 export const DiscoverVerifyBody = z.object({
-  credential: z.string().openapi({ description: "Base64-encoded WebAuthn credential" }),
+  credential: z
+    .string()
+    .openapi({ description: "Base64-encoded WebAuthn credential" }),
 });
 
 // --- Board ---
 export const BackgroundEnum = z.enum([
-  "plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle",
+  "plain",
+  "grid",
+  "cork",
+  "chalkboard",
+  "lined",
+  "canvas",
+  "blueprint",
+  "doodle",
 ]);
 
 export const BackgroundBody = z.object({
@@ -51,9 +66,17 @@ export const BackgroundBody = z.object({
 });
 
 export const ViewportBody = z.object({
-  zoom: z.coerce.number().min(0.25).max(2).openapi({ description: "Zoom level", example: 1 }),
-  scroll_x: z.coerce.number().openapi({ description: "Horizontal scroll", example: 0 }),
-  scroll_y: z.coerce.number().openapi({ description: "Vertical scroll", example: 0 }),
+  zoom: z.coerce
+    .number()
+    .min(0.25)
+    .max(2)
+    .openapi({ description: "Zoom level", example: 1 }),
+  scroll_x: z.coerce
+    .number()
+    .openapi({ description: "Horizontal scroll", example: 0 }),
+  scroll_y: z.coerce
+    .number()
+    .openapi({ description: "Vertical scroll", example: 0 }),
 });
 
 export const ViewportResponse = z.object({
@@ -80,7 +103,10 @@ export const UpdateNoteBody = z.object({
   content: z.string().max(80).optional(),
   description: z.string().optional(),
   tags: z.string().optional(),
-  checklist: z.string().optional().openapi({ description: "JSON array of {text, done}" }),
+  checklist: z
+    .string()
+    .optional()
+    .openapi({ description: "JSON array of {text, done}" }),
   x: z.coerce.number().optional(),
   y: z.coerce.number().optional(),
   z: z.coerce.number().optional(),
@@ -103,15 +129,17 @@ export const NoteResponse = z.object({
 });
 
 export const NoteDetailResponse = NoteResponse.extend({
-  attachments: z.array(z.object({
-    id: z.number(),
-    note_id: z.number(),
-    filename: z.string(),
-    mime_type: z.string(),
-    size: z.number(),
-    path: z.string(),
-    created: z.string().optional(),
-  })),
+  attachments: z.array(
+    z.object({
+      id: z.number(),
+      note_id: z.number(),
+      filename: z.string(),
+      mime_type: z.string(),
+      size: z.number(),
+      path: z.string(),
+      created: z.string().optional(),
+    }),
+  ),
 });
 
 export const AttachmentResponse = z.object({
@@ -126,8 +154,15 @@ export const AttachmentResponse = z.object({
 
 // --- User ---
 export const FontEnum = z.enum([
-  "caveat", "indie-flower", "kalam", "parisienne", "cookie",
-  "handlee", "sofia", "gochi-hand", "grand-hotel",
+  "caveat",
+  "indie-flower",
+  "kalam",
+  "parisienne",
+  "cookie",
+  "handlee",
+  "sofia",
+  "gochi-hand",
+  "grand-hotel",
 ]);
 
 export const FontBody = z.object({

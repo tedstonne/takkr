@@ -1,11 +1,11 @@
-import { describe, expect, test, beforeAll } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { Hono } from "hono";
 import "@/schema";
 import { api } from "@/api";
 import * as Board from "@/board";
-import * as User from "@/user";
-import * as session from "@/session";
 import { db } from "@/database";
+import * as session from "@/session";
+import * as User from "@/user";
 
 const app = new Hono();
 app.route("/api", api);
@@ -27,7 +27,12 @@ describe("openapi spec", () => {
     db.exec("DELETE FROM members");
     db.exec("DELETE FROM boards");
     db.exec("DELETE FROM users");
-    User.create({ username: "specuser", credential_id: "spec-c1", public_key: Buffer.from([1]), counter: 0 } as User.Record);
+    User.create({
+      username: "specuser",
+      credential_id: "spec-c1",
+      public_key: Buffer.from([1]),
+      counter: 0,
+    } as User.Record);
     Board.create("spec-board", "specuser");
 
     const res = await app.request("/api/openapi.json");
@@ -75,7 +80,9 @@ describe("openapi spec", () => {
   // Auth endpoints
   test("has POST /user/register", () => {
     expect(spec.paths["/user/register"]?.post).toBeDefined();
-    expect(spec.paths["/user/register"].post.summary).toBe("Start passkey registration");
+    expect(spec.paths["/user/register"].post.summary).toBe(
+      "Start passkey registration",
+    );
     expect(spec.paths["/user/register"].post.description).toContain("WebAuthn");
   });
 
@@ -85,7 +92,9 @@ describe("openapi spec", () => {
 
   test("has POST /user/discover", () => {
     expect(spec.paths["/user/discover"]?.post).toBeDefined();
-    expect(spec.paths["/user/discover"].post.description).toContain("discoverable");
+    expect(spec.paths["/user/discover"].post.description).toContain(
+      "discoverable",
+    );
   });
 
   test("has POST /user/discover/verify", () => {
@@ -107,31 +116,45 @@ describe("openapi spec", () => {
 
   test("has PUT /boards/{slug}/background", () => {
     expect(spec.paths["/boards/{slug}/background"]?.put).toBeDefined();
-    expect(spec.paths["/boards/{slug}/background"].put.description).toContain("plain");
-    expect(spec.paths["/boards/{slug}/background"].put.description).toContain("cork");
+    expect(spec.paths["/boards/{slug}/background"].put.description).toContain(
+      "plain",
+    );
+    expect(spec.paths["/boards/{slug}/background"].put.description).toContain(
+      "cork",
+    );
   });
 
   test("has GET and PUT /boards/{slug}/viewport", () => {
     expect(spec.paths["/boards/{slug}/viewport"]?.get).toBeDefined();
     expect(spec.paths["/boards/{slug}/viewport"]?.put).toBeDefined();
-    expect(spec.paths["/boards/{slug}/viewport"].put.description).toContain("0.25");
-    expect(spec.paths["/boards/{slug}/viewport"].put.description).toContain("2.0");
+    expect(spec.paths["/boards/{slug}/viewport"].put.description).toContain(
+      "0.25",
+    );
+    expect(spec.paths["/boards/{slug}/viewport"].put.description).toContain(
+      "2.0",
+    );
   });
 
   // Member endpoints
   test("has POST /boards/{slug}/members", () => {
     expect(spec.paths["/boards/{slug}/members"]?.post).toBeDefined();
-    expect(spec.paths["/boards/{slug}/members"].post.description).toContain("collaborator");
+    expect(spec.paths["/boards/{slug}/members"].post.description).toContain(
+      "collaborator",
+    );
   });
 
   test("has DELETE /boards/{slug}/members/{username}", () => {
-    expect(spec.paths["/boards/{slug}/members/{username}"]?.delete).toBeDefined();
+    expect(
+      spec.paths["/boards/{slug}/members/{username}"]?.delete,
+    ).toBeDefined();
   });
 
   // Note endpoints
   test("has POST /boards/{slug}/notes", () => {
     expect(spec.paths["/boards/{slug}/notes"]?.post).toBeDefined();
-    expect(spec.paths["/boards/{slug}/notes"].post.description).toContain("SSE");
+    expect(spec.paths["/boards/{slug}/notes"].post.description).toContain(
+      "SSE",
+    );
   });
 
   test("has GET /notes/{id}", () => {
@@ -146,7 +169,9 @@ describe("openapi spec", () => {
 
   test("has POST /notes/{id}/duplicate", () => {
     expect(spec.paths["/notes/{id}/duplicate"]?.post).toBeDefined();
-    expect(spec.paths["/notes/{id}/duplicate"].post.description).toContain("30px");
+    expect(spec.paths["/notes/{id}/duplicate"].post.description).toContain(
+      "30px",
+    );
   });
 
   test("has DELETE /notes/{id}", () => {
@@ -155,13 +180,17 @@ describe("openapi spec", () => {
 
   test("has POST /notes/{id}/front", () => {
     expect(spec.paths["/notes/{id}/front"]?.post).toBeDefined();
-    expect(spec.paths["/notes/{id}/front"].post.description).toContain("z-index");
+    expect(spec.paths["/notes/{id}/front"].post.description).toContain(
+      "z-index",
+    );
   });
 
   // Attachment endpoints
   test("has POST /notes/{id}/attachments", () => {
     expect(spec.paths["/notes/{id}/attachments"]?.post).toBeDefined();
-    expect(spec.paths["/notes/{id}/attachments"].post.description).toContain("5MB");
+    expect(spec.paths["/notes/{id}/attachments"].post.description).toContain(
+      "5MB",
+    );
   });
 
   test("has GET /notes/{id}/attachments", () => {
@@ -214,14 +243,18 @@ describe("openapi spec", () => {
 
   test("has GET /user/avatar/{filename}", () => {
     expect(spec.paths["/user/avatar/{filename}"]?.get).toBeDefined();
-    expect(spec.paths["/user/avatar/{filename}"].get.description).toContain("public");
+    expect(spec.paths["/user/avatar/{filename}"].get.description).toContain(
+      "public",
+    );
   });
 
   // Every endpoint has a description
   test("all endpoints have descriptions", () => {
     let missing = 0;
     for (const [path, methods] of Object.entries(spec.paths)) {
-      for (const [method, op] of Object.entries(methods as Record<string, any>)) {
+      for (const [method, op] of Object.entries(
+        methods as Record<string, any>,
+      )) {
         if (!op.description || op.description.length < 10) {
           console.log(`Missing description: ${method.toUpperCase()} ${path}`);
           missing++;
@@ -234,7 +267,9 @@ describe("openapi spec", () => {
   // Every endpoint has a summary
   test("all endpoints have summaries", () => {
     for (const [_path, methods] of Object.entries(spec.paths)) {
-      for (const [_method, op] of Object.entries(methods as Record<string, any>)) {
+      for (const [_method, op] of Object.entries(
+        methods as Record<string, any>,
+      )) {
         expect((op as any).summary).toBeTruthy();
       }
     }
@@ -243,7 +278,9 @@ describe("openapi spec", () => {
   // Every endpoint is tagged
   test("all endpoints have at least one tag", () => {
     for (const [_path, methods] of Object.entries(spec.paths)) {
-      for (const [_method, op] of Object.entries(methods as Record<string, any>)) {
+      for (const [_method, op] of Object.entries(
+        methods as Record<string, any>,
+      )) {
         expect((op as any).tags?.length).toBeGreaterThan(0);
       }
     }

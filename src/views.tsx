@@ -48,7 +48,12 @@ export const Login = () => (
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="w-full max-w-sm space-y-8 text-center">
       <div>
-        <a href="/" class="text-4xl font-bold text-slate-900 hover:text-slate-700 transition-colors no-underline">takkr</a>
+        <a
+          href="/"
+          class="text-4xl font-bold text-slate-900 hover:text-slate-700 transition-colors no-underline"
+        >
+          takkr
+        </a>
         <p class="mt-2 text-slate-600">
           Collaborative sticky notes for your ideas
         </p>
@@ -121,7 +126,12 @@ const NotificationBadge = (props: { count: number }) => {
 };
 
 // Home page
-export const Home = (props: { username: string; boards: Board.Record[]; unseenCount?: number; avatar?: string }) => (
+export const Home = (props: {
+  username: string;
+  boards: Board.Record[];
+  unseenCount?: number;
+  avatar?: string;
+}) => (
   <div class="min-h-full p-6">
     <div class="mx-auto max-w-2xl space-y-8">
       <header class="flex items-center justify-between">
@@ -129,7 +139,11 @@ export const Home = (props: { username: string; boards: Board.Record[]; unseenCo
         <div class="flex items-center gap-4">
           <div class="relative">
             {props.avatar ? (
-              <img src={`/api/user/avatar/${props.avatar}`} class="h-8 w-8 rounded-full object-cover" alt="" />
+              <img
+                src={`/api/user/avatar/${props.avatar}`}
+                class="h-8 w-8 rounded-full object-cover"
+                alt=""
+              />
             ) : (
               <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-semibold uppercase">
                 {props.username.slice(0, 2)}
@@ -176,7 +190,9 @@ export const Home = (props: { username: string; boards: Board.Record[]; unseenCo
           x-init={`fetch('/api/invitations').then(r => r.json()).then(d => { invitations = d; loaded = true; })`}
         >
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-medium text-blue-900">New Board Invitations</h3>
+            <h3 class="text-sm font-medium text-blue-900">
+              New Board Invitations
+            </h3>
             <button
               type="button"
               class="text-xs text-blue-600 hover:text-blue-800 underline"
@@ -193,8 +209,14 @@ export const Home = (props: { username: string; boards: Board.Record[]; unseenCo
                   class="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm text-slate-700 hover:bg-blue-100 transition-colors border border-blue-100"
                 >
                   <span>
-                    <span class="font-mono font-medium" x-text="'/' + inv.board_slug" />
-                    <span class="text-slate-500 ml-2" x-text="'invited by ' + inv.invited_by" />
+                    <span
+                      class="font-mono font-medium"
+                      x-text="'/' + inv.board_slug"
+                    />
+                    <span
+                      class="text-slate-500 ml-2"
+                      x-text="'invited by ' + inv.invited_by"
+                    />
                   </span>
                   <span class="text-blue-600 text-xs">View →</span>
                 </a>
@@ -252,8 +274,18 @@ export const Takkr = (props: {
     <div class="takkr-title">{props.note.content}</div>
     {(props.attachmentCount ?? 0) > 0 && (
       <div class="takkr-attachments">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+          />
         </svg>
         <span>{props.attachmentCount}</span>
       </div>
@@ -266,8 +298,18 @@ export const ZoomOverlay = () => (
   <div id="zoom-overlay" class="zoom-overlay" style="display:none;">
     <div class="zoom-backdrop" />
     <button type="button" id="zoom-close-btn" class="zoom-close-btn">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      <svg
+        class="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18L18 6M6 6l12 12"
+        />
       </svg>
     </button>
     <div id="zoom-card" class="zoom-card">
@@ -282,29 +324,44 @@ export const ZoomOverlay = () => (
 
             {/* Title */}
             {/* @ts-expect-error contenteditable accepts string in HTML */}
-            <div class="zoom-back-title" id="zoom-back-title" contenteditable="false" />
+            <div
+              class="zoom-back-title"
+              id="zoom-back-title"
+              contenteditable="false"
+            />
 
             {/* Description */}
             {/* @ts-expect-error contenteditable accepts string in HTML */}
-            <div class="zoom-back-description" id="zoom-back-description" contenteditable="false" data-placeholder="Add details, notes, links..." />
+            <div
+              class="zoom-back-description"
+              id="zoom-back-description"
+              contenteditable="false"
+              data-placeholder="Add details, notes, links..."
+            />
 
             {/* Color picker */}
             <div class="zoom-back-section">
               <div class="zoom-back-section-title">Color</div>
               <div class="zoom-back-colors" id="zoom-back-colors">
-                {(["yellow", "pink", "green", "blue", "orange"] as const).map((c) => (
-                  <button
-                    type="button"
-                    key={c}
-                    data-color={c}
-                    class={`zoom-color-btn bg-takkr-${c}`}
-                  />
-                ))}
+                {(["yellow", "pink", "green", "blue", "orange"] as const).map(
+                  (c) => (
+                    <button
+                      type="button"
+                      key={c}
+                      data-color={c}
+                      class={`zoom-color-btn bg-takkr-${c}`}
+                    />
+                  ),
+                )}
               </div>
             </div>
 
             {/* Assignee — only shown when board has collaborators */}
-            <div class="zoom-back-section" id="zoom-back-assign-section" style="display:none;">
+            <div
+              class="zoom-back-section"
+              id="zoom-back-assign-section"
+              style="display:none;"
+            >
               <div class="zoom-back-section-title">Assign</div>
               <div id="zoom-back-assign" class="zoom-back-assign"></div>
             </div>
@@ -314,8 +371,18 @@ export const ZoomOverlay = () => (
               <div class="zoom-back-section-title">Checklist</div>
               <div class="zoom-back-checklist" id="zoom-back-checklist" />
               <div class="zoom-checklist-add">
-                <input type="text" id="zoom-checklist-input" placeholder="Add item..." />
-                <button type="button" class="btn btn-ghost btn-sm" id="zoom-checklist-add-btn">+</button>
+                <input
+                  type="text"
+                  id="zoom-checklist-input"
+                  placeholder="Add item..."
+                />
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm"
+                  id="zoom-checklist-add-btn"
+                >
+                  +
+                </button>
               </div>
             </div>
 
@@ -323,7 +390,12 @@ export const ZoomOverlay = () => (
             <div class="zoom-back-section">
               <div class="zoom-back-section-title">Tags</div>
               <div class="zoom-back-tags" id="zoom-back-tags">
-                <input type="text" class="zoom-tag-input" id="zoom-tag-input" placeholder="Add tag..." />
+                <input
+                  type="text"
+                  class="zoom-tag-input"
+                  id="zoom-tag-input"
+                  placeholder="Add tag..."
+                />
               </div>
             </div>
 
@@ -332,8 +404,18 @@ export const ZoomOverlay = () => (
               <div class="zoom-back-section-title">Attachments</div>
               <div class="zoom-back-attachments" id="zoom-back-attachments" />
               <label class="zoom-upload-btn" id="zoom-upload-btn">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.317 4.502 4.502 0 013.576 4.065A3 3 0 0118 19.5H6.75z" />
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.317 4.502 4.502 0 013.576 4.065A3 3 0 0118 19.5H6.75z"
+                  />
                 </svg>
                 <span>Upload file (max 5MB)</span>
                 <input type="file" class="hidden" id="zoom-file-input" />
@@ -341,7 +423,13 @@ export const ZoomOverlay = () => (
             </div>
           </div>
           <div class="zoom-back-actions">
-            <button type="button" class="btn btn-ghost btn-sm text-red-500 hover:text-red-700" id="zoom-delete-btn">Delete note</button>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm text-red-500 hover:text-red-700"
+              id="zoom-delete-btn"
+            >
+              Delete note
+            </button>
           </div>
         </div>
       </div>
@@ -603,15 +691,37 @@ const SettingsModal = (props: {
               </div>
             )}
             <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              <svg
+                class="h-5 w-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
+                />
               </svg>
             </div>
-            <input type="file" accept="image/*" class="hidden" id="avatar-file-input" />
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              id="avatar-file-input"
+            />
           </label>
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-slate-900" id="settings-display-name-label">
+            <h3
+              class="text-lg font-semibold text-slate-900"
+              id="settings-display-name-label"
+            >
               {props.displayName || props.username}
             </h3>
             <p class="text-xs text-slate-500">@{props.username}</p>
@@ -622,33 +732,70 @@ const SettingsModal = (props: {
           class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
           onclick="this.closest('dialog').close()"
         >
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
 
       {/* Profile fields — inline edit */}
       <div class="mb-6 space-y-2">
-        <div class="inline-edit-field" id="field-display-name" data-field="display_name" data-endpoint="/api/user/display-name">
-          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">Display Name</label>
+        <div
+          class="inline-edit-field"
+          id="field-display-name"
+          data-field="display_name"
+          data-endpoint="/api/user/display-name"
+        >
+          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            Display Name
+          </label>
           <div class="inline-edit-display" data-placeholder="Add your name...">
             {props.displayName || ""}
           </div>
-          <input type="text" class="inline-edit-input hidden" value={props.displayName} maxlength={50} placeholder="How should we call you?" />
+          <input
+            type="text"
+            class="inline-edit-input hidden"
+            value={props.displayName}
+            maxlength={50}
+            placeholder="How should we call you?"
+          />
         </div>
-        <div class="inline-edit-field" id="field-email" data-field="email" data-endpoint="/api/user/email">
-          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">Email</label>
+        <div
+          class="inline-edit-field"
+          id="field-email"
+          data-field="email"
+          data-endpoint="/api/user/email"
+        >
+          <label class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            Email
+          </label>
           <div class="inline-edit-display" data-placeholder="Add your email...">
             {props.email || ""}
           </div>
-          <input type="email" class="inline-edit-input hidden" value={props.email} placeholder="your@email.com" />
+          <input
+            type="email"
+            class="inline-edit-input hidden"
+            value={props.email}
+            placeholder="your@email.com"
+          />
         </div>
       </div>
 
       {/* Font picker */}
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-slate-700 mb-3">Handwriting Font</h4>
+        <h4 class="text-sm font-medium text-slate-700 mb-3">
+          Handwriting Font
+        </h4>
         <div class="grid grid-cols-3 gap-2" id="settings-font-grid">
           {Object.entries({
             caveat: "Caveat",
@@ -675,7 +822,9 @@ const SettingsModal = (props: {
 
       {/* Preferred note color */}
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-slate-700 mb-3">Default Note Color</h4>
+        <h4 class="text-sm font-medium text-slate-700 mb-3">
+          Default Note Color
+        </h4>
         <div class="flex gap-3" id="settings-color-picker">
           {(["yellow", "pink", "green", "blue", "orange"] as const).map((c) => (
             <button
@@ -691,9 +840,22 @@ const SettingsModal = (props: {
       {/* Board background */}
       {props.isOwner && (
         <div class="mb-6">
-          <h4 class="text-sm font-medium text-slate-700 mb-3">Board Background</h4>
+          <h4 class="text-sm font-medium text-slate-700 mb-3">
+            Board Background
+          </h4>
           <div class="grid grid-cols-4 gap-2" id="settings-bg-grid">
-            {(["plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle"] as const).map((bg) => (
+            {(
+              [
+                "plain",
+                "grid",
+                "cork",
+                "chalkboard",
+                "lined",
+                "canvas",
+                "blueprint",
+                "doodle",
+              ] as const
+            ).map((bg) => (
               <button
                 type="button"
                 key={bg}
@@ -723,7 +885,10 @@ const SettingsModal = (props: {
               <span class="text-xs text-slate-500">owner</span>
             </li>
             {props.members.map((m) => (
-              <li key={m.username} class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+              <li
+                key={m.username}
+                class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2"
+              >
                 <div class="flex items-center gap-2">
                   <div class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-slate-700 text-xs font-semibold uppercase">
                     {m.username.slice(0, 2)}
@@ -735,7 +900,9 @@ const SettingsModal = (props: {
                   hx-target="#hx-body"
                   hx-swap="innerHTML"
                 >
-                  <Button type="submit" variant="destructive" size="sm">Remove</Button>
+                  <Button type="submit" variant="destructive" size="sm">
+                    Remove
+                  </Button>
                 </form>
               </li>
             ))}
@@ -746,15 +913,22 @@ const SettingsModal = (props: {
             hx-swap="innerHTML"
             class="flex gap-2"
           >
-            <Input type="text" name="username" placeholder="Invite by username" class="flex-1" />
-            <Button type="submit" variant="outline">Invite</Button>
+            <Input
+              type="text"
+              name="username"
+              placeholder="Invite by username"
+              class="flex-1"
+            />
+            <Button type="submit" variant="outline">
+              Invite
+            </Button>
           </form>
 
           {/* Invite Link */}
           <div class="mt-4 pt-4 border-t border-slate-200">
             <h5 class="text-xs font-medium text-slate-500 mb-2">Invite Link</h5>
             <div
-              x-data={`{ token: '${props.inviteToken || ''}', url: '', copied: false }`}
+              x-data={`{ token: '${props.inviteToken || ""}', url: '', copied: false }`}
               x-init={`if (token) url = location.origin + '/invite/' + token`}
             >
               <template x-if="!token">
@@ -799,7 +973,9 @@ const SettingsModal = (props: {
                       Revoke
                     </button>
                   </div>
-                  <p class="text-[11px] text-slate-400">Anyone with this link can join the board.</p>
+                  <p class="text-[11px] text-slate-400">
+                    Anyone with this link can join the board.
+                  </p>
                 </div>
               </template>
             </div>
@@ -823,7 +999,9 @@ const SettingsModal = (props: {
                 }`}
               >
                 <span class="font-mono">/{b.slug}</span>
-                <span class={`text-xs ${b.slug === props.board.slug ? "text-slate-400" : "text-slate-400"}`}>
+                <span
+                  class={`text-xs ${b.slug === props.board.slug ? "text-slate-400" : "text-slate-400"}`}
+                >
                   {role}
                 </span>
               </a>
@@ -837,7 +1015,12 @@ const SettingsModal = (props: {
       {/* Sign out */}
       <div class="pt-4 border-t border-slate-200">
         <form action="/api/user/logout" method="post">
-          <Button type="submit" variant="ghost" size="sm" class="text-slate-500">
+          <Button
+            type="submit"
+            variant="ghost"
+            size="sm"
+            class="text-slate-500"
+          >
             Sign Out
           </Button>
         </form>
@@ -873,13 +1056,30 @@ export const BoardView = (props: {
       id="canvas"
       x-data="board()"
       data-background={props.board.background || "grid"}
-      data-boards={JSON.stringify((props.allBoards || []).map(b => ({ slug: b.board.slug, role: b.role })))}
+      data-boards={JSON.stringify(
+        (props.allBoards || []).map((b) => ({
+          slug: b.board.slug,
+          role: b.role,
+        })),
+      )}
       data-slug={props.board.slug}
-      data-members={JSON.stringify([props.board.owner, ...props.members.map(m => m.username)])}
+      data-members={JSON.stringify([
+        props.board.owner,
+        ...props.members.map((m) => m.username),
+      ])}
     >
-      <div id="notes" sse-swap="note:created" hx-swap="beforeend" style="position:relative;width:4000px;height:4000px;transform-origin:0 0;">
+      <div
+        id="notes"
+        sse-swap="note:created"
+        hx-swap="beforeend"
+        style="position:relative;width:4000px;height:4000px;transform-origin:0 0;"
+      >
         {props.notes.map((note) => (
-          <Takkr note={note} key={note.id} attachmentCount={props.attachmentCounts?.get(note.id) ?? 0} />
+          <Takkr
+            note={note}
+            key={note.id}
+            attachmentCount={props.attachmentCounts?.get(note.id) ?? 0}
+          />
         ))}
       </div>
       <div id="note-updated" sse-swap="note:updated" hx-swap="none" />
@@ -927,7 +1127,11 @@ export const BoardView = (props: {
           title={props.username}
         >
           {props.avatar ? (
-            <img src={`/api/user/avatar/${props.avatar}`} class="h-10 w-10 rounded-full object-cover" alt="" />
+            <img
+              src={`/api/user/avatar/${props.avatar}`}
+              class="h-10 w-10 rounded-full object-cover"
+              alt=""
+            />
           ) : (
             <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold uppercase">
               {props.username.slice(0, 2)}
@@ -975,10 +1179,13 @@ export const BoardView = (props: {
 
 // Landing page — the board IS the pitch
 // Landing page — hero + draggable feature notes from DB
-export const Landing = (props: { notes: Note.Record[]; background?: string }) => {
-  const features = props.notes.filter(n => n.tags?.includes("feature"));
-  const usecases = props.notes.filter(n => n.tags?.includes("usecase"));
-  const philosophy = props.notes.filter(n => n.tags?.includes("philosophy"));
+export const Landing = (props: {
+  notes: Note.Record[];
+  background?: string;
+}) => {
+  const features = props.notes.filter((n) => n.tags?.includes("feature"));
+  const usecases = props.notes.filter((n) => n.tags?.includes("usecase"));
+  const philosophy = props.notes.filter((n) => n.tags?.includes("philosophy"));
 
   const NoteGrid = (gridProps: { notes: Note.Record[]; id: string }) => (
     <div
@@ -987,7 +1194,8 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
       style="min-height: 500px;"
     >
       {gridProps.notes.map((note, i) => {
-        const grp = (note.tags || "").split(",").find(t => t.startsWith("grp-")) || "";
+        const grp =
+          (note.tags || "").split(",").find((t) => t.startsWith("grp-")) || "";
         return (
           <div
             key={note.id}
@@ -1008,35 +1216,64 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
       {/* SEO: semantic content from actual notes */}
       <article class="sr-only">
         <h1>takkr — Collaborative Sticky Notes for Your Ideas</h1>
-        <p>Free, real-time collaborative sticky note boards. Organize ideas visually with your team.</p>
+        <p>
+          Free, real-time collaborative sticky note boards. Organize ideas
+          visually with your team.
+        </p>
         <h2>Features</h2>
-        {features.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
+        {features.map((n) => (
+          <section key={n.id}>
+            <h3>{n.content}</h3>
+            {n.description && <p>{n.description}</p>}
+          </section>
+        ))}
         <h2>Use Cases</h2>
-        {usecases.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
+        {usecases.map((n) => (
+          <section key={n.id}>
+            <h3>{n.content}</h3>
+            {n.description && <p>{n.description}</p>}
+          </section>
+        ))}
         <h2>Philosophy</h2>
-        {philosophy.map((n) => (<section key={n.id}><h3>{n.content}</h3>{n.description && <p>{n.description}</p>}</section>))}
+        {philosophy.map((n) => (
+          <section key={n.id}>
+            <h3>{n.content}</h3>
+            {n.description && <p>{n.description}</p>}
+          </section>
+        ))}
       </article>
 
       {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "takkr",
-        "description": "Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source.",
-        "applicationCategory": "ProductivityApplication",
-        "operatingSystem": "Web",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "featureList": [...features, ...usecases].map(n => n.content),
-      })}} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "takkr",
+            description:
+              "Free, real-time collaborative sticky note boards. Drag and drop notes, invite teammates, use vim shortcuts and a command palette. Passkey login, no passwords. Open source.",
+            applicationCategory: "ProductivityApplication",
+            operatingSystem: "Web",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            featureList: [...features, ...usecases].map((n) => n.content),
+          }),
+        }}
+      />
 
       {/* ── Hero ── */}
       <section class="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
-        <h1 class="text-7xl sm:text-8xl font-bold text-slate-900 tracking-tight font-handwriting">takkr</h1>
+        <h1 class="text-7xl sm:text-8xl font-bold text-slate-900 tracking-tight font-handwriting">
+          takkr
+        </h1>
         <p class="mt-6 text-2xl sm:text-4xl font-bold text-slate-800 max-w-2xl leading-tight">
-          Collaborative sticky notes<br />for your ideas
+          Collaborative sticky notes
+          <br />
+          for your ideas
         </p>
         <p class="mt-4 text-lg text-slate-500 max-w-md">
-          Drag, drop, and organize — together, in real-time.<br />
+          Drag, drop, and organize — together, in real-time.
+          <br />
           Free &amp; open source. No passwords, ever.
         </p>
         <div class="mt-10 flex flex-col sm:flex-row items-center gap-4">
@@ -1053,7 +1290,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
             Sign In
           </a>
         </div>
-        <p class="mt-4 text-xs text-slate-400">No credit card. No setup. Just go.</p>
+        <p class="mt-4 text-xs text-slate-400">
+          No credit card. No setup. Just go.
+        </p>
       </section>
 
       {/* ── Board Zone — one unified background for all note sections ── */}
@@ -1063,7 +1302,10 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         data-background="grid"
       >
         {/* Theme switcher arrows */}
-        <div class="sticky top-4 z-30 flex justify-between px-3 sm:px-6 pointer-events-none" style="margin-bottom: -40px;">
+        <div
+          class="sticky top-4 z-30 flex justify-between px-3 sm:px-6 pointer-events-none"
+          style="margin-bottom: -40px;"
+        >
           <button
             id="carousel-prev"
             class="pointer-events-auto w-10 h-10 rounded-full bg-white/80 border border-slate-200 shadow-md flex items-center justify-center hover:bg-white transition-colors text-slate-600 hover:text-slate-900"
@@ -1084,7 +1326,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
 
         {/* ── Features ── */}
         <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">What's inside</h2>
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">
+            What's inside
+          </h2>
           <p class="text-center text-sm board-zone-subtext mb-10">
             go ahead, drag them around
           </p>
@@ -1093,7 +1337,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
 
         {/* ── Use cases ── */}
         <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">Use it for anything</h2>
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">
+            Use it for anything
+          </h2>
           <p class="text-center text-sm board-zone-subtext mb-10">
             boards that fit how you work
           </p>
@@ -1102,7 +1348,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
 
         {/* ── Philosophy ── */}
         <section class="relative mx-auto max-w-5xl px-6 pt-8 pb-16">
-          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">The takkr way</h2>
+          <h2 class="text-center text-3xl font-bold board-zone-heading mb-2">
+            The takkr way
+          </h2>
           <p class="text-center text-sm board-zone-subtext mb-10">
             minimalist by default, powerful on demand
           </p>
@@ -1112,7 +1360,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
 
       {/* ── Bottom CTA ── */}
       <section class="py-20 text-center border-t border-slate-100">
-        <h2 class="text-4xl font-bold text-slate-900 font-handwriting">Ready to try?</h2>
+        <h2 class="text-4xl font-bold text-slate-900 font-handwriting">
+          Ready to try?
+        </h2>
         <p class="mt-3 text-lg text-slate-500">Claim a board in seconds.</p>
         <a
           href="/~/join"
@@ -1120,7 +1370,9 @@ export const Landing = (props: { notes: Note.Record[]; background?: string }) =>
         >
           Start for Free →
         </a>
-        <p class="mt-3 text-xs text-slate-400">No credit card. No setup. Just go.</p>
+        <p class="mt-3 text-xs text-slate-400">
+          No credit card. No setup. Just go.
+        </p>
       </section>
     </div>
   );

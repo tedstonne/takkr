@@ -41,9 +41,19 @@ window.noteDialog = () => ({
       const y = Math.max(20, Math.round(cy + oy));
 
       // Remove old hidden inputs if any, then add fresh ones
-      this.$refs.form.querySelectorAll("input[name=x], input[name=y]").forEach(el => el.remove());
-      const ix = Object.assign(document.createElement("input"), { type: "hidden", name: "x", value: x });
-      const iy = Object.assign(document.createElement("input"), { type: "hidden", name: "y", value: y });
+      this.$refs.form
+        .querySelectorAll("input[name=x], input[name=y]")
+        .forEach((el) => el.remove());
+      const ix = Object.assign(document.createElement("input"), {
+        type: "hidden",
+        name: "x",
+        value: x,
+      });
+      const iy = Object.assign(document.createElement("input"), {
+        type: "hidden",
+        name: "y",
+        value: y,
+      });
       this.$refs.form.append(ix, iy);
     }
 
@@ -56,7 +66,9 @@ window.noteDialog = () => ({
     this.$el.close();
     this.$refs.form?.reset();
     // Remove injected position inputs
-    this.$refs.form?.querySelectorAll("input[name=x], input[name=y]").forEach(el => el.remove());
+    this.$refs.form
+      ?.querySelectorAll("input[name=x], input[name=y]")
+      .forEach((el) => el.remove());
   },
 });
 
@@ -72,7 +84,11 @@ function formatDate(dateStr) {
   if (!dateStr) return "";
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   } catch (_) {
     return dateStr;
   }
@@ -672,13 +688,17 @@ window.board = () => ({
     const canvas = document.getElementById("canvas");
 
     // Pinch-to-zoom (ctrl+wheel = trackpad pinch on most browsers)
-    canvas.addEventListener("wheel", (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        if (e.deltaY < 0) this.zoomIn(e);
-        else this.zoomOut(e);
-      }
-    }, { passive: false });
+    canvas.addEventListener(
+      "wheel",
+      (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          if (e.deltaY < 0) this.zoomIn(e);
+          else this.zoomOut(e);
+        }
+      },
+      { passive: false },
+    );
   },
 
   _applyZoom(oldZoom, pivotClientX, pivotClientY) {
@@ -710,7 +730,8 @@ window.board = () => ({
       this.zoomLevel = ZOOM_LEVELS[idx + 1];
     } else if (idx === -1) {
       // find next level above current
-      this.zoomLevel = ZOOM_LEVELS.find(z => z > old) || ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+      this.zoomLevel =
+        ZOOM_LEVELS.find((z) => z > old) || ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
     }
     const cx = e ? e.clientX : window.innerWidth / 2;
     const cy = e ? e.clientY : window.innerHeight / 2;
@@ -723,7 +744,8 @@ window.board = () => ({
     if (idx > 0) {
       this.zoomLevel = ZOOM_LEVELS[idx - 1];
     } else if (idx === -1) {
-      this.zoomLevel = [...ZOOM_LEVELS].reverse().find(z => z < old) || ZOOM_LEVELS[0];
+      this.zoomLevel =
+        [...ZOOM_LEVELS].reverse().find((z) => z < old) || ZOOM_LEVELS[0];
     }
     const cx = e ? e.clientX : window.innerWidth / 2;
     const cy = e ? e.clientY : window.innerHeight / 2;
@@ -742,7 +764,9 @@ window.board = () => ({
     el.textContent = `${Math.round(this.zoomLevel * 100)}%`;
     el.style.opacity = "1";
     clearTimeout(this._zoomIndicatorTimer);
-    this._zoomIndicatorTimer = setTimeout(() => { el.style.opacity = "0"; }, 2000);
+    this._zoomIndicatorTimer = setTimeout(() => {
+      el.style.opacity = "0";
+    }, 2000);
   },
 
   // --- Viewport persistence ---
@@ -808,43 +832,60 @@ window.board = () => ({
     });
 
     // Avatar upload
-    document.getElementById("avatar-file-input")?.addEventListener("change", async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (file.size > 2 * 1024 * 1024) { alert("Image too large (max 2MB)"); return; }
-      if (!file.type.startsWith("image/")) { alert("Must be an image"); return; }
-
-      const form = new FormData();
-      form.append("file", file);
-
-      try {
-        const res = await fetch("/api/user/avatar", { method: "POST", body: form });
-        if (!res.ok) { alert("Upload failed"); return; }
-        const data = await res.json();
-
-        // Update avatar in settings modal
-        const label = document.getElementById("avatar-label");
-        const initials = document.getElementById("settings-avatar-initials");
-        const existing = document.getElementById("settings-avatar-img");
-
-        if (existing) {
-          existing.src = `/api/user/avatar/${data.avatar}`;
-        } else if (initials) {
-          const img = document.createElement("img");
-          img.src = `/api/user/avatar/${data.avatar}`;
-          img.id = "settings-avatar-img";
-          img.className = "h-14 w-14 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-slate-400 transition-all";
-          initials.replaceWith(img);
+    document
+      .getElementById("avatar-file-input")
+      ?.addEventListener("change", async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Image too large (max 2MB)");
+          return;
+        }
+        if (!file.type.startsWith("image/")) {
+          alert("Must be an image");
+          return;
         }
 
-        // Update header avatar
-        const headerBtn = document.getElementById("settings-btn");
-        if (headerBtn) {
-          headerBtn.innerHTML = `<img src="/api/user/avatar/${data.avatar}" class="h-10 w-10 rounded-full object-cover" alt="" />`;
+        const form = new FormData();
+        form.append("file", file);
+
+        try {
+          const res = await fetch("/api/user/avatar", {
+            method: "POST",
+            body: form,
+          });
+          if (!res.ok) {
+            alert("Upload failed");
+            return;
+          }
+          const data = await res.json();
+
+          // Update avatar in settings modal
+          const label = document.getElementById("avatar-label");
+          const initials = document.getElementById("settings-avatar-initials");
+          const existing = document.getElementById("settings-avatar-img");
+
+          if (existing) {
+            existing.src = `/api/user/avatar/${data.avatar}`;
+          } else if (initials) {
+            const img = document.createElement("img");
+            img.src = `/api/user/avatar/${data.avatar}`;
+            img.id = "settings-avatar-img";
+            img.className =
+              "h-14 w-14 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-slate-400 transition-all";
+            initials.replaceWith(img);
+          }
+
+          // Update header avatar
+          const headerBtn = document.getElementById("settings-btn");
+          if (headerBtn) {
+            headerBtn.innerHTML = `<img src="/api/user/avatar/${data.avatar}" class="h-10 w-10 rounded-full object-cover" alt="" />`;
+          }
+        } catch (_) {
+          alert("Upload failed");
         }
-      } catch (_) { alert("Upload failed"); }
-      e.target.value = "";
-    });
+        e.target.value = "";
+      });
 
     // Inline edit fields (37signals pattern)
     document.querySelectorAll(".inline-edit-field").forEach((field) => {
@@ -886,7 +927,10 @@ window.board = () => ({
 
       // Enter → save, Escape → cancel
       input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") { e.preventDefault(); commit(); }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit();
+        }
         if (e.key === "Escape") {
           e.preventDefault();
           input.classList.add("hidden");
@@ -899,72 +943,89 @@ window.board = () => ({
     });
 
     // Font picker in settings
-    document.getElementById("settings-font-grid")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-font]");
-      if (!btn) return;
-      const font = btn.dataset.font;
+    document
+      .getElementById("settings-font-grid")
+      ?.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-font]");
+        if (!btn) return;
+        const font = btn.dataset.font;
 
-      // Update active state
-      document.querySelectorAll("#settings-font-grid .settings-font-btn").forEach((b) => {
-        b.classList.toggle("active", b.dataset.font === font);
+        // Update active state
+        document
+          .querySelectorAll("#settings-font-grid .settings-font-btn")
+          .forEach((b) => {
+            b.classList.toggle("active", b.dataset.font === font);
+          });
+
+        // Update CSS variable live
+        document.documentElement.style.setProperty(
+          "--takkr-font",
+          `"${FONT_MAP[font] || "Caveat"}"`,
+        );
+
+        // Save
+        fetch("/api/user/font", {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `font=${encodeURIComponent(font)}`,
+        });
       });
-
-      // Update CSS variable live
-      document.documentElement.style.setProperty("--takkr-font", `"${FONT_MAP[font] || "Caveat"}"`);
-
-      // Save
-      fetch("/api/user/font", {
-        method: "PUT",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `font=${encodeURIComponent(font)}`,
-      });
-    });
 
     // Color picker in settings
-    document.getElementById("settings-color-picker")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-color]");
-      if (!btn) return;
-      const color = btn.dataset.color;
+    document
+      .getElementById("settings-color-picker")
+      ?.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-color]");
+        if (!btn) return;
+        const color = btn.dataset.color;
 
-      document.querySelectorAll("#settings-color-picker .settings-color-btn").forEach((b) => {
-        b.classList.toggle("active", b.dataset.color === color);
+        document
+          .querySelectorAll("#settings-color-picker .settings-color-btn")
+          .forEach((b) => {
+            b.classList.toggle("active", b.dataset.color === color);
+          });
+
+        // Update the add-note dialog default
+        const radio = document.querySelector(
+          `#add-note-dialog input[name="color"][value="${color}"]`,
+        );
+        if (radio) radio.checked = true;
+
+        fetch("/api/user/color", {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `color=${encodeURIComponent(color)}`,
+        });
       });
-
-      // Update the add-note dialog default
-      const radio = document.querySelector(`#add-note-dialog input[name="color"][value="${color}"]`);
-      if (radio) radio.checked = true;
-
-      fetch("/api/user/color", {
-        method: "PUT",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `color=${encodeURIComponent(color)}`,
-      });
-    });
 
     // Background picker in settings
-    document.getElementById("settings-bg-grid")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-bg]");
-      if (!btn) return;
-      const bg = btn.dataset.bg;
-      const canvas = document.getElementById("canvas");
-      if (!canvas) return;
+    document
+      .getElementById("settings-bg-grid")
+      ?.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-bg]");
+        if (!btn) return;
+        const bg = btn.dataset.bg;
+        const canvas = document.getElementById("canvas");
+        if (!canvas) return;
 
-      // Update active
-      document.querySelectorAll("#settings-bg-grid .settings-bg-btn").forEach((b) => {
-        b.classList.toggle("active", b.dataset.bg === bg);
+        // Update active
+        document
+          .querySelectorAll("#settings-bg-grid .settings-bg-btn")
+          .forEach((b) => {
+            b.classList.toggle("active", b.dataset.bg === bg);
+          });
+
+        // Swap background live
+        canvas.dataset.background = bg;
+
+        // Save board background
+        const slug = window.location.pathname.slice(1);
+        fetch(`/api/boards/${slug}/background`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `background=${encodeURIComponent(bg)}`,
+        });
       });
-
-      // Swap background live
-      canvas.dataset.background = bg;
-
-      // Save board background
-      const slug = window.location.pathname.slice(1);
-      fetch(`/api/boards/${slug}/background`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `background=${encodeURIComponent(bg)}`,
-      });
-    });
   },
 
   setupKeyboard() {
@@ -1035,9 +1096,7 @@ window.board = () => ({
             body: form,
           });
           if (!res.ok) continue;
-        } catch (_) {
-          continue;
-        }
+        } catch (_) {}
       }
 
       note.classList.remove("uploading");
@@ -1069,13 +1128,17 @@ window.board = () => ({
     const canvas = document.getElementById("canvas");
 
     const preventScroll = (e) => {
-      if (this.dragging) { e.preventDefault(); window.scrollTo(0, 0); }
+      if (this.dragging) {
+        e.preventDefault();
+        window.scrollTo(0, 0);
+      }
     };
 
     canvas.addEventListener("pointerdown", (e) => {
       const note = e.target.closest(".takkr");
       if (!note) return;
-      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT")
+        return;
 
       e.preventDefault();
       this.dragging = note;
@@ -1108,8 +1171,12 @@ window.board = () => ({
       const noteWidth = this.dragging.offsetWidth;
       const noteHeight = this.dragging.offsetHeight;
 
-      let x = (e.clientX - canvasRect.left + canvas.scrollLeft) / z - this.dragOffset.x / z;
-      let y = (e.clientY - canvasRect.top + canvas.scrollTop) / z - this.dragOffset.y / z;
+      let x =
+        (e.clientX - canvasRect.left + canvas.scrollLeft) / z -
+        this.dragOffset.x / z;
+      let y =
+        (e.clientY - canvasRect.top + canvas.scrollTop) / z -
+        this.dragOffset.y / z;
       x = Math.max(0, x);
       y = Math.max(0, y);
 
@@ -1176,16 +1243,34 @@ window.board = () => ({
     // Wire events (once)
     if (!el._wired) {
       el._wired = true;
-      el.querySelector(".palette-backdrop").addEventListener("click", () => this.closePalette());
+      el.querySelector(".palette-backdrop").addEventListener("click", () =>
+        this.closePalette(),
+      );
       input.addEventListener("input", () => {
         this._paletteIndex = 0;
         this._updatePalette(input.value);
       });
       input.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") { e.preventDefault(); this.closePalette(); return; }
-        if (e.key === "ArrowDown") { e.preventDefault(); this._paletteNav(1); return; }
-        if (e.key === "ArrowUp") { e.preventDefault(); this._paletteNav(-1); return; }
-        if (e.key === "Enter") { e.preventDefault(); this._paletteExec(); return; }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          this.closePalette();
+          return;
+        }
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          this._paletteNav(1);
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          this._paletteNav(-1);
+          return;
+        }
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this._paletteExec();
+          return;
+        }
       });
     }
   },
@@ -1221,8 +1306,12 @@ window.board = () => ({
       const userQuery = atMatch[1].toLowerCase();
       const canvas = document.getElementById("canvas");
       let members = [];
-      try { members = JSON.parse(canvas?.dataset.members || "[]"); } catch (_) {}
-      const matchedMembers = members.filter(m => m.toLowerCase().includes(userQuery));
+      try {
+        members = JSON.parse(canvas?.dataset.members || "[]");
+      } catch (_) {}
+      const matchedMembers = members.filter((m) =>
+        m.toLowerCase().includes(userQuery),
+      );
 
       for (const username of matchedMembers) {
         items.push({
@@ -1230,7 +1319,10 @@ window.board = () => ({
           icon: "👤",
           label: `Show ${username}'s cards`,
           hint: `@${username}`,
-          action: () => { this.closePalette(); this._filterByAssignee(username); },
+          action: () => {
+            this.closePalette();
+            this._filterByAssignee(username);
+          },
         });
       }
       if (matchedMembers.length > 0) {
@@ -1239,12 +1331,16 @@ window.board = () => ({
           icon: "✕",
           label: "Clear filter",
           hint: "",
-          action: () => { this.closePalette(); this._filterByAssignee(null); },
+          action: () => {
+            this.closePalette();
+            this._filterByAssignee(null);
+          },
         });
       }
 
       this._paletteItems = items;
-      if (this._paletteIndex >= items.length) this._paletteIndex = Math.max(0, items.length - 1);
+      if (this._paletteIndex >= items.length)
+        this._paletteIndex = Math.max(0, items.length - 1);
       this._renderPaletteItems(items, q);
       return;
     }
@@ -1257,7 +1353,11 @@ window.board = () => ({
       const assigned = note.dataset.assigned || "";
       const searchText = `${title} ${tags} ${assigned}`;
       if (this._fuzzyMatch(searchText, q)) {
-        const hint = assigned ? `@${assigned}` : (tags ? `#${tags.split(",")[0]}` : "");
+        const hint = assigned
+          ? `@${assigned}`
+          : tags
+            ? `#${tags.split(",")[0]}`
+            : "";
         items.push({ type: "note", icon: "📝", label: title, hint, el: note });
       }
     }
@@ -1269,31 +1369,124 @@ window.board = () => ({
     for (const b of boards) {
       if (b.slug === currentSlug) continue;
       if (this._fuzzyMatch(b.slug, q)) {
-        items.push({ type: "board", icon: "📋", label: `/${b.slug}`, hint: b.role, slug: b.slug });
+        items.push({
+          type: "board",
+          icon: "📋",
+          label: `/${b.slug}`,
+          hint: b.role,
+          slug: b.slug,
+        });
       }
     }
 
     // Commands
     const commands = [
-      { label: "New note", icon: "✨", hint: "n", action: () => { this.closePalette(); document.getElementById("add-note-dialog")?.showModal(); } },
-      { label: "Delete note", icon: "🗑️", hint: "x", action: () => { this.closePalette(); this._deleteSelected(); } },
-      { label: "Duplicate note", icon: "📋", hint: "d", action: () => { this.closePalette(); this._duplicateSelected(); } },
-      { label: "Cycle color", icon: "🎨", hint: "c", action: () => { this.closePalette(); this._cycleColor(); } },
-      { label: "Settings", icon: "⚙️", hint: "s", action: () => { this.closePalette(); document.getElementById("settings-modal")?.showModal(); } },
-      { label: "Members", icon: "👥", hint: "m", action: () => { this.closePalette(); document.getElementById("members-modal")?.showModal(); } },
-      { label: "Zoom in", icon: "🔍", hint: "+", action: () => { this.closePalette(); this.zoomIn(); } },
-      { label: "Zoom out", icon: "🔍", hint: "−", action: () => { this.closePalette(); this.zoomOut(); } },
-      { label: "Reset zoom", icon: "🔍", hint: "0", action: () => { this.closePalette(); this.zoomReset(); } },
-      { label: "Help", icon: "❓", hint: "?", action: () => { this.closePalette(); document.getElementById("help-modal")?.showModal(); } },
+      {
+        label: "New note",
+        icon: "✨",
+        hint: "n",
+        action: () => {
+          this.closePalette();
+          document.getElementById("add-note-dialog")?.showModal();
+        },
+      },
+      {
+        label: "Delete note",
+        icon: "🗑️",
+        hint: "x",
+        action: () => {
+          this.closePalette();
+          this._deleteSelected();
+        },
+      },
+      {
+        label: "Duplicate note",
+        icon: "📋",
+        hint: "d",
+        action: () => {
+          this.closePalette();
+          this._duplicateSelected();
+        },
+      },
+      {
+        label: "Cycle color",
+        icon: "🎨",
+        hint: "c",
+        action: () => {
+          this.closePalette();
+          this._cycleColor();
+        },
+      },
+      {
+        label: "Settings",
+        icon: "⚙️",
+        hint: "s",
+        action: () => {
+          this.closePalette();
+          document.getElementById("settings-modal")?.showModal();
+        },
+      },
+      {
+        label: "Members",
+        icon: "👥",
+        hint: "m",
+        action: () => {
+          this.closePalette();
+          document.getElementById("members-modal")?.showModal();
+        },
+      },
+      {
+        label: "Zoom in",
+        icon: "🔍",
+        hint: "+",
+        action: () => {
+          this.closePalette();
+          this.zoomIn();
+        },
+      },
+      {
+        label: "Zoom out",
+        icon: "🔍",
+        hint: "−",
+        action: () => {
+          this.closePalette();
+          this.zoomOut();
+        },
+      },
+      {
+        label: "Reset zoom",
+        icon: "🔍",
+        hint: "0",
+        action: () => {
+          this.closePalette();
+          this.zoomReset();
+        },
+      },
+      {
+        label: "Help",
+        icon: "❓",
+        hint: "?",
+        action: () => {
+          this.closePalette();
+          document.getElementById("help-modal")?.showModal();
+        },
+      },
     ];
     for (const cmd of commands) {
       if (this._fuzzyMatch(cmd.label, q)) {
-        items.push({ type: "command", icon: cmd.icon, label: cmd.label, hint: cmd.hint, action: cmd.action });
+        items.push({
+          type: "command",
+          icon: cmd.icon,
+          label: cmd.label,
+          hint: cmd.hint,
+          action: cmd.action,
+        });
       }
     }
 
     this._paletteItems = items;
-    if (this._paletteIndex >= items.length) this._paletteIndex = Math.max(0, items.length - 1);
+    if (this._paletteIndex >= items.length)
+      this._paletteIndex = Math.max(0, items.length - 1);
     this._renderPaletteItems(items, q);
   },
 
@@ -1303,7 +1496,11 @@ window.board = () => ({
 
     let html = "";
     let lastType = "";
-    const sectionLabels = { note: "Notes", board: "Boards", command: "Commands" };
+    const sectionLabels = {
+      note: "Notes",
+      board: "Boards",
+      command: "Commands",
+    };
     items.forEach((item, i) => {
       if (item.type !== lastType) {
         html += `<div class="palette-section">${sectionLabels[item.type]}</div>`;
@@ -1316,7 +1513,8 @@ window.board = () => ({
       </div>`;
     });
     if (!items.length && q) {
-      html = '<div class="palette-item text-slate-400"><span class="palette-item-icon">🔍</span><span>No results</span></div>';
+      html =
+        '<div class="palette-item text-slate-400"><span class="palette-item-icon">🔍</span><span>No results</span></div>';
     }
     results.innerHTML = html;
 
@@ -1327,7 +1525,9 @@ window.board = () => ({
         this._paletteExec();
       });
       el.addEventListener("mouseenter", () => {
-        results.querySelector(".palette-item.active")?.classList.remove("active");
+        results
+          .querySelector(".palette-item.active")
+          ?.classList.remove("active");
         el.classList.add("active");
         this._paletteIndex = Number(el.dataset.index);
       });
@@ -1345,9 +1545,12 @@ window.board = () => ({
     if (!this._paletteItems.length) return;
     results.querySelector(".palette-item.active")?.classList.remove("active");
     this._paletteIndex += dir;
-    if (this._paletteIndex < 0) this._paletteIndex = this._paletteItems.length - 1;
+    if (this._paletteIndex < 0)
+      this._paletteIndex = this._paletteItems.length - 1;
     if (this._paletteIndex >= this._paletteItems.length) this._paletteIndex = 0;
-    const active = results.querySelector(`[data-index="${this._paletteIndex}"]`);
+    const active = results.querySelector(
+      `[data-index="${this._paletteIndex}"]`,
+    );
     active?.classList.add("active");
     active?.scrollIntoView({ block: "nearest" });
   },
@@ -1374,10 +1577,13 @@ window.board = () => ({
     const notes = document.querySelectorAll("#notes > .takkr");
     if (!username) {
       // Clear filter — restore all
-      notes.forEach(n => { n.style.opacity = ""; n.style.transition = "opacity 0.3s ease"; });
+      notes.forEach((n) => {
+        n.style.opacity = "";
+        n.style.transition = "opacity 0.3s ease";
+      });
       return;
     }
-    notes.forEach(n => {
+    notes.forEach((n) => {
       const assigned = n.dataset.assigned || "";
       const match = assigned === username;
       n.style.transition = "opacity 0.3s ease";
@@ -1397,7 +1603,9 @@ window.board = () => ({
     if (!this.selected) return;
     const noteId = this.selected.dataset.id;
     try {
-      const res = await fetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+      const res = await fetch(`/api/notes/${noteId}/duplicate`, {
+        method: "POST",
+      });
       if (!res.ok) return;
       const html = await res.text();
       document.getElementById("notes").insertAdjacentHTML("beforeend", html);
@@ -1407,12 +1615,16 @@ window.board = () => ({
   _cycleColor() {
     if (!this.selected) return;
     const colors = _T.colors || ["yellow", "pink", "green", "blue", "orange"];
-    const current = Array.from(this.selected.classList)
-      .find(c => c.startsWith("takkr-") && c !== "takkr")?.replace("takkr-", "") || "yellow";
+    const current =
+      Array.from(this.selected.classList)
+        .find((c) => c.startsWith("takkr-") && c !== "takkr")
+        ?.replace("takkr-", "") || "yellow";
     const idx = colors.indexOf(current);
     const next = colors[(idx + 1) % colors.length];
 
-    this.selected.className = this.selected.className.replace(/takkr-\w+/g, "").trim() + ` takkr-${next}`;
+    this.selected.className =
+      this.selected.className.replace(/takkr-\w+/g, "").trim() +
+      ` takkr-${next}`;
 
     fetch(`/api/notes/${this.selected.dataset.id}`, {
       method: "PUT",
@@ -1427,18 +1639,26 @@ window.board = () => ({
 
     // Zoom shortcuts work everywhere
     if ((e.metaKey || e.ctrlKey) && (e.key === "=" || e.key === "+")) {
-      e.preventDefault(); this.zoomIn(); return;
+      e.preventDefault();
+      this.zoomIn();
+      return;
     }
     if ((e.metaKey || e.ctrlKey) && e.key === "-") {
-      e.preventDefault(); this.zoomOut(); return;
+      e.preventDefault();
+      this.zoomOut();
+      return;
     }
     if ((e.metaKey || e.ctrlKey) && e.key === "0") {
-      e.preventDefault(); this.zoomReset(); return;
+      e.preventDefault();
+      this.zoomReset();
+      return;
     }
 
     // Cmd+P / Ctrl+P → palette
     if ((e.metaKey || e.ctrlKey) && e.key === "p") {
-      e.preventDefault(); this.openPalette(); return;
+      e.preventDefault();
+      this.openPalette();
+      return;
     }
 
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
@@ -1468,61 +1688,132 @@ window.board = () => ({
         return;
       }
       this._gPending = true;
-      setTimeout(() => { this._gPending = false; }, 400);
+      setTimeout(() => {
+        this._gPending = false;
+      }, 400);
       return;
     }
     this._gPending = false;
 
     switch (e.key) {
       // Vim navigation
-      case "h": e.preventDefault(); this.selectNearest("left"); break;
-      case "j": e.preventDefault(); this.selectNearest("down"); break;
-      case "k": e.preventDefault(); this.selectNearest("up"); break;
-      case "l": e.preventDefault(); this.selectNearest("right"); break;
+      case "h":
+        e.preventDefault();
+        this.selectNearest("left");
+        break;
+      case "j":
+        e.preventDefault();
+        this.selectNearest("down");
+        break;
+      case "k":
+        e.preventDefault();
+        this.selectNearest("up");
+        break;
+      case "l":
+        e.preventDefault();
+        this.selectNearest("right");
+        break;
 
       // G → last note
       case "G":
         e.preventDefault();
-        { const notes = Array.from(document.querySelectorAll(".takkr"));
-          if (notes.length) this.select(notes[notes.length - 1]); }
+        {
+          const notes = Array.from(document.querySelectorAll(".takkr"));
+          if (notes.length) this.select(notes[notes.length - 1]);
+        }
         break;
 
       // Actions
-      case "n": e.preventDefault(); document.getElementById("add-note-dialog")?.showModal(); break;
+      case "n":
+        e.preventDefault();
+        document.getElementById("add-note-dialog")?.showModal();
+        break;
       case "x":
       case "Delete":
       case "Backspace":
-        e.preventDefault(); this._deleteSelected(); break;
-      case "d": e.preventDefault(); this._duplicateSelected(); break;
-      case "c": e.preventDefault(); this._cycleColor(); break;
-      case "s": e.preventDefault(); document.getElementById("settings-modal")?.showModal(); break;
-      case "m": e.preventDefault(); document.getElementById("members-modal")?.showModal(); break;
-      case "/": e.preventDefault(); this.openPalette(); break;
+        e.preventDefault();
+        this._deleteSelected();
+        break;
+      case "d":
+        e.preventDefault();
+        this._duplicateSelected();
+        break;
+      case "c":
+        e.preventDefault();
+        this._cycleColor();
+        break;
+      case "s":
+        e.preventDefault();
+        document.getElementById("settings-modal")?.showModal();
+        break;
+      case "m":
+        e.preventDefault();
+        document.getElementById("members-modal")?.showModal();
+        break;
+      case "/":
+        e.preventDefault();
+        this.openPalette();
+        break;
 
       // Zoom without modifier
-      case "+": case "=": e.preventDefault(); this.zoomIn(); break;
-      case "-": e.preventDefault(); this.zoomOut(); break;
-
-      case "?": e.preventDefault(); document.getElementById("help-modal")?.showModal(); break;
-      case "Escape":
-        if (this._activeAssigneeFilter) { this._filterByAssignee(null); }
-        else if (this.selected) { this.selected.classList.remove("selected"); this.selected = null; }
+      case "+":
+      case "=":
+        e.preventDefault();
+        this.zoomIn();
         break;
-      case "Tab": e.preventDefault(); this.selectNext(e.shiftKey ? -1 : 1); break;
-      case "Enter": e.preventDefault(); if (this.selected) zoom.open(this.selected); break;
+      case "-":
+        e.preventDefault();
+        this.zoomOut();
+        break;
+
+      case "?":
+        e.preventDefault();
+        document.getElementById("help-modal")?.showModal();
+        break;
+      case "Escape":
+        if (this._activeAssigneeFilter) {
+          this._filterByAssignee(null);
+        } else if (this.selected) {
+          this.selected.classList.remove("selected");
+          this.selected = null;
+        }
+        break;
+      case "Tab":
+        e.preventDefault();
+        this.selectNext(e.shiftKey ? -1 : 1);
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (this.selected) zoom.open(this.selected);
+        break;
 
       // Arrow keys
-      case "ArrowUp": e.preventDefault(); this.selectNearest("up"); break;
-      case "ArrowDown": e.preventDefault(); this.selectNearest("down"); break;
-      case "ArrowLeft": e.preventDefault(); this.selectNearest("left"); break;
-      case "ArrowRight": e.preventDefault(); this.selectNearest("right"); break;
+      case "ArrowUp":
+        e.preventDefault();
+        this.selectNearest("up");
+        break;
+      case "ArrowDown":
+        e.preventDefault();
+        this.selectNearest("down");
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        this.selectNearest("left");
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        this.selectNearest("right");
+        break;
     }
   },
 
   selectNext(direction) {
     const notes = Array.from(document.querySelectorAll(".takkr"));
     if (notes.length === 0) return;
-    if (!this.selected) { this.select(notes[0]); return; }
+    if (!this.selected) {
+      this.select(notes[0]);
+      return;
+    }
     const currentIndex = notes.indexOf(this.selected);
     let nextIndex = currentIndex + direction;
     if (nextIndex < 0) nextIndex = notes.length - 1;
@@ -1533,7 +1824,10 @@ window.board = () => ({
   selectNearest(direction) {
     const notes = Array.from(document.querySelectorAll(".takkr"));
     if (notes.length === 0) return;
-    if (!this.selected) { this.select(notes[0]); return; }
+    if (!this.selected) {
+      this.select(notes[0]);
+      return;
+    }
 
     const current = {
       x: parseInt(this.selected.dataset.x, 10) || 0,
@@ -1550,15 +1844,26 @@ window.board = () => ({
 
       let valid = false;
       switch (direction) {
-        case "up": valid = y < current.y; break;
-        case "down": valid = y > current.y; break;
-        case "left": valid = x < current.x; break;
-        case "right": valid = x > current.x; break;
+        case "up":
+          valid = y < current.y;
+          break;
+        case "down":
+          valid = y > current.y;
+          break;
+        case "left":
+          valid = x < current.x;
+          break;
+        case "right":
+          valid = x > current.x;
+          break;
       }
 
       if (valid) {
         const distance = Math.sqrt((x - current.x) ** 2 + (y - current.y) ** 2);
-        if (distance < minDistance) { minDistance = distance; nearest = note; }
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearest = note;
+        }
       }
     }
 

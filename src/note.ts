@@ -70,7 +70,20 @@ export const create = (
 
 export const update = (
   id: number,
-  data: Partial<Pick<Record, "content" | "description" | "tags" | "checklist" | "x" | "y" | "z" | "color" | "assigned_to">>,
+  data: Partial<
+    Pick<
+      Record,
+      | "content"
+      | "description"
+      | "tags"
+      | "checklist"
+      | "x"
+      | "y"
+      | "z"
+      | "color"
+      | "assigned_to"
+    >
+  >,
 ): Record | null => {
   const note = byId(id);
   if (!note) return null;
@@ -91,7 +104,18 @@ export const update = (
        WHERE id = ?
        RETURNING *`,
     )
-    .get(content, description, tags, checklist, x, y, z, color, assigned_to, id);
+    .get(
+      content,
+      description,
+      tags,
+      checklist,
+      x,
+      y,
+      z,
+      color,
+      assigned_to,
+      id,
+    );
 
   return result as Record;
 };
@@ -102,7 +126,9 @@ export const remove = (id: number): void => {
 
 // Attachment helpers
 export const attachments = (noteId: number): Attachment[] => {
-  return db.query("SELECT * FROM attachments WHERE note_id = ? ORDER BY id ASC").all(noteId) as Attachment[];
+  return db
+    .query("SELECT * FROM attachments WHERE note_id = ? ORDER BY id ASC")
+    .all(noteId) as Attachment[];
 };
 
 export const attachmentById = (id: number): Attachment | null => {
@@ -110,10 +136,18 @@ export const attachmentById = (id: number): Attachment | null => {
   return a ? (a as Attachment) : null;
 };
 
-export const addAttachment = (noteId: number, filename: string, mimeType: string, size: number, path: string): Attachment => {
-  const result = db.query(
-    `INSERT INTO attachments (note_id, filename, mime_type, size, path) VALUES (?, ?, ?, ?, ?) RETURNING *`
-  ).get(noteId, filename, mimeType, size, path);
+export const addAttachment = (
+  noteId: number,
+  filename: string,
+  mimeType: string,
+  size: number,
+  path: string,
+): Attachment => {
+  const result = db
+    .query(
+      `INSERT INTO attachments (note_id, filename, mime_type, size, path) VALUES (?, ?, ?, ?, ?) RETURNING *`,
+    )
+    .get(noteId, filename, mimeType, size, path);
   return result as Attachment;
 };
 
@@ -122,14 +156,20 @@ export const removeAttachment = (id: number): void => {
 };
 
 export const attachmentCount = (noteId: number): number => {
-  const r = db.query("SELECT COUNT(*) as cnt FROM attachments WHERE note_id = ?").get(noteId) as { cnt: number };
+  const r = db
+    .query("SELECT COUNT(*) as cnt FROM attachments WHERE note_id = ?")
+    .get(noteId) as { cnt: number };
   return r.cnt;
 };
 
-export const attachmentCountsForBoard = (boardId: number): Map<number, number> => {
-  const rows = db.query(
-    "SELECT a.note_id, COUNT(*) as cnt FROM attachments a JOIN notes n ON a.note_id = n.id WHERE n.board_id = ? GROUP BY a.note_id"
-  ).all(boardId) as { note_id: number; cnt: number }[];
+export const attachmentCountsForBoard = (
+  boardId: number,
+): Map<number, number> => {
+  const rows = db
+    .query(
+      "SELECT a.note_id, COUNT(*) as cnt FROM attachments a JOIN notes n ON a.note_id = n.id WHERE n.board_id = ? GROUP BY a.note_id",
+    )
+    .all(boardId) as { note_id: number; cnt: number }[];
   const map = new Map<number, number>();
   for (const r of rows) map.set(r.note_id, r.cnt);
   return map;

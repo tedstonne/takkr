@@ -24,7 +24,9 @@ try {
 
 // Migration: add preferred_background column
 try {
-  db.exec(`ALTER TABLE users ADD COLUMN preferred_background TEXT DEFAULT 'grid'`);
+  db.exec(
+    `ALTER TABLE users ADD COLUMN preferred_background TEXT DEFAULT 'grid'`,
+  );
 } catch (_) {}
 
 // Migration: add display_name column
@@ -123,7 +125,9 @@ db.exec(`
     created DATETIME DEFAULT CURRENT_TIMESTAMP
   )
 `);
-db.exec(`CREATE INDEX IF NOT EXISTS idx_attachments_note ON attachments(note_id)`);
+db.exec(
+  `CREATE INDEX IF NOT EXISTS idx_attachments_note ON attachments(note_id)`,
+);
 
 // Viewport state per user per board (zoom + scroll position)
 db.exec(`

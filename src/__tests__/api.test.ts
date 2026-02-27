@@ -3,11 +3,11 @@ import { Hono } from "hono";
 import "@/schema";
 import { api } from "@/api";
 import * as Board from "@/board";
+import { db } from "@/database";
 import * as Member from "@/member";
 import * as Note from "@/note";
-import * as User from "@/user";
 import * as session from "@/session";
-import { db } from "@/database";
+import * as User from "@/user";
 
 // Create a test app with the API mounted
 const app = new Hono();
@@ -31,8 +31,18 @@ describe("api", () => {
     db.exec("DELETE FROM members");
     db.exec("DELETE FROM boards");
     db.exec("DELETE FROM users");
-    User.create({ username: "apiuser", credential_id: "api-c1", public_key: Buffer.from([1]), counter: 0 } as User.Record);
-    User.create({ username: "other", credential_id: "api-c2", public_key: Buffer.from([2]), counter: 0 } as User.Record);
+    User.create({
+      username: "apiuser",
+      credential_id: "api-c1",
+      public_key: Buffer.from([1]),
+      counter: 0,
+    } as User.Record);
+    User.create({
+      username: "other",
+      credential_id: "api-c2",
+      public_key: Buffer.from([2]),
+      counter: 0,
+    } as User.Record);
     const board = Board.create("api-board", "apiuser");
     boardSlug = board.slug;
     const note = Note.create(board.id, "API note", "apiuser");
@@ -172,7 +182,9 @@ describe("api", () => {
   });
 
   test("POST /notes/:id/front brings to front", async () => {
-    const res = await authedFetch(`/api/notes/${noteId}/front`, { method: "POST" });
+    const res = await authedFetch(`/api/notes/${noteId}/front`, {
+      method: "POST",
+    });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(typeof data.z).toBe("number");
@@ -184,8 +196,14 @@ describe("api", () => {
   });
 
   test("DELETE /notes/:id deletes note", async () => {
-    const note = Note.create(Board.bySlug(boardSlug)!.id, "To delete", "apiuser");
-    const res = await authedFetch(`/api/notes/${note.id}`, { method: "DELETE" });
+    const note = Note.create(
+      Board.bySlug(boardSlug)!.id,
+      "To delete",
+      "apiuser",
+    );
+    const res = await authedFetch(`/api/notes/${note.id}`, {
+      method: "DELETE",
+    });
     expect(res.status).toBe(200);
   });
 
@@ -213,7 +231,10 @@ describe("api", () => {
 
   test("POST /notes/:id/attachments with file", async () => {
     const formData = new FormData();
-    formData.append("file", new File(["hello"], "test.txt", { type: "text/plain" }));
+    formData.append(
+      "file",
+      new File(["hello"], "test.txt", { type: "text/plain" }),
+    );
     const res = await authedFetch(`/api/notes/${noteId}/attachments`, {
       method: "POST",
       body: formData,
@@ -239,7 +260,9 @@ describe("api", () => {
   test("DELETE /attachments/:id deletes", async () => {
     const atts = Note.attachments(noteId);
     if (atts.length > 0) {
-      const res = await authedFetch(`/api/attachments/${atts[0].id}`, { method: "DELETE" });
+      const res = await authedFetch(`/api/attachments/${atts[0].id}`, {
+        method: "DELETE",
+      });
       expect(res.status).toBe(200);
     }
   });
@@ -431,7 +454,9 @@ describe("api", () => {
       body: "description=details&tags=tag1,tag2&color=green",
     });
 
-    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, {
+      method: "POST",
+    });
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain("takkr-green"); // same color
@@ -439,7 +464,9 @@ describe("api", () => {
 
   test("POST /notes/:id/duplicate offsets position", async () => {
     const original = Note.byId(noteId)!;
-    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, {
+      method: "POST",
+    });
     expect(res.status).toBe(200);
     // The duplicated note should have offset position
     const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
@@ -449,7 +476,9 @@ describe("api", () => {
   });
 
   test("POST /notes/:id/duplicate copies description and tags", async () => {
-    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, { method: "POST" });
+    const res = await authedFetch(`/api/notes/${noteId}/duplicate`, {
+      method: "POST",
+    });
     expect(res.status).toBe(200);
     const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
     const dup = allNotes[allNotes.length - 1];
@@ -458,7 +487,9 @@ describe("api", () => {
   });
 
   test("POST /notes/:id/duplicate returns 404 for unknown", async () => {
-    const res = await authedFetch("/api/notes/99999/duplicate", { method: "POST" });
+    const res = await authedFetch("/api/notes/99999/duplicate", {
+      method: "POST",
+    });
     expect(res.status).toBe(404);
   });
 
@@ -466,7 +497,9 @@ describe("api", () => {
     // Create a board owned by 'other' with no access for 'apiuser'
     const secret = Board.create("secret-board", "other");
     const secretNote = Note.create(secret.id, "Secret", "other");
-    const res = await authedFetch(`/api/notes/${secretNote.id}/duplicate`, { method: "POST" });
+    const res = await authedFetch(`/api/notes/${secretNote.id}/duplicate`, {
+      method: "POST",
+    });
     expect(res.status).toBe(403);
   });
 
@@ -479,7 +512,7 @@ describe("api", () => {
     });
     expect(res.status).toBe(200);
     const allNotes = Note.forBoard(Board.bySlug(boardSlug)!.id);
-    const positioned = allNotes.find(n => n.content === "Positioned");
+    const positioned = allNotes.find((n) => n.content === "Positioned");
     expect(positioned).toBeDefined();
     expect(positioned!.x).toBe(500);
     expect(positioned!.y).toBe(600);
@@ -488,7 +521,9 @@ describe("api", () => {
   // Board deletion
   test("DELETE /boards/:slug deletes board", async () => {
     const b = Board.create("del-board", "apiuser");
-    const res = await authedFetch(`/api/boards/${b.slug}`, { method: "DELETE" });
+    const res = await authedFetch(`/api/boards/${b.slug}`, {
+      method: "DELETE",
+    });
     expect(res.status === 200 || res.status === 302).toBe(true);
   });
 });

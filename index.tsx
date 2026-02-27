@@ -6,6 +6,7 @@ import { pages } from "@/pages";
 // Initialize schema + seed landing board
 import "@/schema";
 import { ensureLandingBoard } from "@/landing";
+
 ensureLandingBoard();
 
 const app = new Hono();

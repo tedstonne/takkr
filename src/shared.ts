@@ -35,19 +35,20 @@ export const DARK_BACKGROUNDS: string[] = ["chalkboard", "blueprint"];
 
 /** Theme presets for landing carousel */
 export const THEMES = [
-  { bg: "grid",       font: "Caveat",       label: "Classic" },
-  { bg: "cork",       font: "Indie Flower",  label: "Cork Board" },
-  { bg: "chalkboard", font: "Kalam",         label: "Chalkboard" },
-  { bg: "blueprint",  font: "Gochi Hand",    label: "Blueprint" },
-  { bg: "lined",      font: "Handlee",       label: "Notebook" },
-  { bg: "canvas",     font: "Sofia",         label: "Canvas" },
+  { bg: "grid", font: "Caveat", label: "Classic" },
+  { bg: "cork", font: "Indie Flower", label: "Cork Board" },
+  { bg: "chalkboard", font: "Kalam", label: "Chalkboard" },
+  { bg: "blueprint", font: "Gochi Hand", label: "Blueprint" },
+  { bg: "lined", font: "Handlee", label: "Notebook" },
+  { bg: "canvas", font: "Sofia", label: "Canvas" },
 ] as const;
 
 /** JSON blob injected into the page for client-side use */
-export const clientConfig = () => JSON.stringify({
-  fonts: FONTS,
-  colors: COLORS,
-  backgrounds: BACKGROUNDS,
-  darkBackgrounds: DARK_BACKGROUNDS,
-  themes: THEMES,
-});
+export const clientConfig = () =>
+  JSON.stringify({
+    fonts: FONTS,
+    colors: COLORS,
+    backgrounds: BACKGROUNDS,
+    darkBackgrounds: DARK_BACKGROUNDS,
+    themes: THEMES,
+  });

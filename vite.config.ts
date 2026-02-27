@@ -18,7 +18,8 @@ export default defineConfig({
       output: {
         assetFileNames: (info) => {
           if (info.name?.endsWith(".css")) return "styles.css";
-          if (info.name?.match(/\.(woff2?|ttf|eot)$/)) return "fonts/[name][extname]";
+          if (info.name?.match(/\.(woff2?|ttf|eot)$/))
+            return "fonts/[name][extname]";
           return "[name][extname]";
         },
       },

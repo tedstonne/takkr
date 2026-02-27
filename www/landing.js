@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const OVERLAP_Y = CARD_H * 0.25;
 
     // Lay out clusters in a flowing grid
-    const clusterList = [...groups.values(), ...ungrouped.map(n => [n])];
+    const clusterList = [...groups.values(), ...ungrouped.map((n) => [n])];
     const CLUSTER_GAP_X = 40;
     const CLUSTER_GAP_Y = 30;
 
@@ -75,8 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cursorX += clusterW + CLUSTER_GAP_X;
     });
 
-    const maxBottom = notes.reduce((max, n) =>
-      Math.max(max, parseFloat(n.style.top) + CARD_H + 30), 0);
+    const maxBottom = notes.reduce(
+      (max, n) => Math.max(max, parseFloat(n.style.top) + CARD_H + 30),
+      0,
+    );
     container.style.minHeight = `${maxBottom}px`;
   }
 
@@ -86,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Drag support (no save) — works across all boards
   let dragging = null;
   let dragContainer = null;
-  let dragOffset = { x: 0, y: 0 };
+  const dragOffset = { x: 0, y: 0 };
 
   const onDown = (e) => {
     const note = e.target.closest(".landing-note");
@@ -171,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const theme = THEMES[current];
       zone.setAttribute("data-background", theme.bg);
       // Apply font to all notes in the zone
-      zone.querySelectorAll(".landing-note").forEach(n => {
+      zone.querySelectorAll(".landing-note").forEach((n) => {
         n.style.setProperty("--takkr-font", `"${theme.font}"`);
       });
       // Update dots — use light dots on dark backgrounds

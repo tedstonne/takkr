@@ -1,9 +1,9 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
-import * as Member from "@/member";
 import * as Board from "@/board";
-import * as User from "@/user";
 import { db } from "@/database";
+import * as Member from "@/member";
+import * as User from "@/user";
 
 describe("member", () => {
   let boardId: number;
@@ -12,9 +12,24 @@ describe("member", () => {
     db.exec("DELETE FROM members");
     db.exec("DELETE FROM boards");
     db.exec("DELETE FROM users");
-    User.create({ username: "mowner", credential_id: "mc1", public_key: Buffer.from([1]), counter: 0 } as User.Record);
-    User.create({ username: "minvitee", credential_id: "mc2", public_key: Buffer.from([2]), counter: 0 } as User.Record);
-    User.create({ username: "minvitee2", credential_id: "mc3", public_key: Buffer.from([3]), counter: 0 } as User.Record);
+    User.create({
+      username: "mowner",
+      credential_id: "mc1",
+      public_key: Buffer.from([1]),
+      counter: 0,
+    } as User.Record);
+    User.create({
+      username: "minvitee",
+      credential_id: "mc2",
+      public_key: Buffer.from([2]),
+      counter: 0,
+    } as User.Record);
+    User.create({
+      username: "minvitee2",
+      credential_id: "mc3",
+      public_key: Buffer.from([3]),
+      counter: 0,
+    } as User.Record);
     const board = Board.create("member-board", "mowner");
     boardId = board.id;
   });

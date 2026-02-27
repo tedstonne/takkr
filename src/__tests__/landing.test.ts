@@ -1,9 +1,9 @@
-import { describe, expect, test, beforeAll } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
-import { ensureLandingBoard, getLandingData } from "@/landing";
 import * as Board from "@/board";
-import * as Note from "@/note";
 import { db } from "@/database";
+import { ensureLandingBoard, getLandingData } from "@/landing";
+import * as Note from "@/note";
 
 describe("landing", () => {
   beforeAll(() => {
@@ -18,7 +18,9 @@ describe("landing", () => {
 
   test("ensureLandingBoard creates system user", () => {
     ensureLandingBoard();
-    const user = db.query("SELECT * FROM users WHERE username = '__system'").get();
+    const user = db
+      .query("SELECT * FROM users WHERE username = '__system'")
+      .get();
     expect(user).not.toBeNull();
   });
 
@@ -55,28 +57,30 @@ describe("landing", () => {
   test("seeded notes include hero tag", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const heroes = notes.filter(n => n.tags?.includes("hero"));
+    const heroes = notes.filter((n) => n.tags?.includes("hero"));
     expect(heroes.length).toBeGreaterThanOrEqual(1);
   });
 
   test("seeded notes include philosophy tag", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const phil = notes.filter(n => n.tags?.includes("philosophy"));
+    const phil = notes.filter((n) => n.tags?.includes("philosophy"));
     expect(phil.length).toBeGreaterThanOrEqual(1);
   });
 
   test("seeded notes include usecase tag", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const usecases = notes.filter(n => n.tags?.includes("usecase"));
+    const usecases = notes.filter((n) => n.tags?.includes("usecase"));
     expect(usecases.length).toBeGreaterThanOrEqual(1);
   });
 
   test("seeded notes have descriptions on feature cards", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const withDesc = notes.filter(n => n.description && n.description.length > 0);
+    const withDesc = notes.filter(
+      (n) => n.description && n.description.length > 0,
+    );
     expect(withDesc.length).toBeGreaterThanOrEqual(10);
   });
 
@@ -103,7 +107,7 @@ describe("landing", () => {
   test("seeded notes use all 5 colors", () => {
     const board = Board.bySlug("__landing")!;
     const notes = Note.forBoard(board.id);
-    const colors = new Set(notes.map(n => n.color));
+    const colors = new Set(notes.map((n) => n.color));
     expect(colors.has("yellow")).toBe(true);
     expect(colors.has("pink")).toBe(true);
     expect(colors.has("green")).toBe(true);

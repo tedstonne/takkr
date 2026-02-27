@@ -1,22 +1,25 @@
+import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import * as Board from "@/board";
 import * as Invite from "@/invite";
+import { getLandingData } from "@/landing";
 import { Layout } from "@/layout";
 import * as Member from "@/member";
 import { secure } from "@/middleware";
 import * as Note from "@/note";
 import * as User from "@/user";
-import { Scalar } from "@scalar/hono-api-reference";
-import { getLandingData } from "@/landing";
 import { BoardView, Help, Home, Join, Landing, Login } from "@/views";
 
 const resolveFont = (c: any, username?: string): string => {
   // URL param override (backdoor)
   const paramFont = c.req.query("font");
   if (paramFont && User.FONTS[paramFont]) {
-    setCookie(c, "takkr-font", paramFont, { maxAge: 365 * 24 * 60 * 60, path: "/" });
+    setCookie(c, "takkr-font", paramFont, {
+      maxAge: 365 * 24 * 60 * 60,
+      path: "/",
+    });
     return paramFont;
   }
   // Cookie override
@@ -61,7 +64,12 @@ pages.get("/", secure.optional, (c) => {
 
   return c.html(
     <Layout title="Home" id="home" scripts={["/www/home.js"]}>
-      <Home username={username} boards={boards} unseenCount={invitationCount} avatar={profile.avatar} />
+      <Home
+        username={username}
+        boards={boards}
+        unseenCount={invitationCount}
+        avatar={profile.avatar}
+      />
     </Layout>,
   );
 });
@@ -94,7 +102,8 @@ pages.get(
     layout: "modern",
     metaData: {
       title: "takkr API Reference",
-      description: "REST API documentation for takkr — collaborative sticky note boards.",
+      description:
+        "REST API documentation for takkr — collaborative sticky note boards.",
     },
   }),
 );
@@ -114,7 +123,9 @@ pages.get("/invite/:token", secure.optional, (c) => {
   const invite = Invite.findByToken(token);
 
   if (!invite) {
-    throw new HTTPException(404, { message: "Invite link is invalid or has been revoked" });
+    throw new HTTPException(404, {
+      message: "Invite link is invalid or has been revoked",
+    });
   }
 
   const username: string | undefined = c.get("username");
@@ -122,14 +133,20 @@ pages.get("/invite/:token", secure.optional, (c) => {
   if (!username) {
     // Not logged in — store token in cookie and redirect to login
     setCookie(c, "invite-token", token, {
-      httpOnly: true, secure: true, sameSite: "Lax",
-      maxAge: 60 * 60, path: "/", // 1 hour expiry
+      httpOnly: true,
+      secure: true,
+      sameSite: "Lax",
+      maxAge: 60 * 60,
+      path: "/", // 1 hour expiry
     });
     return c.redirect("/~/login");
   }
 
   // Already authenticated — join the board if not already a member/owner
-  if (invite.board_owner !== username && !Member.exists(invite.board_id, username)) {
+  if (
+    invite.board_owner !== username &&
+    !Member.exists(invite.board_id, username)
+  ) {
     Member.add(invite.board_id, username, invite.created_by, 1);
   }
 
@@ -162,8 +179,14 @@ pages.get("/:slug", secure, (c) => {
   const attachmentCounts = Note.attachmentCountsForBoard(board.id);
   const preferredColor = User.getPreferredColor(username);
   const profile = User.getProfile(username);
-  const ownedBoards = Board.owned(username).map((b) => ({ board: b, role: "owner" as const }));
-  const memberBoards = Board.member(username).map((b) => ({ board: b, role: "member" as const }));
+  const ownedBoards = Board.owned(username).map((b) => ({
+    board: b,
+    role: "owner" as const,
+  }));
+  const memberBoards = Board.member(username).map((b) => ({
+    board: b,
+    role: "member" as const,
+  }));
   const allBoards = [...ownedBoards, ...memberBoards];
   const invitationCount = Member.unseenCount(username);
   const inviteLink = isOwner ? Invite.forBoard(board.id) : null;

@@ -2,9 +2,9 @@
 import { version as webauthnVersion } from "@simplewebauthn/browser/package.json";
 import { version as alpineVersion } from "alpinejs/package.json";
 import type { Child } from "hono/jsx";
-import { clientConfig } from "@/shared";
 import { version as htmxVersion } from "htmx.org/package.json";
 import { version as htmxSseVersion } from "htmx-ext-sse/package.json";
+import { clientConfig } from "@/shared";
 
 export type Page = {
   id?: string;
@@ -27,13 +27,22 @@ export const Layout = (props: Page) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta
         name="description"
-        content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."}
+        content={
+          props.description ||
+          "Collaborative sticky note board. Drag, drop, and organize your ideas."
+        }
       />
       <title>{pageTitle(props.title)}</title>
 
       {/* Open Graph */}
       <meta property="og:title" content={pageTitle(props.title)} />
-      <meta property="og:description" content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."} />
+      <meta
+        property="og:description"
+        content={
+          props.description ||
+          "Collaborative sticky note board. Drag, drop, and organize your ideas."
+        }
+      />
       <meta property="og:type" content="website" />
       {props.canonical && <meta property="og:url" content={props.canonical} />}
       {props.ogImage && <meta property="og:image" content={props.ogImage} />}
@@ -41,7 +50,13 @@ export const Layout = (props: Page) => (
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle(props.title)} />
-      <meta name="twitter:description" content={props.description || "Collaborative sticky note board. Drag, drop, and organize your ideas."} />
+      <meta
+        name="twitter:description"
+        content={
+          props.description ||
+          "Collaborative sticky note board. Drag, drop, and organize your ideas."
+        }
+      />
       {props.ogImage && <meta name="twitter:image" content={props.ogImage} />}
 
       {props.canonical && <link rel="canonical" href={props.canonical} />}
@@ -60,7 +75,11 @@ export const Layout = (props: Page) => (
         defer
         src={`https://cdn.jsdelivr.net/npm/@simplewebauthn/browser@${webauthnVersion}/dist/bundle/index.umd.min.js`}
       />
-      <script dangerouslySetInnerHTML={{ __html: `window.__TAKKR__=${clientConfig()};` }} />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.__TAKKR__=${clientConfig()};`,
+        }}
+      />
       {props.scripts?.map((script: string) => (
         <script type="module" src={script} />
       ))}

@@ -1,14 +1,19 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
 import * as auth from "@/auth";
-import * as User from "@/user";
 import { challenges } from "@/config";
 import { db } from "@/database";
+import * as User from "@/user";
 
 describe("auth", () => {
   beforeAll(() => {
     db.exec("DELETE FROM users WHERE username IN ('authuser','newuser')");
-    User.create({ username: "authuser", credential_id: "auth-c1", public_key: Buffer.from([1,2,3]), counter: 0 } as User.Record);
+    User.create({
+      username: "authuser",
+      credential_id: "auth-c1",
+      public_key: Buffer.from([1, 2, 3]),
+      counter: 0,
+    } as User.Record);
   });
 
   test("ErrorCode enum values", () => {
@@ -94,7 +99,10 @@ describe("auth", () => {
 
   test("identify throws for nonexistent credential", async () => {
     try {
-      await auth.identify({ id: "nonexistent", response: { clientDataJSON: btoa(JSON.stringify({ challenge: "x" })) } } as any);
+      await auth.identify({
+        id: "nonexistent",
+        response: { clientDataJSON: btoa(JSON.stringify({ challenge: "x" })) },
+      } as any);
       expect(true).toBe(false);
     } catch (e: any) {
       expect(e.message).toBe(String(auth.ErrorCode.USER_NOT_FOUND));
@@ -105,7 +113,9 @@ describe("auth", () => {
     try {
       await auth.identify({
         id: "auth-c1",
-        response: { clientDataJSON: btoa(JSON.stringify({ challenge: "no-match" })) },
+        response: {
+          clientDataJSON: btoa(JSON.stringify({ challenge: "no-match" })),
+        },
       } as any);
       expect(true).toBe(false);
     } catch (e: any) {

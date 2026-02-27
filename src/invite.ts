@@ -53,9 +53,7 @@ export const findByToken = (token: string): InviteWithBoard | null => {
 
 export const forBoard = (boardId: number): Record | null => {
   const result = db
-    .query(
-      "SELECT * FROM board_invites WHERE board_id = ? AND active = 1",
-    )
+    .query("SELECT * FROM board_invites WHERE board_id = ? AND active = 1")
     .get(boardId);
 
   return (result as Record) || null;

@@ -1,7 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { FONTS, COLORS, BACKGROUNDS, DARK_BACKGROUNDS, THEMES, clientConfig } from "@/shared";
-import * as Note from "@/note";
 import * as Board from "@/board";
+import * as Note from "@/note";
+import {
+  BACKGROUNDS,
+  COLORS,
+  clientConfig,
+  DARK_BACKGROUNDS,
+  FONTS,
+  THEMES,
+} from "@/shared";
 import * as User from "@/user";
 
 describe("shared config", () => {
@@ -58,6 +65,6 @@ describe("shared config", () => {
     expect(config.colors).toEqual([...COLORS]);
     expect(config.backgrounds).toEqual([...BACKGROUNDS]);
     expect(config.darkBackgrounds).toEqual(DARK_BACKGROUNDS);
-    expect(config.themes).toEqual(THEMES.map(t => ({ ...t })));
+    expect(config.themes).toEqual(THEMES.map((t) => ({ ...t })));
   });
 });

@@ -4,12 +4,20 @@ import * as S from "@/schemas";
 describe("schemas", () => {
   // ViewportBody
   test("ViewportBody accepts valid data", () => {
-    const result = S.ViewportBody.safeParse({ zoom: 1, scroll_x: 100, scroll_y: 200 });
+    const result = S.ViewportBody.safeParse({
+      zoom: 1,
+      scroll_x: 100,
+      scroll_y: 200,
+    });
     expect(result.success).toBe(true);
   });
 
   test("ViewportBody coerces strings to numbers", () => {
-    const result = S.ViewportBody.safeParse({ zoom: "0.75", scroll_x: "100", scroll_y: "200" });
+    const result = S.ViewportBody.safeParse({
+      zoom: "0.75",
+      scroll_x: "100",
+      scroll_y: "200",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.zoom).toBe(0.75);
@@ -17,18 +25,31 @@ describe("schemas", () => {
   });
 
   test("ViewportBody rejects zoom below min", () => {
-    const result = S.ViewportBody.safeParse({ zoom: 0.1, scroll_x: 0, scroll_y: 0 });
+    const result = S.ViewportBody.safeParse({
+      zoom: 0.1,
+      scroll_x: 0,
+      scroll_y: 0,
+    });
     expect(result.success).toBe(false);
   });
 
   test("ViewportBody rejects zoom above max", () => {
-    const result = S.ViewportBody.safeParse({ zoom: 3, scroll_x: 0, scroll_y: 0 });
+    const result = S.ViewportBody.safeParse({
+      zoom: 3,
+      scroll_x: 0,
+      scroll_y: 0,
+    });
     expect(result.success).toBe(false);
   });
 
   // CreateNoteBody
   test("CreateNoteBody accepts valid note", () => {
-    const result = S.CreateNoteBody.safeParse({ content: "Hello", color: "pink", x: 100, y: 200 });
+    const result = S.CreateNoteBody.safeParse({
+      content: "Hello",
+      color: "pink",
+      x: 100,
+      y: 200,
+    });
     expect(result.success).toBe(true);
   });
 
@@ -101,7 +122,16 @@ describe("schemas", () => {
 
   // BackgroundEnum
   test("BackgroundEnum accepts all backgrounds", () => {
-    for (const bg of ["plain", "grid", "cork", "chalkboard", "lined", "canvas", "blueprint", "doodle"]) {
+    for (const bg of [
+      "plain",
+      "grid",
+      "cork",
+      "chalkboard",
+      "lined",
+      "canvas",
+      "blueprint",
+      "doodle",
+    ]) {
       expect(S.BackgroundEnum.safeParse(bg).success).toBe(true);
     }
   });
@@ -112,7 +142,17 @@ describe("schemas", () => {
 
   // FontEnum
   test("FontEnum accepts all fonts", () => {
-    for (const f of ["caveat", "indie-flower", "kalam", "parisienne", "cookie", "handlee", "sofia", "gochi-hand", "grand-hotel"]) {
+    for (const f of [
+      "caveat",
+      "indie-flower",
+      "kalam",
+      "parisienne",
+      "cookie",
+      "handlee",
+      "sofia",
+      "gochi-hand",
+      "grand-hotel",
+    ]) {
       expect(S.FontEnum.safeParse(f).success).toBe(true);
     }
   });

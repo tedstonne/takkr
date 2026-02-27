@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
-import * as User from "@/user";
 import { db } from "@/database";
+import * as User from "@/user";
 
 describe("user", () => {
   beforeAll(() => {

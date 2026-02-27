@@ -42,7 +42,10 @@ export const getPreferredColor = (username: string): string => {
 
 export const setPreferredColor = (username: string, color: string): void => {
   if (!COLORS.includes(color as any)) return;
-  db.query("UPDATE users SET preferred_color = ? WHERE username = ?").run(color, username);
+  db.query("UPDATE users SET preferred_color = ? WHERE username = ?").run(
+    color,
+    username,
+  );
 };
 
 export const getPreferredBackground = (username: string): string => {
@@ -51,10 +54,15 @@ export const getPreferredBackground = (username: string): string => {
 };
 
 export const setPreferredBackground = (username: string, bg: string): void => {
-  db.query("UPDATE users SET preferred_background = ? WHERE username = ?").run(bg, username);
+  db.query("UPDATE users SET preferred_background = ? WHERE username = ?").run(
+    bg,
+    username,
+  );
 };
 
-export const getPrefs = (username: string): { font: string; color: string; background: string } => {
+export const getPrefs = (
+  username: string,
+): { font: string; color: string; background: string } => {
   const user = find(username);
   return {
     font: user?.font || "caveat",
@@ -64,18 +72,29 @@ export const getPrefs = (username: string): { font: string; color: string; backg
 };
 
 export const setDisplayName = (username: string, name: string): void => {
-  db.query("UPDATE users SET display_name = ? WHERE username = ?").run(name.trim(), username);
+  db.query("UPDATE users SET display_name = ? WHERE username = ?").run(
+    name.trim(),
+    username,
+  );
 };
 
 export const setEmail = (username: string, email: string): void => {
-  db.query("UPDATE users SET email = ? WHERE username = ?").run(email.trim(), username);
+  db.query("UPDATE users SET email = ? WHERE username = ?").run(
+    email.trim(),
+    username,
+  );
 };
 
 export const setAvatar = (username: string, avatar: string): void => {
-  db.query("UPDATE users SET avatar = ? WHERE username = ?").run(avatar, username);
+  db.query("UPDATE users SET avatar = ? WHERE username = ?").run(
+    avatar,
+    username,
+  );
 };
 
-export const getProfile = (username: string): { username: string; displayName: string; email: string; avatar: string } => {
+export const getProfile = (
+  username: string,
+): { username: string; displayName: string; email: string; avatar: string } => {
   const user = find(username);
   return {
     username,

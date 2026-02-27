@@ -1,16 +1,94 @@
 /* Self-hosted fonts via @fontsource — latin subset only */
 /* DO NOT EDIT: regenerate by copying woff2 files from node_modules/@fontsource */
 
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/inter-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap; src: url('/www/fonts/inter-latin-500-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('/www/fonts/inter-latin-600-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Caveat'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/caveat-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Caveat'; font-style: normal; font-weight: 700; font-display: swap; src: url('/www/fonts/caveat-latin-700-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Indie Flower'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/indie-flower-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Kalam'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/kalam-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Parisienne'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/parisienne-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Cookie'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/cookie-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Handlee'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/handlee-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Sofia'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/sofia-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Gochi Hand'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/gochi-hand-latin-400-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Grand Hotel'; font-style: normal; font-weight: 400; font-display: swap; src: url('/www/fonts/grand-hotel-latin-400-normal.woff2') format('woff2'); }
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/inter-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/www/fonts/inter-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/www/fonts/inter-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/caveat-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/www/fonts/caveat-latin-700-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Indie Flower";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/indie-flower-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Kalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/kalam-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Parisienne";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/parisienne-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cookie";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/cookie-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Handlee";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/handlee-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Sofia";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/sofia-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Gochi Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/gochi-hand-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Grand Hotel";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/www/fonts/grand-hotel-latin-400-normal.woff2") format("woff2");
+}

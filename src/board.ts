@@ -117,18 +117,29 @@ export type Viewport = {
   scroll_y: number;
 };
 
-export const getViewport = (username: string, boardId: number): Viewport | null => {
-  const row = db.query(
-    "SELECT zoom, scroll_x, scroll_y FROM board_viewports WHERE username = ? AND board_id = ?"
-  ).get(username, boardId);
+export const getViewport = (
+  username: string,
+  boardId: number,
+): Viewport | null => {
+  const row = db
+    .query(
+      "SELECT zoom, scroll_x, scroll_y FROM board_viewports WHERE username = ? AND board_id = ?",
+    )
+    .get(username, boardId);
   return row ? (row as Viewport) : null;
 };
 
-export const setViewport = (username: string, boardId: number, zoom: number, scrollX: number, scrollY: number): void => {
+export const setViewport = (
+  username: string,
+  boardId: number,
+  zoom: number,
+  scrollX: number,
+  scrollY: number,
+): void => {
   db.query(
     `INSERT INTO board_viewports (username, board_id, zoom, scroll_x, scroll_y)
      VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(username, board_id) DO UPDATE SET zoom = ?, scroll_x = ?, scroll_y = ?`
+     ON CONFLICT(username, board_id) DO UPDATE SET zoom = ?, scroll_x = ?, scroll_y = ?`,
   ).run(username, boardId, zoom, scrollX, scrollY, zoom, scrollX, scrollY);
 };
 

@@ -49,16 +49,36 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
   }
-  .btn-default { @apply bg-primary text-primary-foreground hover:bg-primary/90; }
-  .btn-destructive { @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
-  .btn-outline { @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground; }
-  .btn-secondary { @apply bg-secondary text-secondary-foreground hover:bg-secondary/80; }
-  .btn-ghost { @apply hover:bg-accent hover:text-accent-foreground; }
-  .btn-link { @apply text-primary underline-offset-4 hover:underline; }
-  .btn-sm { @apply h-9 px-3 rounded-md; }
-  .btn-md { @apply h-10 px-4 py-2; }
-  .btn-lg { @apply h-11 px-8 rounded-md; }
-  .btn-icon { @apply h-10 w-10; }
+  .btn-default {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+  }
+  .btn-outline {
+    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
+  }
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
+  .btn-ghost {
+    @apply hover:bg-accent hover:text-accent-foreground;
+  }
+  .btn-link {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+  .btn-sm {
+    @apply h-9 px-3 rounded-md;
+  }
+  .btn-md {
+    @apply h-10 px-4 py-2;
+  }
+  .btn-lg {
+    @apply h-11 px-8 rounded-md;
+  }
+  .btn-icon {
+    @apply h-10 w-10;
+  }
 
   /* ── Input ── */
   .input {
@@ -66,15 +86,29 @@
   }
 
   /* ── Card ── */
-  .card { @apply rounded-lg border bg-card text-card-foreground shadow-sm; }
-  .card-header { @apply flex flex-col space-y-1.5 p-6; }
-  .card-title { @apply text-2xl font-semibold leading-none tracking-tight; }
-  .card-description { @apply text-sm text-muted-foreground; }
-  .card-content { @apply p-6 pt-0; }
-  .card-footer { @apply flex items-center p-6 pt-0; }
+  .card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+  }
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+  .card-title {
+    @apply text-2xl font-semibold leading-none tracking-tight;
+  }
+  .card-description {
+    @apply text-sm text-muted-foreground;
+  }
+  .card-content {
+    @apply p-6 pt-0;
+  }
+  .card-footer {
+    @apply flex items-center p-6 pt-0;
+  }
 
   /* ── Board backgrounds ── */
-  [data-background="plain"] { @apply bg-white; }
+  [data-background="plain"] {
+    @apply bg-white;
+  }
 
   [data-background="grid"] {
     @apply bg-slate-50;
@@ -85,39 +119,85 @@
   [data-background="cork"] {
     background-color: #c4956a;
     background-image:
-      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-      repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
-      radial-gradient(ellipse at 20% 50%, rgba(210,170,120,0.5) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(180,140,90,0.4) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 80%, rgba(200,160,110,0.3) 0%, transparent 50%);
-    background-size: 8px 8px, 8px 8px, 100% 100%, 100% 100%, 100% 100%;
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.02) 2px,
+        rgba(0, 0, 0, 0.02) 4px
+      ),
+      radial-gradient(
+        ellipse at 20% 50%,
+        rgba(210, 170, 120, 0.5) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 80% 20%,
+        rgba(180, 140, 90, 0.4) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 50% 80%,
+        rgba(200, 160, 110, 0.3) 0%,
+        transparent 50%
+      );
+    background-size:
+      8px 8px,
+      8px 8px,
+      100% 100%,
+      100% 100%,
+      100% 100%;
   }
   [data-background="cork"] .takkr {
-    filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.3));
   }
 
   [data-background="chalkboard"] {
     background-color: #2d4a3e;
     background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-      radial-gradient(ellipse at 30% 70%, rgba(0,0,0,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.03) 0%, transparent 60%);
-    background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      radial-gradient(
+        ellipse at 30% 70%,
+        rgba(0, 0, 0, 0.15) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse at 70% 30%,
+        rgba(255, 255, 255, 0.03) 0%,
+        transparent 60%
+      );
+    background-size:
+      40px 40px,
+      40px 40px,
+      100% 100%,
+      100% 100%;
   }
   [data-background="chalkboard"] .takkr {
-    filter: drop-shadow(1px 2px 6px rgba(0,0,0,0.5));
+    filter: drop-shadow(1px 2px 6px rgba(0, 0, 0, 0.5));
   }
   [data-background="chalkboard"]::after {
     content: "";
     @apply pointer-events-none absolute bottom-0 left-0 right-0;
     height: 12px;
-    background: linear-gradient(to top, rgba(200,190,170,0.15), transparent);
+    background: linear-gradient(to top, rgba(200, 190, 170, 0.15), transparent);
   }
 
   [data-background="lined"] {
     @apply bg-white;
-    background-image: linear-gradient(transparent 39px, #e8d4d4 39px, #e8d4d4 40px, transparent 40px);
+    background-image: linear-gradient(
+      transparent 39px,
+      #e8d4d4 39px,
+      #e8d4d4 40px,
+      transparent 40px
+    );
     background-size: 100% 40px;
     background-position: 0 20px;
   }
@@ -133,22 +213,38 @@
   [data-background="canvas"] {
     background-color: #f5f0eb;
     background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.02) 1px, rgba(0,0,0,0.02) 2px),
-      repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.015) 1px, rgba(0,0,0,0.015) 2px);
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(0, 0, 0, 0.02) 1px,
+        rgba(0, 0, 0, 0.02) 2px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 1px,
+        rgba(0, 0, 0, 0.015) 1px,
+        rgba(0, 0, 0, 0.015) 2px
+      );
     background-size: 4px 4px;
   }
 
   [data-background="blueprint"] {
     background-color: #1e3a5f;
     background-image:
-      linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px),
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size:
+      100px 100px,
+      100px 100px,
+      20px 20px,
+      20px 20px;
   }
   [data-background="blueprint"] .takkr {
-    filter: drop-shadow(1px 2px 8px rgba(0,0,0,0.4));
+    filter: drop-shadow(1px 2px 8px rgba(0, 0, 0, 0.4));
   }
 
   [data-background="doodle"] {
@@ -158,15 +254,33 @@
   }
 
   /* ── Font families ── */
-  .font-caveat { font-family: "Caveat", cursive; }
-  .font-indie-flower { font-family: "Indie Flower", cursive; }
-  .font-kalam { font-family: "Kalam", cursive; }
-  .font-parisienne { font-family: "Parisienne", cursive; }
-  .font-cookie { font-family: "Cookie", cursive; }
-  .font-handlee { font-family: "Handlee", cursive; }
-  .font-sofia { font-family: "Sofia", cursive; }
-  .font-gochi-hand { font-family: "Gochi Hand", cursive; }
-  .font-grand-hotel { font-family: "Grand Hotel", cursive; }
+  .font-caveat {
+    font-family: "Caveat", cursive;
+  }
+  .font-indie-flower {
+    font-family: "Indie Flower", cursive;
+  }
+  .font-kalam {
+    font-family: "Kalam", cursive;
+  }
+  .font-parisienne {
+    font-family: "Parisienne", cursive;
+  }
+  .font-cookie {
+    font-family: "Cookie", cursive;
+  }
+  .font-handlee {
+    font-family: "Handlee", cursive;
+  }
+  .font-sofia {
+    font-family: "Sofia", cursive;
+  }
+  .font-gochi-hand {
+    font-family: "Gochi Hand", cursive;
+  }
+  .font-grand-hotel {
+    font-family: "Grand Hotel", cursive;
+  }
 
   /* ── Takkr note card ── */
   .takkr {
@@ -176,9 +290,15 @@
     touch-action: none;
     border-radius: 2px;
   }
-  .takkr:nth-child(odd) { transform: rotate(-1deg); }
-  .takkr:nth-child(even) { transform: rotate(0.5deg); }
-  .takkr:nth-child(3n) { transform: rotate(1.5deg); }
+  .takkr:nth-child(odd) {
+    transform: rotate(-1deg);
+  }
+  .takkr:nth-child(even) {
+    transform: rotate(0.5deg);
+  }
+  .takkr:nth-child(3n) {
+    transform: rotate(1.5deg);
+  }
 
   .takkr:hover {
     @apply shadow-xl;
@@ -247,18 +367,30 @@
 
   /* Dotted grid bg for landing note areas */
   .landing-board {
-    background-image: radial-gradient(circle, oklch(0.85 0 0) 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      oklch(0.85 0 0) 1px,
+      transparent 1px
+    );
     background-size: 24px 24px;
     border-radius: 16px;
     padding: 16px;
   }
   /* Board zone heading colors — dark text by default, light on dark backgrounds */
-  .board-zone-heading { color: #0f172a; }
-  .board-zone-subtext { color: #94a3b8; }
+  .board-zone-heading {
+    color: #0f172a;
+  }
+  .board-zone-subtext {
+    color: #94a3b8;
+  }
   [data-background="chalkboard"] .board-zone-heading,
-  [data-background="blueprint"] .board-zone-heading { color: #f1f5f9; }
+  [data-background="blueprint"] .board-zone-heading {
+    color: #f1f5f9;
+  }
   [data-background="chalkboard"] .board-zone-subtext,
-  [data-background="blueprint"] .board-zone-subtext { color: rgba(255,255,255,0.5); }
+  [data-background="blueprint"] .board-zone-subtext {
+    color: rgba(255, 255, 255, 0.5);
+  }
 
   /* Remove dotted grid from note sub-boards when parent board-zone has a background */
   #board-zone .landing-board {
@@ -271,11 +403,21 @@
     font-size: 0.75rem;
   }
 
-  .takkr-yellow { @apply bg-takkr-yellow; }
-  .takkr-pink { @apply bg-takkr-pink; }
-  .takkr-green { @apply bg-takkr-green; }
-  .takkr-blue { @apply bg-takkr-blue; }
-  .takkr-orange { @apply bg-takkr-orange; }
+  .takkr-yellow {
+    @apply bg-takkr-yellow;
+  }
+  .takkr-pink {
+    @apply bg-takkr-pink;
+  }
+  .takkr-green {
+    @apply bg-takkr-green;
+  }
+  .takkr-blue {
+    @apply bg-takkr-blue;
+  }
+  .takkr-orange {
+    @apply bg-takkr-orange;
+  }
 
   /* Tape effect */
   .takkr::before {
@@ -286,7 +428,7 @@
     transform: translateX(-50%) rotate(-2deg);
     width: 60px;
     height: 16px;
-    background: rgba(255,255,255,0.4);
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 1px;
   }
 
@@ -476,17 +618,17 @@
   .zoom-assign-btn {
     @apply flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer border;
     font-family: var(--font-sans);
-    border-color: rgba(0,0,0,0.1);
-    background: rgba(0,0,0,0.05);
-    color: rgba(0,0,0,0.6);
+    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.6);
   }
   .zoom-assign-btn:hover {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
   }
   .zoom-assign-btn.active {
-    background: rgba(0,0,0,0.15);
-    border-color: rgba(0,0,0,0.25);
-    color: rgba(0,0,0,0.85);
+    background: rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 0.85);
     font-weight: 600;
   }
   .zoom-assign-avatar {
@@ -517,14 +659,38 @@
   .settings-bg-preview {
     @apply w-full h-10 rounded;
   }
-  .settings-bg-preview-plain { @apply bg-white; }
-  .settings-bg-preview-grid { @apply bg-slate-100; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 4px 4px; }
-  .settings-bg-preview-cork { background-color: #c4956a; }
-  .settings-bg-preview-chalkboard { background-color: #2d4a3e; }
-  .settings-bg-preview-lined { @apply bg-white; background-image: linear-gradient(transparent 60%, #e8d4d4 60%, #e8d4d4 64%, transparent 64%); }
-  .settings-bg-preview-canvas { background-color: #f5f0eb; }
-  .settings-bg-preview-blueprint { background-color: #1e3a5f; }
-  .settings-bg-preview-doodle { @apply bg-slate-100; }
+  .settings-bg-preview-plain {
+    @apply bg-white;
+  }
+  .settings-bg-preview-grid {
+    @apply bg-slate-100;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .settings-bg-preview-cork {
+    background-color: #c4956a;
+  }
+  .settings-bg-preview-chalkboard {
+    background-color: #2d4a3e;
+  }
+  .settings-bg-preview-lined {
+    @apply bg-white;
+    background-image: linear-gradient(
+      transparent 60%,
+      #e8d4d4 60%,
+      #e8d4d4 64%,
+      transparent 64%
+    );
+  }
+  .settings-bg-preview-canvas {
+    background-color: #f5f0eb;
+  }
+  .settings-bg-preview-blueprint {
+    background-color: #1e3a5f;
+  }
+  .settings-bg-preview-doodle {
+    @apply bg-slate-100;
+  }
 
   .settings-font-btn {
     @apply px-3 py-2 rounded-md border border-slate-200 text-center text-sm cursor-pointer transition-all duration-150 hover:border-slate-400 hover:bg-slate-50;
@@ -632,21 +798,41 @@
 }
 
 @keyframes filePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.1); }
-  50% { box-shadow: 0 0 0 8px rgba(0,0,0,0.05); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 0, 0, 0.05);
+  }
 }
 
 @keyframes uploadPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

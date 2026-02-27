@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import "@/schema";
 import * as Board from "@/board";
-import * as User from "@/user";
 import { db } from "@/database";
+import * as User from "@/user";
 
 describe("board", () => {
   beforeAll(() => {
@@ -10,8 +10,18 @@ describe("board", () => {
     db.exec("DELETE FROM notes");
     db.exec("DELETE FROM boards");
     db.exec("DELETE FROM users");
-    User.create({ username: "owner1", credential_id: "bc1", public_key: Buffer.from([1]), counter: 0 } as User.Record);
-    User.create({ username: "member1", credential_id: "bc2", public_key: Buffer.from([2]), counter: 0 } as User.Record);
+    User.create({
+      username: "owner1",
+      credential_id: "bc1",
+      public_key: Buffer.from([1]),
+      counter: 0,
+    } as User.Record);
+    User.create({
+      username: "member1",
+      credential_id: "bc2",
+      public_key: Buffer.from([2]),
+      counter: 0,
+    } as User.Record);
   });
 
   test("BACKGROUNDS has expected entries", () => {
@@ -66,7 +76,9 @@ describe("board", () => {
 
   test("member returns boards user is member of", () => {
     const board = Board.bySlug("my-board")!;
-    db.exec(`INSERT INTO members (board_id, username, invited_by) VALUES (${board.id}, 'member1', 'owner1')`);
+    db.exec(
+      `INSERT INTO members (board_id, username, invited_by) VALUES (${board.id}, 'member1', 'owner1')`,
+    );
     const boards = Board.member("member1");
     expect(boards.length).toBe(1);
   });
